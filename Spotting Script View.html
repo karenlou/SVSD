@@ -1,0 +1,896 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Spotting Script View (Copy) (Copy)</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&family=Courier+Prime:wght@400;700&display=swap">
+<style>
+/* Single light look: the page background is the paper. Layout: shadcn/ui defaults. Score card on top; the Script card fills the rest of the screen and scrolls inside itself, one sticky header per set. Hovering a cue previews its clip in a thumbnail; clicking opens the full cue card with the clip on top. */
+:root{
+  --background:#f1efeb; --score-bg:#e8e5df; --foreground:#0c0a09; --card:#ffffff; --card-foreground:#0c0a09; --popover:#ffffff;
+  --primary:#1c1917; --primary-foreground:#fafaf9; --secondary:#f5f3f0; --muted:#f5f3f0; --muted-foreground:#78716c;
+  --accent:#f3f1ed; --border:#e5e2dd; --input:#e2ded8; --ring:#a1a1a1; --well:#0a0a0a; --well-fg:#fafafa;
+  --radius:.625rem;
+  --ambience:#7f9460; --footsteps:#c2643f; --props:#d69726; --cloth:#cf7f8b; --hardfx:#e0552b; --score:#8a5a7e;
+  --shadow-sm:0 1px 2px rgba(0,0,0,.05); --shadow-md:0 4px 6px -1px rgba(0,0,0,.1),0 2px 4px -2px rgba(0,0,0,.1);
+  --f-sans:"Geist",ui-sans-serif,system-ui,-apple-system,sans-serif; --f-mono:"Geist Mono",ui-monospace,Menlo,monospace;
+  --f-script:"Courier Prime","Courier New",Courier,monospace;
+}
+*{box-sizing:border-box}
+body{background:var(--background);color:var(--foreground);font-family:var(--f-sans);font-size:14px;line-height:20px;-webkit-font-smoothing:antialiased;
+  min-height:100dvh;display:flex;flex-direction:column;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 16px}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--ring);outline-offset:2px}
+canvas.g{display:block;flex:none}
+.wrap{max-width:1120px;width:100%;margin:0 auto;flex:1;min-height:0;display:flex;flex-direction:column;gap:20px}
+
+/* header */
+header.top{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px;padding-block:14px;border-bottom:1px solid var(--border);
+  font:500 11px/16px var(--f-mono);letter-spacing:.08em;text-transform:uppercase}
+.brand{display:flex;align-items:center;gap:10px;color:var(--foreground)}
+.crumb{color:var(--muted-foreground)}
+.nav{display:flex;gap:4px}
+.nav button{border:0;background:none;cursor:pointer;padding:4px 10px;font:inherit;letter-spacing:inherit;text-transform:inherit;color:var(--muted-foreground);white-space:pre}
+.nav button:hover{color:var(--foreground)}
+.nav button[aria-selected="true"]{color:var(--foreground)}
+.nav button[aria-selected="true"]::before{content:"[ "}.nav button[aria-selected="true"]::after{content:" ]"}
+.meta{justify-self:end;display:flex;gap:16px;color:var(--muted-foreground)}
+.meta b{font-weight:500;color:var(--foreground)}
+.scr{display:inline-block}
+@media (max-width:760px){header.top{grid-template-columns:1fr auto}.meta{display:none}}
+
+/* shadcn: Button */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:32px;padding:0 12px;border-radius:calc(var(--radius) - 2px);font-size:13px;font-weight:500;cursor:pointer;border:1px solid transparent;white-space:nowrap;transition:background .15s,opacity .15s}
+.btn svg{width:14px;height:14px}
+.btn-default{background:var(--primary);color:var(--primary-foreground)}
+.btn-default:hover{opacity:.9}
+.btn-outline{background:var(--background);border-color:var(--input);box-shadow:var(--shadow-sm)}
+.btn-outline:hover{background:var(--accent)}
+.btn-ghost{background:transparent}
+.btn-ghost:hover{background:var(--accent)}
+.btn-icon{width:32px;padding:0}
+.btn:disabled{opacity:.5;pointer-events:none}
+
+/* shadcn: Badge */
+.badge{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--border);border-radius:calc(var(--radius) - 4px);padding:1px 8px;font-size:12px;font-weight:500;line-height:18px;white-space:nowrap}
+.badge i{width:6px;height:6px;border-radius:50%;background:var(--c)}
+
+/* shadcn: ToggleGroup */
+.toggles{display:flex;flex-wrap:wrap;gap:2px}
+.tg{display:inline-flex;align-items:center;gap:6px;border:0;background:transparent;height:28px;padding:0 9px;border-radius:calc(var(--radius) - 2px);font-size:12.5px;font-weight:500;cursor:pointer;color:var(--muted-foreground);transition:background .15s,color .15s}
+.tg:hover{color:var(--foreground)}
+.tg[aria-pressed="true"]{background:var(--accent);color:var(--foreground)}
+.tg i{width:6px;height:6px;border-radius:50%;background:var(--c)}
+.tg b{font:400 11px var(--f-mono);color:var(--muted-foreground);opacity:.8}
+.hint{color:var(--muted-foreground);font-size:13px}
+
+/* shadcn: Card */
+.card{background:var(--card);color:var(--card-foreground);border:1px solid var(--border);border-radius:calc(var(--radius) + 4px);box-shadow:var(--shadow-sm)}
+.card-h{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px 16px;padding:16px 20px 0}
+.card-t{font-weight:600;font-size:14px;line-height:20px}
+.card-d{color:var(--muted-foreground);font-size:13px}
+
+/* score: a fill a shade darker than the page */
+.score{background:var(--score-bg);border:0;border-radius:3px;box-shadow:none}
+.staff-wrap{overflow-x:auto;padding:4px 20px 14px}
+.staff{position:relative;min-width:960px;height:100px;display:grid;grid-template-columns:84px 1fr}
+.clef{position:relative;border-right:1px solid var(--border)}
+.clef span{position:absolute;right:10px;transform:translateY(-50%);font-size:11px;color:var(--muted-foreground);display:flex;align-items:center;gap:6px;white-space:nowrap}
+.clef span i{width:5px;height:5px;border-radius:50%;background:var(--c)}
+.lanes{position:relative}
+.lanes .ln{position:absolute;left:0;right:0;height:1px;background:color-mix(in srgb,var(--foreground) 30%,var(--score-bg))}
+.lanes .lane{position:absolute;left:0;right:0;height:12px;transform:translateY(-50%);border-radius:6px;pointer-events:none;
+  background:linear-gradient(90deg,transparent 0%,color-mix(in srgb,var(--c) 8%,transparent) 40%,color-mix(in srgb,var(--c) 22%,transparent) 100%) no-repeat 0 0/0% 100%;
+  transition:background-size .7s cubic-bezier(.22,1,.36,1)}
+.lanes .lane.on{background-size:100% 100%}
+.trail{position:absolute;left:0;height:12px;margin-top:-6px;border-radius:6px;pointer-events:none;transform-origin:left;
+  background:linear-gradient(90deg,transparent 0%,color-mix(in srgb,var(--c) 10%,transparent) 45%,color-mix(in srgb,var(--c) 40%,transparent) 100%);
+  animation:trail .55s cubic-bezier(.22,1,.36,1) both}
+@keyframes trail{from{transform:scaleX(0);opacity:.3}to{transform:none;opacity:1}}
+.lanes .barl{position:absolute;width:1px;background:color-mix(in srgb,var(--foreground) 38%,var(--score-bg))}
+.lanes .sc{position:absolute;top:0;font:400 10px var(--f-mono);color:var(--muted-foreground);transform:translateX(5px);white-space:nowrap}
+.mk{position:absolute;width:20px;height:20px;margin:-10px 0 0 -10px;border:0;padding:3px;background:transparent;border-radius:50%;cursor:pointer;transition:opacity .2s,transform .25s cubic-bezier(.3,1.4,.5,1),filter .25s;z-index:1}
+.mk::before{content:"";position:absolute;inset:-3px;border-radius:50%;background:color-mix(in srgb,var(--c) 20%,var(--card));box-shadow:0 0 0 1px color-mix(in srgb,var(--c) 35%,var(--card));opacity:0;transform:scale(.4);transition:opacity .25s,transform .35s cubic-bezier(.22,1,.36,1);pointer-events:none}
+.mk canvas{position:relative}
+.mk:hover,.mk.hot,.mk.match{z-index:3}
+.mk:hover,.mk.hot{transform:scale(1.3)}
+.mk:hover::before,.mk.hot::before{opacity:1;transform:none}
+.mk.match::before{opacity:1;transform:scale(.85)}
+.mk.faded{opacity:.2}
+
+/* shadcn: Tooltip */
+.tip{position:fixed;z-index:50;pointer-events:none;background:var(--primary);color:var(--primary-foreground);font-size:12px;line-height:16px;border-radius:calc(var(--radius) - 2px);padding:6px 10px;white-space:nowrap;transform:translate(-50%,-100%);margin-top:-10px;animation:tipin .12s ease-out}
+@keyframes tipin{from{opacity:0;transform:translate(-50%,-90%)}}
+
+/* script card: fixed height down to the bottom of the screen, scrolls inside */
+.script{flex:1 1 0;min-height:420px;display:flex;flex-direction:row;gap:20px;min-width:0}
+.pane{flex:1;min-width:0;position:relative;display:flex;flex-direction:column;border:1px solid var(--border);border-radius:3px;overflow:hidden}
+.pane::after{content:"";position:absolute;left:0;right:0;bottom:0;height:88px;pointer-events:none;z-index:6;background:linear-gradient(to bottom,transparent,var(--background) 85%)}
+.scroller{flex:1;min-width:0;min-height:0;overflow-y:auto;overscroll-behavior:contain;position:relative;scrollbar-width:thin;scrollbar-color:var(--input) transparent}
+.doc{padding:0 0 96px}
+.act{position:relative}
+.act-h{position:sticky;top:0;z-index:5;display:flex;align-items:center;flex-wrap:wrap;gap:4px 14px;padding:11px 20px;width:100%;border:0;text-align:left;cursor:pointer;
+  background:color-mix(in srgb,var(--background) 97%,transparent);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--border);font:500 11px/16px var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted-foreground)}
+.act-h:hover{background:color-mix(in srgb,var(--accent) 92%,transparent)}
+.act-h .chev{width:14px;height:14px;flex:none;color:var(--muted-foreground);transition:transform .25s cubic-bezier(.22,1,.36,1)}
+.act.collapsed .chev{transform:rotate(-90deg)}
+.act-body{display:grid;grid-template-rows:1fr;transition:grid-template-rows .3s cubic-bezier(.22,1,.36,1)}
+.act-body>.inner{overflow:hidden;min-height:0}
+.act.collapsed .act-body{grid-template-rows:0fr;visibility:hidden;transition:grid-template-rows .3s cubic-bezier(.22,1,.36,1),visibility 0s .3s}
+.act-h .nm{color:var(--foreground);font-weight:600;display:flex;align-items:center;gap:8px}
+.act-h .nm i{width:6px;height:6px;border-radius:1px;background:var(--foreground)}
+.act-h .bd{letter-spacing:.04em}
+.act-h .at{margin-left:auto;color:var(--foreground)}
+.row{position:relative;display:grid;grid-template-columns:64px minmax(0,1fr)}
+.gut{position:relative}
+.scene-no{position:absolute;right:12px;top:22px;text-align:right;font:500 13px var(--f-mono);color:var(--muted-foreground)}
+.page{padding:0 40px;font-family:var(--f-script);font-size:15px;line-height:28px;transition:opacity .35s}
+.page p{margin:0;padding-bottom:20px}
+.page .slug{font-weight:700;letter-spacing:.03em;padding-top:20px}
+.page .sub{font-weight:700;padding-top:0}
+.page .char{padding:4px 0 0 32%;padding-bottom:0}
+.page .line{padding:0 16% 20px 20%}
+.ci{display:grid;grid-template-columns:20px 1fr;align-items:center;gap:10px;border:0;background:transparent;text-align:left;cursor:pointer;border-radius:calc(var(--radius) - 2px);padding:6px 8px;transition:background .15s,opacity .3s}
+.ci:hover,.ci.hot,.ci.open{background:var(--accent)}
+/* the cue list is its own column; an entry is only there while its cue is on screen */
+.cuelist{width:240px;flex:none;display:flex;flex-direction:column;min-height:0}
+.cuelist-h{padding:11px 8px;border-bottom:1px solid var(--border);font:500 11px/16px var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted-foreground)}
+.cl-scroll{flex:1;min-height:0;position:relative;overflow-y:auto;scrollbar-width:none;padding-top:8px;-webkit-mask-image:linear-gradient(to bottom,transparent,#000 18px,#000 calc(100% - 64px),transparent);mask-image:linear-gradient(to bottom,transparent,#000 18px,#000 calc(100% - 64px),transparent)}
+
+.ci{opacity:.17;transition:background .15s,opacity .35s}
+.ci.in,.ci.open,.ci:hover{opacity:1}
+.ci .lbl{font-size:13px;font-weight:500;line-height:18px;min-width:0}
+.ci .cat{display:block;font-size:12px;font-weight:400;color:var(--muted-foreground)}
+
+/* highlight */
+.cue{cursor:pointer;border-radius:3px;-webkit-box-decoration-break:clone;box-decoration-break:clone;
+  background-image:linear-gradient(90deg,transparent 0%,color-mix(in srgb,var(--c) 10%,transparent) 35%,color-mix(in srgb,var(--c) 38%,transparent) 100%),
+    linear-gradient(90deg,color-mix(in srgb,var(--c) 10%,transparent),color-mix(in srgb,var(--c) 55%,transparent));
+  background-repeat:no-repeat;background-position:0 0,0 100%;background-size:0% 100%,100% 1px;
+  transition:background-size .55s cubic-bezier(.22,1,.36,1),color .2s}
+.cue.hot,.doc.filtering .cue.match{background-size:100% 100%,100% 1px}
+.doc.filtering .cue:not(.match){background-size:0% 100%,0% 1px}
+.doc.focusing .row:not(.focus-row) .page{opacity:.35}
+.cuelist.filtering .ci:not(.match){opacity:.1}
+.cuelist.filtering .ci:hover{opacity:1}
+
+/* shadcn: Popover: the cue card (fixed, follows its cue while the script scrolls) */
+.pop{position:fixed;z-index:30;width:248px;animation:popin .16s ease-out;transition:width .3s cubic-bezier(.22,1,.36,1)}
+.pop.open{width:320px}
+.pop{cursor:grab;user-select:none;-webkit-user-select:none}
+.pop .btn{cursor:pointer}
+.pop.dragging,.pop.dragging *{cursor:grabbing!important}
+.pop:not(.open)::after{content:"";position:absolute;inset:-14px;z-index:-1}
+.pop:not(.open) .x{display:none}
+.cap,.more{display:grid;transition:grid-template-rows .3s cubic-bezier(.22,1,.36,1)}
+.cap{grid-template-rows:1fr}.pop.open .cap{grid-template-rows:0fr}
+.more{grid-template-rows:0fr;visibility:hidden}.pop.open .more{grid-template-rows:1fr;visibility:visible}
+.cap>div,.more>div{overflow:hidden;min-height:0}
+@keyframes popin{from{opacity:0;transform:translateY(-4px) scale(.98)}}
+.pop .panel{background:var(--popover);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-md);overflow:hidden}
+
+/* clip thumbnail: always the first thing in the card */
+.clipslot{position:relative;aspect-ratio:16/9;max-width:100%;margin:6px 6px 0;background:#000;border-radius:calc(var(--radius) - 3px);overflow:hidden}
+.clipslot .media{position:absolute;inset:0}
+.clipslot .media canvas,.clipslot .media video{display:block;width:100%;height:100%;object-fit:cover}
+.cliptag{position:absolute;left:8px;top:8px;display:flex;align-items:center;gap:6px;font:400 10.5px/14px var(--f-mono);color:#e5e5e5;background:rgba(0,0,0,.55);padding:2px 7px;border-radius:4px;-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
+.cliptag i{width:6px;height:6px;border-radius:50%;background:var(--c,#a3a3a3)}
+.cliptag.rec{color:#fafafa}.cliptag.rec i{background:#ef4444;animation:blink 1s steps(2) infinite}
+.clipslot .x{position:absolute;right:6px;top:6px;color:#e5e5e5;background:rgba(0,0,0,.45);height:28px;width:28px}
+.clipslot .x:hover{background:rgba(0,0,0,.75);color:#fff}
+.peekcap{display:flex;justify-content:space-between;gap:8px;padding:8px 12px 10px;font-size:12px;line-height:16px;color:var(--muted-foreground)}
+
+/* record countdown */
+.cd{position:absolute;inset:0;display:grid;place-items:center;background:rgba(0,0,0,.5)}
+.cd i{position:absolute;width:96px;height:96px;border-radius:50%;border:2px solid rgba(255,255,255,.7);animation:ring 1s ease-out both}
+.cd b{font:500 64px/1 var(--f-mono);color:#fafafa;animation:cdpop 1s ease-out both}
+.cd small{position:absolute;bottom:10px;font:400 10.5px var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:#d4d4d4}
+@keyframes ring{from{transform:scale(1.5);opacity:0}30%{opacity:1}to{transform:scale(.8);opacity:.2}}
+@keyframes cdpop{0%{opacity:0;transform:scale(1.4)}25%{opacity:1;transform:scale(1)}80%{opacity:1}100%{opacity:.1;transform:scale(.9)}}
+
+/* hero: waveform / glyph */
+.hero{position:relative;height:88px;background:var(--well);display:grid;place-items:center;margin:6px 6px 0;border-radius:calc(var(--radius) - 3px);overflow:hidden}
+.hero canvas.big{width:48px;height:48px}
+.hero .tag{position:absolute;left:8px;top:7px;z-index:2;display:flex;align-items:center;gap:6px;font:400 10.5px var(--f-mono);color:#a3a3a3}
+.hero .tag i{width:6px;height:6px;border-radius:50%;background:#a3a3a3}
+.hero .tag.rec i{background:#ef4444;animation:blink 1s steps(2) infinite}
+.hero .tag.rec{color:#fafafa}
+@keyframes blink{50%{opacity:.15}}
+.hero .tl{position:absolute;right:6px;top:4px;z-index:2;display:flex;gap:2px}
+.hero .btn-ghost{color:#d4d4d4;height:28px;width:28px}
+.hero .btn-ghost:hover{background:#262626;color:#fafafa}
+.wave{position:absolute;inset:0}
+.wave .bars{position:absolute;inset:0;display:flex;align-items:center;gap:2px;padding:24px 14px 12px;transition:opacity .2s}
+.wave .bars span{flex:1;height:var(--h);min-height:2px;border-radius:2px;background:var(--c);opacity:.9}
+.wave.playing::after{content:"";position:absolute;top:22px;bottom:10px;width:2px;border-radius:1px;background:#fafafa;left:14px;animation:sweep 1.7s linear forwards}
+@keyframes sweep{to{left:calc(100% - 16px)}}
+.wave.playing::after{animation-duration:var(--d,1.7s)}
+.hero .tag{max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wave .clear{position:absolute;left:50%;top:55%;transform:translate(-50%,-50%) scale(.96);opacity:0;pointer-events:none;
+  background:rgba(10,10,10,.82);border-color:#404040;color:#fafafa;transition:opacity .15s,transform .15s,background .15s}
+.wave .clear svg{color:#f87171}
+.wave .clear:hover{background:#1f1f1f;border-color:#6b2c2c}
+.wave:hover .clear,.wave:focus-within .clear{opacity:1;pointer-events:auto;transform:translate(-50%,-50%)}
+.wave:hover .bars,.wave:focus-within .bars{opacity:.2}
+@media (hover:none){.wave .clear{opacity:1;pointer-events:auto;transform:translate(-50%,-50%)}.wave .bars{opacity:.3}}
+
+.pop .head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding:12px 14px 0}
+.pop h3{margin:0;font-size:14px;font-weight:600;line-height:20px}
+.pop .sub{color:var(--muted-foreground);font-size:12px;line-height:16px}
+.pop .body{padding:12px 14px 14px}
+.pop .lab{font-size:12px;font-weight:500;color:var(--muted-foreground)}
+.pop .note{margin:4px 0 0;font:400 13px/20px var(--f-script)}
+.pop .line{margin:10px 0 0;padding-top:10px;border-top:1px solid var(--border);font-size:12px;color:var(--muted-foreground)}
+.pop .line em{font-style:normal;font-family:var(--f-script);color:var(--foreground)}
+.pop .acts{display:flex;justify-content:center;gap:8px;padding:0 14px 14px}
+
+/* right-click menu */
+.ctx{position:fixed;z-index:50;min-width:150px;padding:4px;background:var(--popover);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-md);animation:popin .12s ease-out}
+.ctx[hidden]{display:none}
+.ctx button{display:flex;align-items:center;gap:8px;width:100%;border:0;background:transparent;padding:7px 10px;border-radius:calc(var(--radius) - 3px);font:inherit;font-size:13px;color:var(--foreground);cursor:pointer;text-align:left}
+.ctx button:hover,.ctx button:focus-visible{background:var(--accent);outline:0}
+.ctx svg{width:14px;height:14px}
+/* drop targets, upload zone, library */
+.btn-drop{background:transparent;color:var(--foreground);border:1px dashed var(--ring)}
+.btn-drop:hover{background:var(--accent);border-color:var(--foreground)}
+.hero.dz{background:transparent;border:1px dashed var(--input);margin:6px 8px 0;height:86px}
+.dzb{all:unset;box-sizing:border-box;position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;color:var(--foreground);font-size:13px;border-radius:inherit}
+.dzb svg{width:18px;height:18px;margin-bottom:3px;color:var(--muted-foreground)}
+.dzb small{color:var(--muted-foreground);font-size:12px}
+.dzb:hover,.dzb:focus-visible{background:var(--accent)}
+.pop.drop{outline:2px dashed var(--foreground);outline-offset:3px;border-radius:12px}
+.pop.drop .hero.dz{background:var(--accent);border-color:var(--foreground)}
+.cue.drop{outline:1px dashed var(--c);outline-offset:2px;background-size:100% 100%,100% 1px}
+.ci.drop{background:var(--accent);outline:1px dashed var(--ring)}
+.lib{padding:10px 12px 12px}
+.lib-h{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:500;margin-bottom:8px}
+.lib-h small{margin-left:auto;color:var(--muted-foreground);font:400 11px var(--f-mono)}
+.lib-h .btn{width:26px;height:26px;margin-left:-6px}
+.chips{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px}
+.chip{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--border);background:transparent;border-radius:999px;padding:2px 8px;font:inherit;font-size:11.5px;color:var(--muted-foreground);cursor:pointer}
+.chip i{width:6px;height:6px;border-radius:50%;background:var(--c)}
+.chip:hover{background:var(--accent)}
+.chip[aria-pressed=true]{background:var(--foreground);color:var(--background);border-color:var(--foreground)}
+.lrows{max-height:206px;overflow-y:auto;margin:0 -4px;padding-right:2px}
+.lr{display:grid;grid-template-columns:26px minmax(0,1fr) auto;gap:6px;align-items:center;padding:3px 4px;border-radius:6px}
+.lr:hover{background:var(--accent)}
+.lr .btn-icon{width:26px;height:26px}
+.lr .lm{min-width:0}.lr .n{font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lr small{display:block;color:var(--muted-foreground);font-size:11.5px}
+.lr .btn-outline{height:24px;padding:0 9px;font-size:12px}
+.lr.fit{background:color-mix(in srgb,var(--accent) 70%,transparent)}
+.fitb{display:inline-flex;align-items:center;margin-right:6px;padding:0 6px;border-radius:999px;background:var(--foreground);color:var(--background);font-size:10.5px;line-height:16px;font-weight:500}
+/* library section */
+.libsec{background:transparent;border:1px solid var(--border);border-radius:3px;box-shadow:none;margin:0}
+.libsec.drop{outline:2px dashed var(--foreground);outline-offset:-4px;background:var(--accent)}
+.libh{display:flex;align-items:center;gap:10px;padding:0 8px 0 0}
+.libt{all:unset;box-sizing:border-box;flex:1;display:flex;align-items:center;gap:10px;padding:11px 20px;cursor:pointer;font:500 11px/16px var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--foreground);border-radius:3px}
+.libt:hover{background:var(--accent)}
+.libt .chev{width:14px;height:14px;color:var(--muted-foreground);transition:transform .25s cubic-bezier(.22,1,.36,1)}
+.libsec.collapsed .libt .chev{transform:rotate(-90deg)}
+.libt small{color:var(--muted-foreground);font:inherit}
+.libbody{display:grid;grid-template-rows:1fr;transition:grid-template-rows .3s cubic-bezier(.22,1,.36,1)}
+.libsec.collapsed .libbody{grid-template-rows:0fr}
+.libbody>div{overflow:hidden;min-height:0}
+.libin{padding:2px 20px 14px}
+.libsec .chips{margin:0 0 8px}
+.libgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:0 14px;max-height:150px;overflow-y:auto}
+.lr.lone{grid-template-columns:26px minmax(0,1fr);cursor:grab}
+.lr.lone:active{cursor:grabbing}
+.lib .empty{margin:12px 4px;color:var(--muted-foreground);font-size:12.5px}
+/* highlighter: appears over a text selection */
+.hl{position:fixed;z-index:40;display:flex;gap:7px;padding:7px 9px;background:var(--popover);border:1px solid var(--border);border-radius:999px;box-shadow:var(--shadow-md);transform:translateX(-50%);animation:popin .12s ease-out}
+.hl[hidden]{display:none}
+.hl button{width:16px;height:16px;border:0;padding:0;border-radius:50%;background:var(--c);cursor:pointer;transition:transform .12s}
+.hl button:hover{transform:scale(1.25)}
+
+/* shadcn Sonner toast */
+.toasts{position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:60;display:flex;flex-direction:column;gap:8px}
+.toast{display:flex;align-items:center;gap:10px;background:var(--popover);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-md);padding:12px 14px;font-size:13px;min-width:260px;animation:tin .25s cubic-bezier(.2,1.2,.4,1)}
+.toast small{display:block;color:var(--muted-foreground);font:400 11.5px var(--f-mono)}
+@keyframes tin{from{opacity:0;transform:translateY(10px)}}
+
+@media (max-width:860px){
+  .script{flex-direction:column}
+  .cuelist{width:auto}
+  .cl-scroll{display:flex;flex-wrap:wrap;align-content:flex-start;flex:none;max-height:112px;padding:8px 0 0;-webkit-mask-image:none;mask-image:none}
+  .cuelist-h{display:none}
+  .row{grid-template-columns:minmax(0,1fr)}
+  .gut{display:none}
+  .page{padding:0 18px;font-size:14px}
+  .ci{grid-template-columns:18px auto}
+  .page .char{padding-left:28%}.page .line{padding:0 4% 20px 12%}
+  .act-h{padding-inline:18px}
+  .pop{width:min(248px,calc(100vw - 32px))}
+  .pop.open{width:min(320px,calc(100vw - 32px))}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div class="wrap">
+<header class="top">
+  <div class="brand"><canvas class="g" id="garden" width="16" height="16" style="width:16px;height:16px" aria-hidden="true"></canvas><span class="scr" data-scr>Spotting</span><span class="crumb">/ <span class="scr" data-scr>Challengers</span></span></div>
+  <nav class="nav" role="tablist" aria-label="Stage"><button role="tab" aria-selected="true"><span class="scr" data-scr>Spot</span></button><button role="tab" aria-selected="false"><span class="scr" data-scr>Perform</span></button><button role="tab" aria-selected="false"><span class="scr" data-scr>Review</span></button></nav>
+  <div class="meta"><span><span class="scr" data-scr>Takes</span> <b id="navTally">0/0</b></span><span class="scr" data-scr>Set 1–3</span></div>
+</header>
+
+<section class="script" aria-label="Script">
+  <div class="pane"><main class="doc scroller" id="doc" tabindex="-1"></main></div>
+  <aside class="cuelist" id="cuelist" aria-label="Cues"><div class="cuelist-h">Cues</div><div class="cl-scroll" id="clScroll"></div></aside>
+</section>
+
+<section class="card libsec collapsed" id="libsec" aria-label="Library">
+  <div class="libh"><button class="libt" id="libT" aria-expanded="false"><svg class="chev" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6l4 4 4-4"/></svg>Library <small id="libN"></small></button><button class="btn btn-drop" id="libUp"></button></div>
+  <div class="libbody"><div><div class="libin"><div class="chips" id="libChips"></div><div class="libgrid" id="libGrid"></div></div></div></div>
+</section>
+
+<section class="card score" aria-label="Score">
+  <div class="card-h"><div><div class="card-t">Score</div></div><div class="toggles" id="bar" role="group" aria-label="Filter cues"></div></div>
+  <div class="staff-wrap"><div class="staff"><div class="clef" id="clef"></div><div class="lanes" id="tl"></div></div></div>
+</section>
+</div>
+<div class="toasts" id="toasts" aria-live="polite"></div>
+
+<script>
+const CATS={ambience:"Ambience",footsteps:"Footsteps",props:"Props",cloth:"Cloth",hardfx:"Hard FX",score:"Score"};
+/* loc picks the look of the stand-in clip. Add clip:"url.mp4" to any cue to use a real video instead. */
+const CUES={
+ crowd:{c:"ambience",n:"Challenger crowd murmur",s:"library",loc:"court",d:"Small crowd, big feeling. Keep it thin: more folding chairs than stadium."},
+ racket:{c:"props",n:"Ball in the racket throat",s:"none",loc:"court",d:"A tiny, private click. His ritual before the violence."},
+ serve:{c:"hardfx",n:"Serve thwack",s:"upload",loc:"court",d:"The sound the whole film rhymes with. Hard, dry, a little too loud."},
+ pounce:{c:"footsteps",n:"Pounce off the baseline",s:"none",loc:"court",d:"Sneaker bite on hard court, then the flat whop of the forehand."},
+ alarm:{c:"hardfx",n:"Alarm clock blare",s:"upload",loc:"hotel",d:"Cut hard from black. Harsh and mechanical, no cozy snooze tone."},
+ lotion:{c:"props",n:"Body lotion in the mirror",s:"none",loc:"hotel",d:"Soft, slick, intimate. Her routine, her armor."},
+ tv:{c:"ambience",n:"TV match commentary",s:"none",loc:"home",d:"Off-screen and flat. The room is a broadcast he can't escape."},
+ sharpie:{c:"props",n:"Sharpie on the mockup",s:"none",loc:"home",d:"One squeak of felt tip. A tiny act of rebellion; let it land."},
+ throw:{c:"hardfx",n:"Racket thrown, video freezes",s:"none",loc:"hotel",d:"The clatter hits, then the paused frame goes silent."},
+ spider:{c:"score",n:"Kids' movie score through the wall",s:"none",loc:"hotel",d:"Muffled animated-movie music. Warmth he's shut out of."},
+ vending:{c:"props",n:"Vending machine drop",s:"none",loc:"lobby",d:"Cheap thunk and rattle. Sad-motel specific."},
+ chime:{c:"props",n:"iMessage chime",s:"none",loc:"night",d:"Phone chirp, too cheerful for the reply that follows."},
+ hoodie:{c:"cloth",n:"Hoodie pillow, back seat",s:"none",loc:"night",d:"Nylon and old upholstery. He's done this before."},
+ knocking:{c:"hardfx",n:"Knuckles on car glass",s:"none",loc:"night",d:"Sudden and close. Snap us out of black on the first knock."},
+ fh:{c:"hardfx",n:"Forehand winner, down the line",s:"none",loc:"court",d:"2007 is crisper and brighter. Let the ball ring."},
+ heckle:{c:"ambience",n:"Heckler, off-screen",s:"none",loc:"court",d:"Far, loud, and distinctly Patrick. Place him just outside the frame."},
+ ace:{c:"hardfx",n:"Ace",s:"upload",loc:"court",d:"Art's answer. Cleaner than the heckles, then silence."},
+ snack:{c:"ambience",n:"Empty snack bar room tone",s:"none",loc:"snack",d:"Fridge hum, far-off practice. Nobody here but the two of them."},
+ churros:{c:"props",n:"Paper bag of churros",s:"none",loc:"snack",d:"Crinkle and a bite. A small gesture of care."},
+ shirt:{c:"cloth",n:"T-shirt hits the floor",s:"none",loc:"dorm",d:"Cotton, soft landing. The shirt returns later; make it count."},
+ hospital:{c:"ambience",n:"Therapy room, hours in",s:"none",loc:"hospital",d:"Monitor tick, ventilation. Time has stopped for Tashi."},
+ rally:{c:"hardfx",n:"Slugfest rally",s:"none",loc:"court",d:"Ugly, punishing, no musical shaping. Just bodies and ball."},
+ sail:{c:"hardfx",n:"Shot sails past Tashi",s:"none",loc:"court",d:"The ball she chose to miss. A whisper, then the fence rattle."},
+ monster:{c:"hardfx",n:"Monstrous forehand",s:"none",loc:"court",d:"The release. Heavier than any thwack before it."},
+ wind:{c:"ambience",n:"Wind rising, chairs flying",s:"library",loc:"court",d:"Builds across the scene. Debris, flapping banners, fold-up chairs."},
+ saunadoor:{c:"props",n:"Sauna door opens",s:"none",loc:"sauna",d:"Wood on wood, a rush of cooler air. Then steam."},
+ towel:{c:"cloth",n:"Towel over his face",s:"none",loc:"sauna",d:"Damp terry, slow breath. Art hiding in plain sight."},
+ whiskey:{c:"props",n:"Ice in a whiskey glass",s:"upload",loc:"bar",d:"Quiet, late, closer to the mic."},
+ bartv:{c:"ambience",n:"Bar TV highlights",s:"none",loc:"bar",d:"Crowd roar through a small speaker. Art's win, played to an empty room."},
+ elevator:{c:"hardfx",n:"Elevator ding and doors",s:"none",loc:"lobby",d:"Bright ding, doors slide. Art arrives right after the kiss."}
+};
+const SCRIPT=[
+ {name:"Set One",board:"Donaldson 0–0 · Zweig 0–0",scenes:[
+  {n:1,slug:"EXT. A TENNIS COURT IN NEW ROCHELLE - LATE AFTERNOON/EVENING",b:[
+   ["a","His shocking presence at this rinky-dink tournament is the sole reason why the modest venue is [[crowd|packed with locals, tourists]], and anyone living in the vicinity of New Rochelle who is even remotely interested in tennis."],
+   ["c","UMPIRE"],["l","Donaldson to serve."],
+   ["a","Art goes into his service motion: right before he tosses the ball, he [[racket|places it for a second perfectly in the hole on the neck of the racket]]."],
+   ["a","[[serve|Thwacckkkk!]]"],
+   ["a","Art resets, serves a slightly softer ball. Patrick [[pounce|POUNCES on it]], hitting a flat, whopping forehand. Art can’t get to it."]]},
+  {n:2,slug:"INT. HOTEL BEDROOM IN ATLANTA - MORNING",b:[
+   ["t","Two Weeks Earlier."],
+   ["a","Loud, blaring sound of an [[alarm|ALARM CLOCK]]. Art opens his eyes and reaches over to turn off the alarm: It’s 5:30 AM -- barely light outside."],
+   ["a","Tashi’s already up, [[lotion|applying body lotion]] in the mirror. As she gets to her knee, she pauses, briefly, running her finger over a scar."],
+   ["c","TASHI"],["l","Let’s go."]]},
+  {n:3,slug:"INT. THE LIVING ROOM - A LITTLE LATER",b:[
+   ["a","Art gets stretched on the floor by his PHYSIOTHERAPIST as he [[tv|watches yesterday’s matches on TV]]."],
+   ["a","Art reaches over and mutes the TV. Tashi notices this, then takes out a red [[sharpie|sharpie]] and adds an “s” to the ad copy: “Game Changers.”"]]},
+  {n:4,slug:"INT. THE FANCY HOTEL ROOM IN ATLANTA - EVENING",b:[
+   ["a","Tashi and Art are watching footage of Art getting crushed."],
+   ["c","ART"],["l","He was playing really well..."],
+   ["a","Art misses a shot, [[throw|throws his racket]]. Tashi pauses the video."],
+   ["a","Art looks at the TV still frozen on the image of him throwing his racket. In the other room, he can hear [[spider|the opening notes of the Spiderverse score]]."]]},
+  {n:5,slug:"INT. ROADSIDE MOTEL LOBBY, NEW ROCHELLE - LATER",b:[
+   ["a","In the corner, a WOMAN in men’s boxers and a NY Giants jersey tries to get some Famous Amos cookies from the [[vending|vending machine]]. We can see Patrick’s Honda through the window. His card has just been declined."],
+   ["c","PATRICK"],["l","Can I pay tomorrow? I’ve been driving all day, I’m exhausted..."]]},
+  {n:6,slug:"EXT. THE MOTEL PARKING LOT - MOMENTS LATER",b:[
+   ["a","He sends it, waits. His phone [[chime|chimes]]."],
+   ["a","Text from Lana: “I haven’t spoken to you in five years.”"]]},
+  {n:7,slug:"EXT. NEW ROCHELLE COUNTRY CLUB - A BIT LATER",b:[
+   ["a","He parks in the far corner, shuts off his car, and looks around. He turns off the lights, folds up a hoodie into a makeshift pillow, [[hoodie|climbs in back]] and curls up, looking like he’s done this before."],
+   ["a","BLACK. Loud sound of [[knocking|KNOCKING]]. Light snaps back to..."]]}
+ ]},
+ {name:"Set Two",board:"Donaldson 2, 0–0 · Zweig 6, 0–0",scenes:[
+  {n:8,slug:"EXT. STANFORD PRACTICE COURT - DAY",b:[
+   ["t","Twelve Years Earlier. Stanford, 2007."],
+   ["a","Tashi rallies against a TEAMMATE as the rest of the team watches. She wins a point [[fh|crushing a forehand down the line]]."]]},
+  {n:9,slug:"EXT. STANFORD PRACTICE COURT - DAY, THE NEXT WEEK",b:[
+   ["a","Art stands at the service line. Across the net, a TEAMMATE is ready to return. Art starts to go into his motion --"],
+   ["c","[[heckle|HECKLER (O.S.)]]"],["l","WOO HOOOO! Let’s go!"],
+   ["a","Art doesn’t smile. He just turns his attention back to his teammate, goes into his motion and sends in [[ace|an ace]]."]]},
+  {n:10,slug:"INT. STANFORD SNACK BAR - A LITTLE LATER",b:[
+   ["a","Patrick sits in front of the windows in the [[snack|mostly empty snack bar]], staring at a poster of Tashi on a bulletin board nearby."],
+   ["a","Art comes over with some [[churros|churros]] and sees Patrick looking at the poster. He sits down next to him and hands him one."],
+   ["c","ART"],["l","So tell me about the tour."]]},
+  {n:11,slug:"INT. TASHI’S DORM ROOM - LATER",b:[
+   ["a","Patrick and Tashi are making out on her bed. Tashi still wears her “I Told Ya” shirt."],
+   ["a","She rolls on top of him. He takes off her shirt and [[shirt|throws it on the ground]]."]]},
+  {n:12,slug:"INT. SPORTS THERAPY ROOM - NIGHT",b:[
+   ["a","Art sits next to Tashi’s bed. She stares at the wall, completely drained of life. [[hospital|They’ve been there for hours.]]"],
+   ["c","TASHI"],["l","OUT! OUT! OUT!"]]},
+  {n:13,slug:"EXT. PHIL’S TIRE TOWN CHALLENGER - 2019, EVENING",b:[
+   ["a","Art and Patrick have a punishing [[rally|rally -- slugfest tennis, ugly and brutal]]. Tashi watches, stone faced, as Art hits a backhand to the baseline. Patrick can’t get there."]]}
+ ]},
+ {name:"Set Three",board:"Donaldson 2, 6, 1–0 · Zweig 6, 2, 0–0",scenes:[
+  {n:14,slug:"EXT. PRACTICE COURT AT THE ATLANTA OPEN - DAY",b:[
+   ["t","Eight Years Earlier."],
+   ["a","Tashi feeds Art balls, calling out shots. Tashi notices him out of the corner of her eye and lets one of Art’s shots [[sail|sail right by her]]."],
+   ["a","She feeds him one. He hits a [[monster|monstrous forehand]]."]]},
+  {n:15,slug:"EXT. PHIL’S TIRE TOWN CHALLENGER - DAY",b:[
+   ["t","The day before the final."],
+   ["a","After the just-concluded semi-final match, [[wind|wind is starting to pick up in New Rochelle]], sending trash, tennis balls, and fold up chairs flying on the grass behind the court."]]},
+  {n:16,slug:"INT. SAUNA AT THE NEW ROCHELLE COUNTRY CLUB - SAME TIME",b:[
+   ["a","Art sits with a [[towel|towel over his face]]. The door [[saunadoor|opens]], and a NAKED MAN walks over and stands right in front of him."],
+   ["c","PATRICK"],["l","Can you do me a favor?"]]},
+  {n:17,slug:"INT. HOTEL BAR IN ATLANTA - MIDDLE OF THE NIGHT",b:[
+   ["a","Tashi sips a [[whiskey|whiskey]] in the empty bar, watching [[bartv|a TV playing highlights]] from Art’s semi-finals match earlier that day."],
+   ["a","Patrick sits down next to her and picks up her drink."]]},
+  {n:18,slug:"INT. HOTEL LOBBY IN ATLANTA - 3AM",b:[
+   ["a","[[elevator|Elevator doors open]], revealing Art, having just woken up, stepping into the lobby, concerned."],
+   ["a","He looks in at the bar just after Tashi and Patrick have broken apart."]]}
+ ]}
+];
+const done=q=>q.s!=="none";
+const fileOf=q=>q.f?.name||q.n.toLowerCase().replace(/[^a-z]+/g,"_").replace(/_$/,"")+".wav";
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+
+/* ---------- glyphs: 5x5 dot-matrix states, stepped at 12fps ---------- */
+const PI=Math.PI,TAU=PI*2, cl=(v,a=0,b=1)=>Math.min(b,Math.max(a,v)), ramp=(p,at,len=.08)=>cl((p-at)/len);
+const ix=(x,y)=>(y+2)*5+(x+2), blank=()=>new Float32Array(25);
+const CELLS=[];for(let y=-2;y<=2;y++)for(let x=-2;x<=2;x++)CELLS.push([x,y]);
+const setv=(b,pts,v)=>{for(const[x,y]of pts){const i=ix(x,y);b[i]=Math.max(b[i],v)}};
+const FLOWER=[[0,0,1],[0,-1,.35],[0,1,.35],[-1,0,.35],[1,0,.35],[0,-2,1],[0,2,1],[-2,0,1],[2,0,1],[-1,-1,1],[1,-1,1],[-1,1,1],[1,1,1]];
+const PLUS=[[0,0],[0,-1],[0,1],[-1,0],[1,0]];
+const DIAMOND=CELLS.filter(([x,y])=>Math.abs(x)+Math.abs(y)===2).sort((a,b)=>((Math.atan2(a[0],-a[1])+TAU)%TAU)-((Math.atan2(b[0],-b[1])+TAU)%TAU));
+const CHECK=[[-2,0],[-1,1],[0,0],[1,-1],[2,-2]];
+const GARDEN=[[0,0],[0,-2],[2,-2],[2,0],[2,2],[0,2],[-2,2],[-2,0],[-2,-2]];
+const G={
+  seed:{kind:"loop",f(t){const b=blank(),s=.5+.5*Math.sin(t/2.4*TAU);b[ix(0,0)]=.35+.5*s;setv(b,PLUS.slice(1),.12+.1*s);return b}},
+  bud:{kind:"loop",f(t){const b=blank(),s=.5+.5*Math.sin(t/2*TAU);b[ix(0,0)]=1;setv(b,PLUS.slice(1),.35+.65*s);return b}},
+  unfurl:{kind:"shot",dur:.6,f(t,p){const b=blank();b[ix(0,0)]=ramp(p,0,.2);const k1=ramp(p,.22,.2),k2=ramp(p,.48,.25);
+    for(const[x,y]of PLUS.slice(1))b[ix(x,y)]=k1*(k2>0?1-.65*k2:1);for(const[x,y]of DIAMOND)b[ix(x,y)]=k2;return b}},
+  orbit:{kind:"loop",f(t){const b=blank(),ph=(t/1.2%1)*8;DIAMOND.forEach(([x,y],i)=>{const d=(ph-i+8)%8;b[ix(x,y)]=d<4?1-d/4:0});b[ix(0,0)]=.25+.2*Math.sin(t*5);return b}},
+  pulse:{kind:"loop",f(t){const b=blank();for(const[x,y]of CELLS){const d=Math.abs(x)+Math.abs(y);if(!d){b[ix(x,y)]=1;continue}const a=Math.atan2(y,x),amp=cl(.5+.5*Math.sin(t*6.5+a*1.7)*Math.cos(t*3.1-a*1.3));b[ix(x,y)]=cl(amp*2.4-(d-1))*(d>2?.6:1)}return b}},
+  set:{kind:"shot",dur:1.1,f(t,p){const b=blank();if(p<.5){const k=p<.3?1:1-ramp(p,.3,.2);for(const[x,y,v]of FLOWER)b[ix(x,y)]=(x===0&&y===0)?1:v*k}
+    CHECK.forEach(([x,y],i)=>{b[ix(x,y)]=Math.max(b[ix(x,y)]*(p<.5?1:0),ramp(p,.5+i*.08,.08))});return b}},
+  check:{kind:"loop",f(){const b=blank();setv(b,CHECK,1);return b}},
+  pollinate:{kind:"loop",f(t){const b=blank(),p=(t/1.8)%1,path=[[-1,0],[0,-1],[1,0]];setv(b,[[-2,-1],[-2,1]],.45);b[ix(-2,0)]=.9;
+    const glow=p>.7?1-(p-.7)*1.2:.25;setv(b,[[2,-1],[2,1]],.25+.4*Math.max(0,glow-.25));b[ix(2,0)]=Math.max(.35,glow);
+    if(p>.1&&p<.72){const q=(p-.1)/.62,j=Math.min(2,Math.floor(q*3)),[x,y]=path[j];b[ix(x,y)]=1}return b}},
+  garden:{kind:"count",f(t,p,it){const b=blank(),n=it.count||0;GARDEN.forEach(([x,y],i)=>{b[ix(x,y)]=i<n?1:.12});return b}}
+};
+const insts=new Set(); let NOW=performance.now()/1000;
+function glyph(cv,key,o={}){const it={cv,ctx:cv.getContext("2d"),key,start:NOW,color:o.color||"--foreground",count:o.count,base:o.base??.1};size(it);insts.add(it);return it}
+function size(it){const w=parseFloat(it.cv.style.width)||it.cv.getBoundingClientRect().width||16,d=Math.min(devicePixelRatio||1,2);it.w=w;it.d=d;it.cv.width=it.cv.height=Math.round(w*d)}
+function setG(it,key,color){if(!it)return;it.key=key;it.start=NOW;if(color)it.color=color}
+function rr(c,x,y,w,h,r){c.beginPath();c.moveTo(x+r,y);c.arcTo(x+w,y,x+w,y+h,r);c.arcTo(x+w,y+h,x,y+h,r);c.arcTo(x,y+h,x,y,r);c.arcTo(x,y,x+w,y,r);c.closePath()}
+const colCache={}; function col(v){return v.startsWith("--")?(colCache[v]??=css(v)):v}
+const clearCols=()=>{for(const k in colCache)delete colCache[k]};
+new MutationObserver(clearCols).observe(document.documentElement,{attributes:true});
+matchMedia("(prefers-color-scheme:dark)").addEventListener?.("change",clearCols);
+const reduce=matchMedia("(prefers-reduced-motion:reduce)").matches;
+function draw(it){
+  const g=G[it.key];let t=Math.floor((NOW-it.start)*12)/12,p=1;
+  if(g.kind==="shot")p=Math.floor(cl((NOW-it.start)/g.dur)*12)/12;
+  if(reduce){t=0;p=1}
+  const b=g.f(t,p,it),c=it.ctx,S=it.w*it.d,cell=S/5,dot=cell*(it.w<=14?.78:.74),off=(cell-dot)/2;
+  c.setTransform(1,0,0,1,0,0);c.clearRect(0,0,S,S);c.fillStyle=col(it.color);
+  for(let i=0;i<25;i++){const v=Math.round(cl(b[i])*4)/4;c.globalAlpha=it.base+(1-it.base)*v;rr(c,(i%5)*cell+off,((i/5)|0)*cell+off,dot,dot,dot*.3);c.fill()}
+  c.globalAlpha=1;
+}
+/* ---------- stand-in clips: drawn on a canvas; a cue with clip:"url" uses a real <video> ---------- */
+const LOCS={
+  court:{a:"#2c4d38",b:"#0c1812",k:"court"}, hotel:{a:"#503a28",b:"#150e09",k:"window"}, home:{a:"#303641",b:"#0f1115",k:"tv"},
+  night:{a:"#1c2a48",b:"#05070c",k:"streak"}, lobby:{a:"#3d3529",b:"#0e0c09",k:"bokeh"}, snack:{a:"#3b4c55",b:"#0c1215",k:"window"},
+  dorm:{a:"#4b3041",b:"#130a0f",k:"bokeh"}, hospital:{a:"#34494c",b:"#0a1112",k:"diag"}, sauna:{a:"#704019",b:"#1b0d04",k:"slats"}, bar:{a:"#3c2336",b:"#0a050a",k:"bokeh"}
+};
+const CLIP_LEN=4, clips=new Set();
+function hash(s){let h=2166136261;for(const ch of s)h=Math.imul(h^ch.charCodeAt(0),16777619);return h>>>0}
+function rng(seed){return()=>{seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function drawClip(it,t){
+  const c=it.ctx,W=480,H=270,q=it.q,L=LOCS[q.loc]||LOCS.lobby,sw=Math.sin(t/CLIP_LEN*TAU);
+  c.save();const z=1+.05*(t/CLIP_LEN);c.translate(W/2,H/2);c.scale(z,z);c.translate(-W/2,-H/2);
+  const g=c.createLinearGradient(0,0,0,H);g.addColorStop(0,L.a);g.addColorStop(1,L.b);c.fillStyle=g;c.fillRect(-20,-20,W+40,H+40);
+  if(L.k==="court"){
+    c.fillStyle="rgba(0,0,0,.28)";c.fillRect(0,150,W,H);c.strokeStyle="rgba(255,255,255,.35)";c.lineWidth=1.5;c.beginPath();
+    c.moveTo(0,172);c.lineTo(W,172);c.moveTo(0,226);c.lineTo(W,226);c.moveTo(W/2,150);c.lineTo(W/2,H);c.stroke();
+    c.fillStyle="rgba(255,255,255,.1)";c.fillRect(70,118,340,32);c.strokeStyle="rgba(255,255,255,.45)";c.beginPath();c.moveTo(70,118);c.lineTo(410,118);c.stroke();
+    const bx=((t/CLIP_LEN)*1.3-.15)*W,by=176-Math.abs(Math.sin(t*PI*1.5))*84;c.fillStyle="#dbe84e";c.shadowColor="#dbe84e";c.shadowBlur=10;c.beginPath();c.arc(bx,by,4,0,TAU);c.fill();c.shadowBlur=0;
+  }else if(L.k==="window"){
+    c.fillStyle="rgba(255,236,200,.85)";c.fillRect(310,40,110,110);c.fillStyle="rgba(255,236,200,.07)";c.beginPath();c.moveTo(310,40);c.lineTo(420,40);c.lineTo(250,270);c.lineTo(80,270);c.closePath();c.fill();
+    c.fillStyle="rgba(0,0,0,.35)";c.fillRect(363,40,3,110);c.fillRect(310,93,110,3);
+  }else if(L.k==="tv"){
+    const f=.55+.25*Math.sin(t*9)+.1*Math.sin(t*23),gl=c.createRadialGradient(330,110,10,330,110,200);gl.addColorStop(0,`rgba(150,190,255,${.35*f})`);gl.addColorStop(1,"transparent");c.fillStyle=gl;c.fillRect(0,0,W,H);
+    c.fillStyle=`rgba(190,215,255,${.6+.25*f})`;c.fillRect(280,80,100,60);
+  }else if(L.k==="streak"){
+    for(let i=0;i<7;i++){const y=60+i*26,x=((1-((t/CLIP_LEN*(1+i%3*.5)+i*.17)%1))*(W+160))-80;c.fillStyle=`rgba(255,${190+i*8},120,${.1+.06*(i%3)})`;c.fillRect(x,y,120+i*10,3)}
+  }else if(L.k==="slats"){
+    for(let x=0;x<W;x+=34){c.fillStyle=(x/34)%2?"rgba(0,0,0,.18)":"rgba(255,170,80,.06)";c.fillRect(x,0,34,H)}
+    const s=c.createLinearGradient(0,H,0,60);s.addColorStop(0,`rgba(255,235,210,${.12+.06*sw})`);s.addColorStop(1,"transparent");c.fillStyle=s;c.fillRect(0,0,W,H);
+  }else if(L.k==="diag"){
+    for(let i=-2;i<6;i++){c.fillStyle="rgba(210,240,240,.06)";c.beginPath();c.moveTo(i*90+sw*8,0);c.lineTo(i*90+50+sw*8,0);c.lineTo(i*90-110+sw*8,H);c.lineTo(i*90-160+sw*8,H);c.fill()}
+  }else{
+    for(const [x,y,r,a] of it.bk){c.fillStyle=`rgba(255,200,140,${.05+.12*a})`;c.beginPath();c.arc(x+sw*6*a,y,r,0,TAU);c.fill()}
+  }
+  const fx=[W*.36+sw*14,W*.64-Math.sin(t/CLIP_LEN*TAU+1)*10];
+  fx.forEach((x,i)=>{c.fillStyle="rgba(5,5,5,.62)";c.beginPath();c.arc(x,112+i*4,15,0,TAU);c.fill();rr(c,x-26,130+i*4,52,150,22);c.fill()});
+  if(q.c==="hardfx"){const f=Math.max(0,1-((t%2)/.18));if(f>0){c.fillStyle=`rgba(255,255,255,${.2*f})`;c.fillRect(-20,-20,W+40,H+40)}}
+  c.restore();
+  const v=c.createRadialGradient(W/2,H/2,H*.35,W/2,H/2,W*.66);v.addColorStop(0,"transparent");v.addColorStop(1,"rgba(0,0,0,.55)");c.fillStyle=v;c.fillRect(0,0,W,H);
+  c.fillStyle="rgba(255,255,255,.05)";for(let i=0;i<70;i++)c.fillRect(Math.random()*W,Math.random()*H,1.5,1.5);
+  c.fillStyle="#000";c.fillRect(0,0,W,24);c.fillRect(0,H-24,W,24);
+  const s=Math.floor(t),f=Math.floor((t%1)*24);c.fillStyle="#cfcfcf";c.font="11px ui-monospace,Menlo,monospace";c.fillText(`00:00:0${s}:${String(f).padStart(2,"0")}`,12,H-8);
+  c.fillStyle=it.col;c.fillRect(0,H-2,W*t/CLIP_LEN,2);
+}
+function makeClip(id){
+  const q=CUES[id],wrap=document.createElement("div");wrap.className="media";
+  if(q.clip){const v=document.createElement("video");v.src=q.clip;v.muted=true;v.loop=true;v.playsInline=true;v.preload="metadata";wrap.appendChild(v);
+    return{el:wrap,play(){v.play().catch(()=>{})},pause(){v.pause()},reset(){v.currentTime=0},destroy(){v.pause();v.removeAttribute("src");v.load()}}}
+  const cv=document.createElement("canvas");cv.width=480;cv.height=270;wrap.appendChild(cv);
+  const r=rng(hash(id)),it={cv,ctx:cv.getContext("2d"),q,playing:false,t0:0,col:col(`--${q.c}`),bk:Array.from({length:10},()=>[r()*480,r()*220+20,8+r()*24,r()])};
+  clips.add(it);drawClip(it,.9);
+  return{el:wrap,play(){if(reduce)return;if(!it.playing){it.playing=true;it.t0=NOW}},pause(){it.playing=false;drawClip(it,.9)},reset(){it.t0=NOW;if(!it.playing)drawClip(it,0)},destroy(){it.playing=false;clips.delete(it)}};
+}
+(function loop(now){NOW=now/1000;for(const it of insts){if(!it.cv.isConnected){insts.delete(it);continue}draw(it)}
+  for(const it of clips){if(it.playing)drawClip(it,(NOW-it.t0)%CLIP_LEN)}
+  requestAnimationFrame(loop)})(performance.now());
+const restKey=q=>done(q)?"check":"seed";
+const restColor="--muted-foreground";
+
+/* ---------- render script: one sticky section per set ---------- */
+const doc=$("#doc"), order=[], ACTIDS=[];
+const parse=t=>t.replace(/\[\[(\w+)\|([^\]]+)\]\]/g,(_,id,txt)=>{order.push(id);return `<span class="cue" tabindex="0" data-id="${id}" style="--c:var(--${CUES[id].c})">${txt}</span>`});
+doc.innerHTML=SCRIPT.map((act,ai)=>{
+  const rows=[],start=order.length;
+  act.scenes.forEach(sc=>{
+    rows.push({gut:`<div class="scene-no">${sc.n}</div>`,page:`<p class="slug">${sc.slug}</p>`,cues:[]});
+    sc.b.forEach(([t,txt])=>{const s=order.length,body=parse(txt),ids=order.slice(s);ids.forEach(id=>{CUES[id].scene=sc.n;CUES[id].act=ai});
+      const cls=t==="a"?"":t==="t"?"sub":t==="c"?"char":"line",prev=rows[rows.length-1];
+      if((t==="l")&&prev.dlg){prev.page+=`<p class="${cls}">${body}</p>`;prev.cues.push(...ids);return}
+      rows.push({gut:"",page:`<p class="${cls}">${body}</p>`,cues:ids,dlg:t==="c"})});
+  });
+  ACTIDS[ai]=order.slice(start);
+  return `<section class="act" data-act="${ai}"><button class="act-h" aria-expanded="true"><svg class="chev" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6l4 4 4-4"/></svg><span class="nm"><i></i>${act.name}</span><span class="bd">${act.board}</span><span class="at" data-act="${ai}"></span></button><div class="act-body"><div class="inner">`+
+    rows.map(r=>`<div class="row"><div class="gut">${r.gut}</div><div class="page">${r.page}</div></div>`).join("")+`</div></div></section>`;
+}).join("");
+const list=$("#cuelist"), clScroll=$("#clScroll");
+const ciHTML=id=>{const q=CUES[id];return `<button class="ci" data-id="${id}" aria-label="${q.n}"><canvas class="g" style="width:16px;height:16px" aria-hidden="true"></canvas><span class="lbl">${q.n}<span class="cat">${CATS[q.c]}</span></span></button>`};
+clScroll.insertAdjacentHTML("beforeend",order.map(ciHTML).join(""));
+/* Every cue has an entry. Entries whose phrase is on screen are full strength, the rest are faded, and the list scrolls so the active ones sit mid-list with neighbours filling the space. */
+let settleRaf=0;
+let overList=false;clScroll.addEventListener("pointerenter",()=>overList=true);clScroll.addEventListener("pointerleave",()=>overList=false);
+function settleList(){if(overList)return;cancelAnimationFrame(settleRaf);settleRaf=requestAnimationFrame(()=>{
+  const on=$$(".ci.in",clScroll);if(!on.length)return;const H=clScroll.clientHeight,top=on[0].offsetTop,last=on[on.length-1],bot=last.offsetTop+last.offsetHeight;
+  clScroll.scrollTo({top:cl(bot-top>H-48?top-24:(top+bot)/2-H/2,0,clScroll.scrollHeight-H),behavior:reduce?"auto":"smooth"})})}
+const io=new IntersectionObserver(es=>{es.forEach(e=>$(`.ci[data-id="${e.target.dataset.id}"]`).classList.toggle("in",e.isIntersecting));settleList()},{root:doc,rootMargin:"-40px 0px -56px 0px"});
+$$(".cue").forEach(c=>io.observe(c));
+const RG={}; $$(".ci").forEach(b=>{const q=CUES[b.dataset.id];RG[b.dataset.id]=glyph(b.querySelector("canvas"),restKey(q),{color:restColor})});
+
+/* filters */
+let curCat="all";
+function renderBar(){const counts={};order.forEach(id=>counts[CUES[id].c]=(counts[CUES[id].c]||0)+1);
+  $("#bar").innerHTML=`<button class="tg" data-cat="all" aria-pressed="${curCat==="all"}">All <b>${order.length}</b></button>`+Object.keys(CATS).map(k=>`<button class="tg" data-cat="${k}" aria-pressed="${curCat===k}" style="--c:var(--${k})"><i></i>${CATS[k]} <b>${counts[k]||0}</b></button>`).join("")}
+function applyFilter(){const cat=curCat;doc.classList.toggle("filtering",cat!=="all");list.classList.toggle("filtering",cat!=="all");
+  $$(".cue,.ci").forEach(el=>el.classList.toggle("match",cat==="all"||CUES[el.dataset.id].c===cat));
+  $$(".mk",tl).forEach(m=>{const hit=CUES[m.dataset.id].c===cat;m.classList.toggle("faded",cat!=="all"&&!hit);m.classList.toggle("match",cat!=="all"&&hit)});
+  $$(".lane",tl).forEach(l=>l.classList.toggle("on",l.dataset.lane===cat))}
+renderBar();
+
+/* score: one bar line per set */
+const tl=$("#tl"), NG={}, LANES=["score","ambience","hardfx","props","cloth","footsteps"];
+function renderScore(){
+  const top=22,step=11,Y={};LANES.forEach((c,i)=>Y[c]=top+i*step);const lines=[0,2,4,6].map(i=>top+i*step);
+  $("#clef").innerHTML=LANES.map(c=>`<span style="top:${Y[c]}px;--c:var(--${c})"><i></i>${CATS[c]}</span>`).join("");
+  const gap=2.2,total=order.length+gap*(SCRIPT.length-1)+1;let pos=.6,last=null,out="";
+  out+=LANES.map(c=>`<div class="lane" data-lane="${c}" style="top:${Y[c]}px;--c:var(--${c})"></div>`).join("");
+  out+=lines.map(y=>`<div class="ln" style="top:${y}px"></div>`).join("");
+  const X=p=>(p/total*100).toFixed(2)+"%";
+  order.forEach(id=>{const q=CUES[id];
+    if(last!==null&&q.act!==last){pos+=gap/2;out+=`<div class="barl" style="left:${X(pos)};top:${lines[0]}px;height:${lines[3]-lines[0]}px"></div>`;pos+=gap/2}
+    if(q.act!==last)out+=`<span class="sc" style="left:${X(Math.max(pos-.9,0))}">Set ${q.act+1}</span>`;
+    out+=`<button class="mk" data-id="${id}" aria-label="Jump to ${q.n}" style="left:${X(pos)};top:${Y[q.c]}px;--c:var(--${q.c})"><canvas class="g" style="width:14px;height:14px" aria-hidden="true"></canvas></button>`;
+    pos++;last=q.act});
+  tl.innerHTML=out;
+  $$(".mk",tl).forEach(m=>{const q=CUES[m.dataset.id];NG[m.dataset.id]=glyph(m.querySelector("canvas"),restKey(q),{color:done(q)?`--${q.c}`:"--muted-foreground",base:.16})});
+}
+renderScore();
+const garden=glyph($("#garden"),"garden",{count:0,base:.14});
+function tally(){const n=order.filter(id=>done(CUES[id])).length;garden.count=Math.round(n/order.length*9);const nt=$("#navTally");if(nt)nt.textContent=`${n}/${order.length}`;
+  $$(".at").forEach(el=>{const ids=ACTIDS[el.dataset.act];el.textContent=`${ids.filter(id=>done(CUES[id])).length} / ${ids.length} takes`})}
+tally();
+
+/* nav: characters scramble through glyphs, then resolve left to right */
+const GLY="ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#%&*+=/<>[]";
+function scramble(el){
+  if(reduce)return; const final=el.dataset.text||(el.dataset.text=el.textContent); if(el._raf)cancelAnimationFrame(el._raf);
+  el.style.width=el.getBoundingClientRect().width+"px"; const t0=performance.now(), per=28, settle=final.length*per+160;
+  (function step(now){const e=now-t0; let out="";
+    for(let i=0;i<final.length;i++){const ch=final[i]; if(ch===" "||e>i*per+160){out+=ch;continue} out+=GLY[(Math.random()*GLY.length)|0]}
+    el.textContent=out; if(e<settle){el._raf=requestAnimationFrame(step)}else{el.textContent=final;el.style.width="";el._raf=null}})(t0);
+}
+$$("[data-scr]").forEach(el=>{const host=el.closest("button")||el; host.addEventListener("pointerenter",()=>scramble(el))});
+$$(".nav button").forEach(b=>b.addEventListener("click",()=>{$$(".nav button").forEach(x=>x.setAttribute("aria-selected",x===b));scramble(b.querySelector("[data-scr]"))}));
+setTimeout(()=>$$("[data-scr]").forEach((el,i)=>setTimeout(()=>scramble(el),i*60)),200);
+
+/* ---------- hover: zoom-up highlight, focus pull, glyph unfurl ---------- */
+let card=null, showT=null, hideT=null;
+function toggleAct(sec,force){const c=force??!sec.classList.contains("collapsed");sec.classList.toggle("collapsed",c);sec.querySelector(".act-h").setAttribute("aria-expanded",String(!c));closeCard()}
+doc.addEventListener("click",e=>{const h=e.target.closest(".act-h");if(h)toggleAct(h.closest(".act"))});
+function link(id,on){
+  const span=$(`.cue[data-id="${id}"]`),item=$(`.ci[data-id="${id}"]`),mk=$(`.mk[data-id="${id}"]`),q=CUES[id];if(!span)return;
+  span.classList.toggle("hot",on);item.classList.toggle("hot",on);mk&&mk.classList.toggle("hot",on);
+  tl.querySelectorAll(`.trail[data-id="${id}"]`).forEach(t=>t.remove());
+  if(on&&mk){const tr=document.createElement("div");tr.className="trail";tr.dataset.id=id;tr.style.top=mk.style.top;tr.style.width=mk.style.left;tr.style.setProperty("--c",`var(--${q.c})`);tl.insertBefore(tr,tl.firstChild)}
+  if(mk)setG(NG[id],on?(done(q)?"set":"unfurl"):restKey(q),on||done(q)?`--${q.c}`:"--muted-foreground");
+  span.closest(".row").classList.toggle("focus-row",on);doc.classList.toggle("focusing",on);
+  if(card&&card.open&&card.id===id)return;
+  if(on)setG(RG[id],done(q)?"set":"unfurl",`--${q.c}`);else setG(RG[id],restKey(q),restColor);
+}
+[doc,list].forEach(r=>r.addEventListener("pointerover",e=>{const t=e.target.closest(".cue,.ci");if(t&&!t.contains(e.relatedTarget)){link(t.dataset.id,true);if(e.pointerType!=="touch")peekShow(t.dataset.id)}}));
+[doc,list].forEach(r=>r.addEventListener("pointerout",e=>{const t=e.target.closest(".cue,.ci");if(t&&!t.contains(e.relatedTarget)){link(t.dataset.id,false);peekHide()}}));
+[doc,list].forEach(r=>r.addEventListener("focusin",e=>{const t=e.target.closest(".cue,.ci");if(t){link(t.dataset.id,true);peekShow(t.dataset.id)}}));
+[doc,list].forEach(r=>r.addEventListener("focusout",e=>{const t=e.target.closest(".cue,.ci");if(t){link(t.dataset.id,false);peekHide()}}));
+
+/* filters */
+$("#bar").addEventListener("click",e=>{const b=e.target.closest(".tg");if(!b)return;curCat=b.dataset.cat;renderBar();applyFilter();
+  order.forEach(id=>{const q=CUES[id];if(curCat!=="all"&&q.c===curCat)setG(RG[id],"unfurl",`--${q.c}`);else setG(RG[id],restKey(q),restColor)})});
+
+/* scroll the script to a cue (opening its set if collapsed), then run a callback */
+function jumpTo(id,after){const cue=$(`.cue[data-id="${id}"]`),sec=cue.closest(".act"),was=sec.classList.contains("collapsed");if(was)toggleAct(sec,false);
+  setTimeout(()=>{cue.scrollIntoView({behavior:reduce?"auto":"smooth",block:"center"});setTimeout(after,450)},280+(was?320:0))}
+
+/* score: tooltip, then a bar zooms upward from the note and the script scrolls to the cue */
+let tip=null;
+tl.addEventListener("pointerover",e=>{const m=e.target.closest(".mk");if(!m||m.contains(e.relatedTarget))return;link(m.dataset.id,true);tip?.remove();const r=m.getBoundingClientRect();
+  tip=document.createElement("div");tip.className="tip";tip.textContent=CUES[m.dataset.id].n;tip.style.left=r.left+r.width/2+"px";tip.style.top=r.top+"px";document.body.appendChild(tip)});
+tl.addEventListener("pointerout",e=>{const m=e.target.closest(".mk");if(m&&!m.contains(e.relatedTarget)){link(m.dataset.id,false);tip?.remove();tip=null}});
+tl.addEventListener("click",e=>{const m=e.target.closest(".mk");if(!m)return;const id=m.dataset.id;tip?.remove();tip=null;
+  jumpTo(id,()=>{link(id,true);setTimeout(()=>link(id,false),1500)})});
+
+/* ---------- cue card: hover peek (clip only) and click-to-open (clip on top) ---------- */
+const ICON={up:'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 10.5V3M5 5.5L8 2.5l3 3M3 10.5v2h10v-2"/></svg>',back:'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3.5L5.5 8l4.5 4.5"/></svg>',rec:'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="5.5"/><circle cx="8" cy="8" r="2.5" fill="currentColor" stroke="none"/></svg>',
+  lib:'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M2.5 3h3v10h-3zM6.5 3h3v10h-3zM11 3.5l2.6.7-2.3 9.1-2.6-.7"/></svg>',
+  play:'<svg viewBox="0 0 16 16"><path d="M5 3.5v9l7.5-4.5z" fill="currentColor"/></svg>',
+  stop:'<svg viewBox="0 0 16 16"><rect x="4" y="4" width="8" height="8" rx="1.5" fill="currentColor"/></svg>',
+  trash:'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4.5h10M6.5 4.5V3h3v1.5M4.5 4.5l.6 8.5h5.8l.6-8.5M7 7v4M9 7v4"/></svg>',
+  x:'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M4 4l8 8M12 4l-8 8"/></svg>'};
+function wave(id,c,pk){if(pk)return pk.map(p=>`<span style="--h:${Math.round(10+p*90)}%"></span>`).join("");const r=rng(hash(id)+7),env=c==="hardfx"?i=>Math.exp(-i/9):c==="ambience"?()=>.55:c==="score"?i=>.4+.5*Math.sin(i/6):i=>Math.max(.1,Math.sin(i/47*PI*3)**2);
+  return Array.from({length:48},(_,i)=>`<span style="--h:${Math.round(10+Math.min(1,env(i)*(.5+r()*.6))*90)}%"></span>`).join("")}
+
+/* (Once dragged, the card keeps the spot it was dropped in.) The card sits beside the cue: to its right when the cue is in the left half of the script pane, to its left otherwise; its top edge
+   lines up with the cue when the cue is in the upper half, its bottom edge when in the lower half (so it grows upward from there).
+   The anchor is the visible part of the cue, so the card stays on screen when the cue is partly scrolled out. */
+function place(c){
+  const sp=$(`.cue[data-id="${c.id}"]`);if(!sp)return;
+  const r=sp.getClientRects()[0],sr=doc.getBoundingClientRect(),vw=document.documentElement.clientWidth,vh=innerHeight,w=c.el.offsetWidth,h=c.el.offsetHeight,
+    y0=cl(r.top,sr.top+$(".act-h").offsetHeight,sr.bottom),y1=cl(r.bottom,y0,sr.bottom);
+  c.el.style.left=cl(c.free?c.fx:c.right?r.right+10:r.left-10-w,16,vw-16-w)+"px";
+  c.el.style.top=cl(c.free?c.fy:c.up?y1-h:y0,8,vh-h-8)+"px";
+}
+function follow(c,ms=400){const t0=performance.now();(function f(){if(card!==c)return;place(c);if(performance.now()-t0<ms)requestAnimationFrame(f)})()}
+const clipPlay=c=>{c.clipOn=true;c.clip.play()}, clipPause=c=>{c.clipOn=false;c.clip.pause()};
+
+/* one container: hover shows the clip, click stretches the same container open */
+function mount(id){
+  closeCard();const el=document.createElement("div");el.className="pop";document.body.appendChild(el);
+  const r0=$(`.cue[data-id="${id}"]`).getClientRects()[0],sr=doc.getBoundingClientRect();
+  card={id,el,mode:"idle",open:false,right:(r0.left+r0.right)/2<sr.left+sr.width/2,up:(r0.top+r0.bottom)/2>sr.top+sr.height/2,free:false,fx:0,fy:0,dragged:false,
+    clip:makeClip(id),clipOn:false,playing:false,hover:false};
+  const c=card;el.addEventListener("pointerenter",()=>{c.hover=true;clearTimeout(hideT);if(!c.open)link(c.id,true)});
+  el.addEventListener("pointerleave",()=>{c.hover=false;if(!c.open){link(c.id,false);peekHide()}});
+  el.addEventListener("pointerdown",e=>{if(e.button||e.target.closest("button"))return;
+    const x0=e.clientX,y0=e.clientY,bb=el.getBoundingClientRect();c.dragged=false;el.setPointerCapture(e.pointerId);
+    const mv=ev=>{const mx=ev.clientX-x0,my=ev.clientY-y0;if(!c.dragged&&Math.hypot(mx,my)<4)return;c.dragged=true;el.classList.add("dragging");c.free=true;c.fx=bb.left+mx;c.fy=bb.top+my;place(c)};
+    const up=()=>{el.classList.remove("dragging");el.removeEventListener("pointermove",mv);el.removeEventListener("pointerup",up);el.removeEventListener("pointercancel",up);setTimeout(()=>{c.dragged=false},0)};
+    el.addEventListener("pointermove",mv);el.addEventListener("pointerup",up);el.addEventListener("pointercancel",up)});
+  clipPlay(card);render();
+}
+function peekShow(id){clearTimeout(hideT);if(card&&(card.open||card.id===id))return;clearTimeout(showT);showT=setTimeout(()=>mount(id),70)}
+function peekHide(){clearTimeout(showT);clearTimeout(hideT);hideT=setTimeout(()=>{if(card&&!card.open&&!card.hover)closeCard()},220)}
+function closeCard(){clearTimeout(showT);clearTimeout(hideT);if(!card)return;const id=card.id;clearInterval(card.timer);clearInterval(card.cd);clearTimeout(card.auto);card.clip.destroy();card.el.remove();card=null;
+  $$(".ci.open").forEach(c=>c.classList.remove("open"));setG(RG[id],restKey(CUES[id]),restColor)}
+function render(){
+  const {id,el,mode}=card,q=CUES[id],has=done(q),c=`--${q.c}`;
+  el.classList.toggle("open",card.open);
+  const status=has?(q.s==="library"?"From library":"Uploaded"):"No file yet";
+  let more;
+  if(mode==="lib"){
+    const rows=ranked(q,card.cat);
+    more=`<div class="lib"><div class="lib-h"><button class="btn btn-ghost btn-icon" data-act="lback" aria-label="Back">${ICON.back}</button>Library<small>${rows.length} files</small></div>
+      <div class="chips">${["all",...Object.keys(CATS)].map(k=>`<button class="chip" data-act="lcat" data-cat="${k}" aria-pressed="${card.cat===k}"${k==="all"?"":` style="--c:var(--${k})"`}>${k==="all"?"All":`<i></i>${CATS[k]}`}</button>`).join("")}</div>
+      <div class="lrows">${rows.map(l=>`<div class="lr${l.fit?" fit":""}"><button class="btn btn-ghost btn-icon" data-act="lprev" data-lid="${l.id}" aria-label="Preview ${l.n}">${ICON.play}</button><div class="lm"><div class="n">${l.n}</div><small>${l.fit?`<span class="fitb">Best fit</span>`:""}${CATS[l.c]} · ${fmtD(l.dur)}${l.user?" · yours":""}</small></div><button class="btn btn-outline" data-act="luse" data-lid="${l.id}">Use</button></div>`).join("")||`<p class="empty">No files in this category yet.</p>`}</div></div>`;
+  }else{
+    more=`<div class="hero${has?"":" dz"}" style="--c:var(${c})">${has
+      ?`<div class="wave${card.playing?" playing":""}" style="--d:${card.pdur||1.7}s"><div class="bars">${wave(id,q.c,q.f?.peaks)}</div><button class="btn clear" data-act="clear">${ICON.trash}Remove file</button></div><span class="tag"><i style="background:var(${c})"></i>${fileOf(q)}</span><div class="tl"><button class="btn btn-ghost btn-icon" data-act="play" aria-label="Preview sound">${ICON.play}</button></div>`
+      :`<button class="dzb" data-act="upload">${ICON.up}<b>Drop an audio file</b><small>or click to browse</small></button>`}</div>
+      <div class="head"><div><h3>${q.n}</h3><div class="sub">Scene ${q.scene} · ${CATS[q.c]}</div></div><span class="badge" style="--c:var(${c})"><i></i>${status}</span></div>
+      <div class="body"><div class="lab">Director's note</div><p class="note">${q.d}</p>
+        <p class="line">In the script: <em>“${$(`.cue[data-id="${id}"]`).textContent}”</em></p></div>
+      <div class="acts"><button class="btn btn-drop" data-act="upload">${ICON.up}${has?"Replace file":"Upload audio"}</button>
+      <button class="btn btn-outline" data-act="lib">${ICON.lib}${has?"Swap from library":"Find from library"}</button></div>`;
+  }
+  el.innerHTML=`<div class="panel">
+    <div class="clipslot"><div class="mediaslot"></div><span class="cliptag" style="--c:var(${c})"><i></i>Clip · 0:04</span><button class="btn btn-ghost btn-icon x" data-act="close" aria-label="Close">${ICON.x}</button></div>
+    <div class="cap"><div><div class="peekcap"><span>Scene ${q.scene} · ${CATS[q.c]}</span></div></div></div>
+    <div class="more"><div>${more}</div></div></div>`;
+  el.querySelector(".mediaslot").replaceWith(card.clip.el);if(card.clipOn)card.clip.play();
+  place(card);
+}
+function openCard(id){
+  clearTimeout(showT);clearTimeout(hideT);
+  if(card&&card.open&&card.id===id)return;
+  if(!card||card.id!==id)mount(id);
+  card.open=true;$(`.ci[data-id="${id}"]`).classList.add("open");setG(RG[id],"bud",`--${CUES[id].c}`);
+  card.el.classList.add("open");follow(card);
+}
+/* library of files the designer already owns (stand-ins), plus anything uploaded this session */
+const LIBSRC={ambience:[["Crowd murmur, small",14],["Stadium bed, distant",32],["Hotel corridor room tone",20],["Living room TV bleed",18],["Wind through fence",12],["Night street hum",26],["Lobby chatter",22]],
+  footsteps:[["Sneakers on hard court",6],["Heels on tile",8],["Bare feet on wood",5],["Gravel walk",9],["Stairwell steps",7],["Dress shoes on carpet",6]],
+  props:[["Racket string pluck",2],["Lotion pump",3],["Marker on paper",4],["Ball bounce, hard floor",5],["Keys on counter",3],["Towel snap",2],["Cup set down",2]],
+  cloth:[["Jacket rustle",4],["Towel wipe",3],["Sheets shift",6],["Skirt swish",3],["Sleeve brush",2]],
+  hardfx:[["Ball impact crack",2],["Alarm clock buzz",5],["Door slam",3],["Racket smash",4],["Low impact thud",3],["Glass crash",4]],
+  score:[["Pulse synth drone",48],["Tension strings swell",24],["Low brass hit",6],["Techno loop 128bpm",32],["Piano motif, sparse",40]]};
+const LIB=[];let lid=0;Object.entries(LIBSRC).forEach(([c,a])=>a.forEach(([n,d])=>LIB.push({id:"l"+lid++,c,n,dur:d})));
+const fmtD=t=>Math.floor(t/60)+":"+String(Math.round(t%60)).padStart(2,"0");
+let curSrc=null;
+function playFile(f,cat){actx();ac.resume();try{curSrc&&curSrc.stop()}catch(e){}curSrc=null;
+  if(f&&f.buf){const src=ac.createBufferSource(),g=ac.createGain();src.buffer=f.buf;g.gain.value=.8;src.connect(g).connect(ac.destination);src.start();curSrc=src}else play(cat)}
+
+/* best fit: words (and loose synonyms) shared between the cue and a file's name, with a nudge for matching category */
+const SYN=[["thwack","hit","crack","impact","smash","slam","thud","whop","strike","pounce"],["alarm","blare","buzz","clock","ring"],["crowd","murmur","chatter","audience","stadium","tone","room"],["towel","cloth","rustle","sheet","jacket","sleeve","brush","wipe","swish"],["step","sneaker","shoe","heel","gravel","stair","baseline","walk"],["drone","pulse","score","synth","strings","brass","piano","techno","music","tension"],["glass","crash","shatter","drop"],["racket","ball","bounce","tennis"],["lotion","pump","marker","mirror","sharpie"]];
+const toks=t=>{const o=new Set;(t.toLowerCase().match(/[a-z]+/g)||[]).forEach(w=>{if(w.length<3)return;w=w.length>4?w.replace(/s$/,""):w;o.add(w);SYN.forEach((g,i)=>g.includes(w)&&o.add("#"+i))});return o};
+function ranked(q,cat){const id=card.id,ct=toks(q.n+" "+q.d+" "+($(`.cue[data-id="${id}"]`)?.textContent||""));
+  const sc=LIB.map((l,i)=>{let n=0;toks(l.n).forEach(t=>ct.has(t)&&n++);return{l,i,v:n*2+(l.c===q.c?1:0)}});
+  const best=new Set(sc.filter(x=>x.v>=3).sort((a,b)=>b.v-a.v||a.i-b.i).slice(0,3).map(x=>x.l.id));
+  return sc.filter(x=>cat==="all"||x.l.c===cat).map(x=>({...x.l,fit:best.has(x.l.id)})).sort((a,b)=>b.fit-a.fit)}
+
+/* put a file on a cue: from upload, drag-and-drop or the library */
+function useFile(id,f,s,msg){const q=CUES[id];if(!q)return;q.s=s;q.f=f;
+  setG(NG[id],"set",`--${q.c}`);setTimeout(()=>NG[id]&&setG(NG[id],"check",`--${q.c}`),1200);setG(RG[id],"set",`--${q.c}`);
+  if(card&&card.id===id){card.mode="idle";clipPlay(card);render()}tally();toast(msg,f.name,q.c)}
+const isAudio=f=>/^audio\//.test(f.type)||/\.(wav|aiff?|mp3|m4a|flac|ogg|opus)$/i.test(f.name);
+async function readAudio(file){try{actx();const buf=await ac.decodeAudioData(await file.arrayBuffer());const d=buf.getChannelData(0),n=48,st=Math.max(1,Math.floor(d.length/n));
+    const peaks=Array.from({length:n},(_,i)=>{let m=0;for(let j=i*st;j<Math.min(d.length,(i+1)*st);j+=Math.ceil(st/200))m=Math.max(m,Math.abs(d[j]));return m});const mx=Math.max(...peaks)||1;
+    return{name:file.name,dur:buf.duration,buf,peaks:peaks.map(v=>v/mx)}}catch(e){return null}}
+const guessCat=n=>{const t=toks(n),hit=[[7,"props"],[8,"props"],[4,"footsteps"],[2,"ambience"],[3,"cloth"],[0,"hardfx"],[1,"hardfx"],[6,"hardfx"],[5,"score"]].find(([g])=>t.has("#"+g));return hit?hit[1]:"props"};
+function libAdd(f,cat){const l={id:"l"+lid++,c:cat,n:f.name.replace(/\.[^.]+$/,""),dur:f.dur,user:true,f};LIB.push(l);renderLib();return l}
+async function addFile(id,file){const q=CUES[id];if(!q)return;
+  if(!isAudio(file)){toast("Not an audio file",file.name,q.c,"seed");return}
+  const f=await readAudio(file);if(!f){toast("Couldn't read that file",file.name,q.c,"seed");return}
+  libAdd(f,q.c);useFile(id,f,"upload","File added")}
+async function addToLib(files){for(const file of files){
+  if(!isAudio(file)){toast("Not an audio file",file.name,"props","seed");continue}
+  const f=await readAudio(file);if(!f){toast("Couldn't read that file",file.name,"props","seed");continue}
+  const c=libCat!=="all"?libCat:guessCat(f.name.replace(/[_-]+/g," "));libAdd(f,c);toast("Added to library",f.name,c)}}
+
+/* library section: collapsible, filterable, takes uploads and drops; rows can be dragged onto cues */
+let libCat="all";const libsec=$("#libsec");
+function renderLib(){$("#libN").textContent=LIB.length+" files";
+  $("#libUp").innerHTML=ICON.up+"Upload to library";
+  $("#libChips").innerHTML=["all",...Object.keys(CATS)].map(k=>`<button class="chip" data-cat="${k}" aria-pressed="${libCat===k}"${k==="all"?"":` style="--c:var(--${k})"`}>${k==="all"?"All":`<i></i>${CATS[k]}`}</button>`).join("");
+  $("#libGrid").innerHTML=LIB.filter(l=>libCat==="all"||l.c===libCat).map(l=>`<div class="lr lone" draggable="true" data-lid="${l.id}" title="Drag onto a cue"><button class="btn btn-ghost btn-icon" data-lprev="${l.id}" aria-label="Preview ${l.n}">${ICON.play}</button><div class="lm"><div class="n">${l.n}</div><small>${CATS[l.c]} · ${fmtD(l.dur)}${l.user?" · yours":""}</small></div></div>`).join("")}
+renderLib();
+$("#libT").addEventListener("click",()=>{const c=libsec.classList.toggle("collapsed");$("#libT").setAttribute("aria-expanded",!c)});
+$("#libChips").addEventListener("click",e=>{const b=e.target.closest(".chip");if(b){libCat=b.dataset.cat;renderLib()}});
+$("#libGrid").addEventListener("click",e=>{const b=e.target.closest("[data-lprev]");if(b){const it=LIB.find(l=>l.id===b.dataset.lprev);playFile(it.f,it.c)}});
+$("#libGrid").addEventListener("dragstart",e=>{const r=e.target.closest(".lr");if(!r)return;e.dataTransfer.setData("text/x-lib",r.dataset.lid);e.dataTransfer.effectAllowed="copy"});
+$("#libUp").addEventListener("click",()=>{fin._id=null;fin.multiple=true;fin.click()});
+
+function clearFile(id){const q=CUES[id];if(!q)return;const n=fileOf(q);q.s="none";delete q.f;
+  setG(NG[id],"seed","--muted-foreground");setG(RG[id],"bud",`--${q.c}`);if(card&&card.id===id)render();tally();toast("File removed",n,q.c,"seed")}
+const fin=document.createElement("input");fin.type="file";fin.accept="audio/*,.wav,.aif,.aiff,.mp3,.m4a,.flac,.ogg";fin.hidden=true;document.body.appendChild(fin);
+fin.addEventListener("click",e=>e.stopPropagation());
+fin.addEventListener("change",()=>{const fs=[...fin.files],id=fin._id;fin.value="";fin.multiple=false;if(!fs.length)return;if(id)addFile(id,fs[0]);else addToLib(fs)});
+/* drag a file onto a cue in the script, its entry in the list, or its card */
+const dtHas=(e,t)=>e.dataTransfer&&[...e.dataTransfer.types].includes(t);
+let dropEl=null;const setDrop=el=>{if(dropEl!==el){dropEl?.classList.remove("drop");dropEl=el;el?.classList.add("drop")}};
+const dropT=e=>{const files=dtHas(e,"Files"),t=e.target.closest?.(".cue,.ci,.pop"+(files?",.libsec":""));return t};
+document.addEventListener("dragover",e=>{if(!dtHas(e,"Files")&&!dtHas(e,"text/x-lib"))return;e.preventDefault();const t=dropT(e);setDrop(t);e.dataTransfer.dropEffect=t?"copy":"none"});
+document.addEventListener("dragleave",e=>{if(!e.relatedTarget)setDrop(null)});
+document.addEventListener("drop",e=>{const files=dtHas(e,"Files"),lib=dtHas(e,"text/x-lib");if(!files&&!lib)return;e.preventDefault();const t=dropT(e);setDrop(null);if(!t)return;
+  if(t.id==="libsec"){addToLib([...e.dataTransfer.files]);return}
+  const onCard=t.classList.contains("pop"),id=onCard?card?.id:t.dataset.id;if(!id)return;
+  if(lib){const it=LIB.find(l=>l.id===e.dataTransfer.getData("text/x-lib"));if(it)useFile(id,it.f||{name:it.n.toLowerCase().replace(/[^a-z0-9]+/g,"_")+".wav",dur:it.dur},"library","Pulled from library")}
+  else addFile(id,e.dataTransfer.files[0]);
+  if(!onCard)openCard(id)});
+
+document.addEventListener("click",e=>{
+  if(card&&!card.open&&card.el.contains(e.target)){e.stopPropagation();if(!card.dragged)openCard(card.id);return}
+  const a=e.target.closest("[data-act]");
+  if(a&&card&&card.open&&card.el.contains(a)){const id=card.id,q=CUES[id],act=a.dataset.act;
+    if(act==="close")return closeCard();
+    if(act==="play"){const d=q.f?Math.min(q.f.dur,12):1.7;card.playing=true;card.pdur=d;render();playFile(q.f,q.c);
+      setTimeout(()=>{if(card&&card.id===id){card.playing=false;if(card.mode==="idle")render()}},d*1000+50);return}
+    if(act==="upload"){fin._id=id;fin.click();return}
+    if(act==="clear")return clearFile(id);
+    if(act==="lib"){card.mode="lib";card.cat=q.c;render();return}
+    if(act==="lback"){card.mode="idle";render();return}
+    if(act==="lcat"){card.cat=a.dataset.cat;render();return}
+    const it=LIB.find(l=>l.id===a.dataset.lid);
+    if(act==="lprev"&&it){playFile(it.f,it.c);return}
+    if(act==="luse"&&it){useFile(id,it.f||{name:it.n.toLowerCase().replace(/[^a-z0-9]+/g,"_")+".wav",dur:it.dur},"library","Pulled from library");return}
+    return;
+  }
+  const t=e.target.closest(".cue,.ci");
+  if(t&&(doc.contains(t)||list.contains(t))){e.stopPropagation();const id=t.dataset.id;if(t.classList.contains("ci")&&!t.classList.contains("in")&&!t.classList.contains("open"))jumpTo(id,()=>openCard(id));else openCard(id);return}
+  if(card&&card.open&&!e.composedPath().includes(card.el))closeCard();
+});
+doc.addEventListener("keydown",e=>{if(e.key==="Enter"&&e.target.classList.contains("cue"))e.target.click()});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeCard()});
+doc.addEventListener("scroll",()=>{if(card&&!card.open&&!card.hover)closeCard();else if(card)place(card)},{passive:true});
+addEventListener("resize",()=>card&&place(card));
+
+/* sync derived state after cues are added or removed */
+function sync(){const all=$$(".cue");order.splice(0,order.length,...all.map(c=>c.dataset.id));
+  $$(".act").forEach((sec,i)=>ACTIDS[i]=$$(".cue",sec).map(c=>c.dataset.id));
+  renderBar();renderScore();applyFilter();tally();settleList()}
+/* resolve: the phrase goes back to plain script text and the cue disappears everywhere */
+function resolveCue(id){const q=CUES[id],span=$(`.cue[data-id="${id}"]`);if(!span)return;closeCard();io.unobserve(span);
+  const par=span.parentNode;span.replaceWith(...span.childNodes);par.normalize();
+  $(`.ci[data-id="${id}"]`).remove();delete RG[id];delete NG[id];delete CUES[id];sync();toast("Cue resolved",q.n,q.c,"check")}
+const ctx=document.createElement("div");ctx.className="ctx";ctx.hidden=true;ctx.innerHTML=`<button type="button"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5l3.2 3L13 4.5"/></svg>Resolve cue</button>`;document.body.appendChild(ctx);
+let ctxId=null;const hideCtx=()=>{ctx.hidden=true;ctxId=null};
+doc.addEventListener("contextmenu",e=>{const c=e.target.closest(".cue");if(!c)return;e.preventDefault();ctxId=c.dataset.id;ctx.hidden=false;
+  const vw=innerWidth,vh=innerHeight;ctx.style.left=Math.min(e.clientX,vw-ctx.offsetWidth-8)+"px";ctx.style.top=Math.min(e.clientY,vh-ctx.offsetHeight-8)+"px";ctx.firstChild.focus()});
+ctx.addEventListener("click",()=>{const id=ctxId;hideCtx();if(id)resolveCue(id)});
+document.addEventListener("pointerdown",e=>{if(!ctx.contains(e.target))hideCtx()});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")hideCtx()});
+doc.addEventListener("scroll",hideCtx,{passive:true});addEventListener("resize",hideCtx);
+
+/* ---------- highlighter: select a phrase in the script, pick a sound type, and it becomes a cue like the others ---------- */
+const hl=document.createElement("div");hl.className="hl";hl.hidden=true;
+hl.innerHTML=Object.keys(CATS).map(k=>`<button data-cat="${k}" style="--c:var(--${k})" title="${CATS[k]}" aria-label="Add ${CATS[k]} cue"></button>`).join("");document.body.appendChild(hl);
+let hlRange=null,hlT=0,uid=0;
+function checkSel(){
+  const sel=getSelection();hlRange=null;hl.hidden=true;if(!sel||sel.isCollapsed||!sel.rangeCount)return;
+  const r=sel.getRangeAt(0),n=r.startContainer,p=n.parentElement;
+  if(n!==r.endContainer||n.nodeType!==3||!p||!p.closest(".page")||p.closest(".cue,.slug")||r.toString().trim().length<2)return;
+  const b=r.getBoundingClientRect(),vw=document.documentElement.clientWidth;hlRange=r.cloneRange();hl.hidden=false;
+  hl.style.left=cl(b.left+b.width/2,70,vw-70)+"px";hl.style.top=(b.top>doc.getBoundingClientRect().top+90?b.top-44:b.bottom+8)+"px"}
+document.addEventListener("selectionchange",()=>{clearTimeout(hlT);hlT=setTimeout(checkSel,120)});
+doc.addEventListener("scroll",()=>{hl.hidden=true},{passive:true});
+hl.addEventListener("pointerdown",e=>e.preventDefault());
+hl.addEventListener("click",e=>{e.stopPropagation();const b=e.target.closest("button");if(b&&hlRange)addCue(hlRange,b.dataset.cat)});
+function addCue(range,cat){
+  const text=range.toString().replace(/\s+/g," ").trim(),id="u"+(++uid),row=range.startContainer.parentElement.closest(".row"),all0=$$(".cue");
+  let scene=1;for(let r=row;r;r=r.previousElementSibling){const n=r.querySelector(".scene-no");if(n){scene=+n.textContent;break}}
+  const prev=all0.filter(c=>c.compareDocumentPosition(range.startContainer)&Node.DOCUMENT_POSITION_FOLLOWING).pop()||all0[0];
+  CUES[id]={c:cat,n:text.length>34?text.slice(0,33).trimEnd()+"…":text[0].toUpperCase()+text.slice(1),s:"none",loc:CUES[prev.dataset.id].loc,d:"Added from the script. No note yet.",scene,act:+row.closest(".act").dataset.act};
+  const span=document.createElement("span");span.className="cue";span.tabIndex=0;span.dataset.id=id;span.style.setProperty("--c",`var(--${cat})`);range.surroundContents(span);
+  getSelection().removeAllRanges();hl.hidden=true;hlRange=null;
+  const all=$$(".cue"),nextId=all[all.indexOf(span)+1]?.dataset.id;
+  clScroll.insertAdjacentHTML("beforeend",ciHTML(id));const ci=clScroll.lastElementChild;clScroll.insertBefore(ci,nextId?$(`.ci[data-id="${nextId}"]`):null);
+  RG[id]=glyph(ci.querySelector("canvas"),"seed",{color:restColor});io.observe(span);
+  sync();toast("Cue added",CUES[id].n,cat);openCard(id);
+}
+
+/* shadcn Sonner-style toast */
+function toast(msg,file,cat,key="set"){const t=document.createElement("div");t.className="toast";t.innerHTML=`<canvas class="g" style="width:16px;height:16px" aria-hidden="true"></canvas><div>${msg}<small>${file}</small></div>`;
+  $("#toasts").appendChild(t);glyph(t.querySelector("canvas"),key,{color:`--${cat}`,base:.08});setTimeout(()=>t.remove(),2800)}
+
+/* ---------- sound sketches ---------- */
+let ac=null,noiseBuf=null;
+function actx(){if(!ac){ac=new (window.AudioContext||window.webkitAudioContext)();noiseBuf=ac.createBuffer(1,ac.sampleRate*3,ac.sampleRate);const d=noiseBuf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1}return ac}
+function burst(out,t,dur,type,freq,q,peak,attack=.005){const s=ac.createBufferSource();s.buffer=noiseBuf;const fl=ac.createBiquadFilter();fl.type=type;fl.frequency.value=freq;fl.Q.value=q;
+  const g=ac.createGain();g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(peak,t+attack);g.gain.exponentialRampToValueAtTime(.0001,t+dur);s.connect(fl).connect(g).connect(out);s.start(t,Math.random()*1.5);s.stop(t+dur+.05)}
+function tone(out,t,dur,freq,peak,type="sine",end){const o=ac.createOscillator();o.type=type;o.frequency.setValueAtTime(freq,t);if(end)o.frequency.exponentialRampToValueAtTime(end,t+dur);
+  const g=ac.createGain();g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(peak,t+Math.min(.04,dur/3));g.gain.exponentialRampToValueAtTime(.0001,t+dur);o.connect(g).connect(out);o.start(t);o.stop(t+dur+.05)}
+function play(cat){actx();ac.resume();const out=ac.createGain();out.gain.value=.7;out.connect(ac.destination);const t=ac.currentTime+.03;
+  if(cat==="footsteps"){[0,.42,.86,1.3].forEach(o=>{burst(out,t+o,.09,"bandpass",900,1.2,.9);tone(out,t+o,.08,90,.4)})}
+  else if(cat==="props"){[0,.18,.31,.62,.7].forEach((o,i)=>burst(out,t+o,.05,"highpass",2400+i*300,.8,.7))}
+  else if(cat==="cloth"){burst(out,t,.5,"bandpass",2200,.7,.45,.2);burst(out,t+.55,.6,"bandpass",1800,.7,.35,.25)}
+  else if(cat==="hardfx"){tone(out,t,.9,110,.9,"sine",38);burst(out,t,.7,"lowpass",420,.7,.8)}
+  else if(cat==="ambience"){burst(out,t,1.6,"highpass",3000,.3,.18,.6);burst(out,t,1.6,"lowpass",500,.5,.25,.6)}
+  else{[220,277.2,329.6].forEach((fq,i)=>tone(out,t+i*.12,1.6,fq,.16))}}
+</script>
+
+</body></html>
