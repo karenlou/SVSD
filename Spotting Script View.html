@@ -89,7 +89,7 @@ header.top{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;ga
 @keyframes trail{from{transform:scaleX(0);opacity:.3}to{transform:none;opacity:1}}
 .lanes .barl{position:absolute;width:1px;background:color-mix(in srgb,var(--foreground) 38%,var(--score-bg))}
 .lanes .sc{position:absolute;top:0;font:400 10px var(--f-mono);color:var(--muted-foreground);transform:translateX(5px);white-space:nowrap}
-.mk{position:absolute;width:20px;height:20px;margin:-10px 0 0 -10px;border:0;padding:3px;background:transparent;border-radius:50%;cursor:pointer;transition:opacity .2s,transform .25s cubic-bezier(.3,1.4,.5,1),filter .25s;z-index:1}
+.mk{position:absolute;width:26px;height:26px;margin:-13px 0 0 -13px;border:0;padding:3px;background:transparent;border-radius:50%;cursor:pointer;transition:opacity .2s,transform .25s cubic-bezier(.3,1.4,.5,1),filter .25s;z-index:1}
 .mk::before{content:"";position:absolute;inset:-3px;border-radius:50%;background:color-mix(in srgb,var(--c) 20%,var(--card));box-shadow:0 0 0 1px color-mix(in srgb,var(--c) 35%,var(--card));opacity:0;transform:scale(.4);transition:opacity .25s,transform .35s cubic-bezier(.22,1,.36,1);pointer-events:none}
 .mk canvas{position:relative}
 .mk:hover,.mk.hot,.mk.match{z-index:3}
@@ -99,18 +99,33 @@ header.top{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;ga
 .mk.faded{opacity:.2}
 /* the staff is also the timeline: one slot per clip, as long as the clip; comments ride their category lane inside it */
 .lanes .slot{position:absolute;top:14px;height:72px;border-left:1px solid color-mix(in srgb,var(--foreground) 16%,var(--score-bg));background:color-mix(in srgb,var(--foreground) 3%,transparent);cursor:crosshair;transition:background .15s}
-.lanes .slot:hover{background:color-mix(in srgb,var(--foreground) 6%,transparent)}
-.lanes .slot.cur{background:color-mix(in srgb,var(--foreground) 9%,transparent)}
+.lanes .slot:hover{background:color-mix(in srgb,var(--card) 40%,transparent)}
+.lanes .slot.cur{background:color-mix(in srgb,var(--card) 65%,transparent)}
 .lanes .slot.drop{outline:1px dashed var(--foreground);outline-offset:-1px}
-.cm{position:absolute;height:8px;min-width:8px;margin-top:-4px;padding:0;border:0;border-radius:4px;cursor:pointer;z-index:2;
-  background:color-mix(in srgb,var(--c) 45%,transparent);box-shadow:inset 0 0 0 1px var(--c);transition:opacity .2s,box-shadow .15s}
-.cm.pt{width:8px;margin-left:-4px;border-radius:50%;background:var(--c)}
-.cm.addressed{background:repeating-linear-gradient(135deg,var(--c) 0 2px,transparent 2px 4px)}
-.cm.approved{background:transparent;opacity:.5}
-.cm:hover,.cm.on{z-index:4;opacity:1;box-shadow:inset 0 0 0 1px var(--c),0 0 0 2px var(--score-bg),0 0 0 3px var(--c)}
+.cm{position:absolute;height:12px;min-width:12px;margin-top:-6px;padding:0;border:0;border-radius:6px;cursor:pointer;z-index:2;
+  background:var(--card);box-shadow:inset 0 0 0 2px var(--c);transition:opacity .2s,box-shadow .15s}
+.cm.pt{width:12px;margin-left:-6px;border-radius:50%}
+.cm.addressed,.cm.approved{background:var(--c)}
+.cm.approved{opacity:.45}
+.cm:hover,.cm.on{z-index:4;opacity:1;box-shadow:inset 0 0 0 2px var(--c),0 0 0 2px var(--score-bg),0 0 0 3.5px var(--c)}
 .cm.faded{opacity:.12}
 .lanes .ph{position:absolute;top:10px;height:80px;width:2px;margin-left:-1px;border-radius:1px;background:var(--foreground);pointer-events:none;z-index:5}
-.lanes .sel{position:absolute;top:14px;height:72px;background:color-mix(in srgb,var(--foreground) 12%,transparent);border-inline:1px solid var(--foreground);pointer-events:none;z-index:3}
+/* clip view: the score keeps its lanes, but the clip in view takes ~45% of the width and the rest condense; clicking empty space evens them out */
+.v-clips{display:none}
+.view-clips .v-clips{display:inline}.view-clips .v-script{display:none}
+.lanes .slot,.lanes .barl,.lanes .sc{transition:left .4s cubic-bezier(.22,1,.36,1),width .4s cubic-bezier(.22,1,.36,1),background .15s,box-shadow .15s}
+.lanes .mk{transition:left .4s cubic-bezier(.22,1,.36,1),opacity .2s,transform .25s cubic-bezier(.3,1.4,.5,1),filter .25s}
+.lanes .cm{transition:left .4s cubic-bezier(.22,1,.36,1),width .4s cubic-bezier(.22,1,.36,1),opacity .2s,box-shadow .15s}
+.view-clips .lanes .slot.focus,.view-clips .lanes .slot.hover{background:color-mix(in srgb,var(--card) 70%,transparent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--foreground) 22%,transparent)}
+.lanes .slot .sl{display:none;position:absolute;left:-1px;top:-14px;z-index:6;padding:0 6px;border-radius:3px;background:var(--foreground);color:var(--background);font:500 11px/14px var(--f-sans);white-space:nowrap;pointer-events:none}
+.lanes .slot.rt .sl{left:auto;right:0}
+.lanes .slot .sl small{margin-left:6px;font:400 10px var(--f-mono);opacity:.7}
+.view-clips .lanes .slot.focus .sl,.view-clips .lanes .slot.hover .sl{display:block}
+.view-clips .lanes .slot.hover .sl{z-index:7}
+.lanes .slot .stk{display:none;position:absolute;left:0;right:0;bottom:0;height:6px;pointer-events:none}
+.lanes .slot .stk i{position:absolute;bottom:0;width:1px;height:3px;background:color-mix(in srgb,var(--foreground) 35%,transparent)}
+.lanes .slot .stk i.l{height:6px;background:color-mix(in srgb,var(--foreground) 60%,transparent)}
+.view-clips .lanes:not(.even) .slot.focus .stk{display:block}
 .filters{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px}
 .vsep{width:1px;height:16px;background:color-mix(in srgb,var(--foreground) 18%,transparent)}
 
@@ -313,6 +328,14 @@ button.stc{cursor:pointer}button.stc:hover{background:var(--accent)}
 .chip i{width:6px;height:6px;border-radius:50%;background:var(--c)}
 .chip:hover{background:var(--accent)}
 .chip[aria-pressed=true]{background:var(--foreground);color:var(--background);border-color:var(--foreground)}
+/* a new comment starts at the playhead; play or scrub on, then "Set end" makes it a range */
+.rng{display:flex;align-items:center;gap:4px;padding:8px 12px 0 18px;border-top:1px solid var(--border);background:var(--popover);font:400 11.5px/24px var(--f-mono);color:var(--foreground)}
+.rng+.compose{border-top:0}
+.rng .btn{height:24px;padding:0 8px;font:400 12px var(--f-sans)}
+.rng .btn-icon{width:24px;padding:0}.rng .btn svg{width:12px;height:12px}
+.rng [data-act=setend]{margin-left:auto}
+.rng [data-act=setend] b{margin-left:4px;font:500 11.5px var(--f-mono)}
+.rng .btn:disabled{opacity:.45;pointer-events:none}
 .compose{position:relative;padding:12px 12px 12px 18px;border-top:1px solid var(--border);background:var(--popover)}
 .pend{margin-bottom:8px}.pend .hero.sm:first-child{margin-top:0}
 .cin{display:flex;align-items:flex-end;gap:10px}
@@ -368,49 +391,46 @@ button.stc{cursor:pointer}button.stc:hover{background:var(--accent)}
 .ctx .kr{display:flex;align-items:center;gap:10px;padding:5px 10px;font-size:12.5px}
 .ctx kbd{min-width:24px;padding:1px 6px;border:1px solid var(--border);border-bottom-width:2px;border-radius:5px;background:var(--card);font:500 11px var(--f-mono);text-align:center}
 
-/* clip view: the cut as a player, a timecode ruler with comments, and a strip of clips */
+/* clip view: every clip in a row that scrolls sideways, each under its cue's title; the centred one is the player. One transport row below */
 .pane.clips::after{display:none}
-.stage{flex:1;min-height:0;display:flex;flex-direction:column;gap:10px;padding:14px 16px 12px}
-.st-h{display:flex;align-items:center;gap:10px}
-.st-h .tt{flex:1;min-width:0}
-.st-h b{display:block;font-size:15px;font-weight:500;line-height:20px}
-.st-h small{display:block;font:400 11px/16px var(--f-mono);color:var(--muted-foreground);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.st-h .btn{height:28px;padding:0 10px;font-size:12.5px}
+.stage{flex:1;min-height:0;display:flex;flex-direction:column;gap:10px;padding:14px 0 12px}
+.stage>:not(.reel){margin-inline:16px}
+.reel{position:relative;flex:1;min-height:140px;display:flex;gap:20px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;overscroll-behavior-x:contain;padding-inline:calc(50% - var(--fw,480px)/2);scrollbar-width:none}
+.reel::-webkit-scrollbar{display:none}
+.reel-i{flex:none;width:var(--fw,480px);display:flex;flex-direction:column;justify-content:center;gap:8px;scroll-snap-align:center;cursor:pointer;opacity:.35;transition:opacity .2s}
+.reel-i:hover{opacity:.6}
+.reel-i[aria-current=true]{opacity:1;cursor:default}
+.reel-t{display:flex;align-items:center;gap:10px;height:28px}
+.reel-t .tt{flex:1;min-width:0}
+.reel-t b{display:block;font-size:15px;font-weight:500;line-height:18px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.reel-t small{display:block;font:400 11px/14px var(--f-mono);color:var(--muted-foreground);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.reel-t .btn{height:28px;padding:0 10px;font-size:12.5px}
+.reel-f{position:relative;aspect-ratio:16/9;background:#000;border-radius:10px;overflow:hidden}
+.reel-f>canvas,.reel-f>video{display:block;width:100%;height:100%;object-fit:cover}
+.reel-i.drop .reel-f{outline:2px dashed var(--foreground);outline-offset:3px}
 .st-note{margin:-4px 0 0;font:400 12.5px/19px var(--f-script);color:var(--muted-foreground);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .st-note span{font:500 11.5px var(--f-sans);color:var(--foreground);margin-right:6px}
-.st-p{flex:1;min-height:120px;display:grid;place-items:center}
-.player{position:relative;background:#000;border-radius:10px;overflow:hidden}
+.player{position:absolute;inset:0;background:#000;overflow:hidden}
 .player .pm,.player .media{position:absolute;inset:0}
 .player .media canvas,.player .media video{display:block;width:100%;height:100%;object-fit:cover}
 .player .abox .av{width:22px;height:22px;left:-10px;top:-10px}
-.ctl{display:flex;align-items:center;gap:4px}
+.ctl{display:flex;align-items:center;gap:8px}
 .ctl .btn-icon{width:30px;height:30px}
-.ctl .tc{margin-left:6px;font:500 12px var(--f-mono)}
-.ctl .hint{margin-left:auto;font-size:12px}
-.ruler{position:relative;flex:none;height:60px;border:1px solid var(--border);border-radius:8px;background:var(--card);cursor:crosshair;touch-action:none;overflow:hidden}
+.ctl .tc{flex:none;font:500 12px var(--f-mono)}
+.ruler{position:relative;flex:1;min-width:0;height:48px;border:1px solid var(--border);border-radius:8px;background:var(--card);cursor:crosshair;touch-action:none;overflow:hidden}
 .ruler .tk{position:absolute;top:0;width:1px;height:5px;background:var(--input)}
 .ruler .tk.l{height:9px;background:var(--ring)}
 .ruler .tk span{position:absolute;top:9px;left:3px;font:400 10px var(--f-mono);color:var(--muted-foreground);white-space:nowrap}
-.ruler .rb{position:absolute;height:7px;min-width:7px;padding:0;border:0;border-radius:4px;cursor:pointer;z-index:2;background:color-mix(in srgb,var(--c) 45%,transparent);box-shadow:inset 0 0 0 1px var(--c)}
-.ruler .rb.pt{width:9px;height:9px;margin:-1px 0 0 -4.5px;border-radius:50%;background:var(--c)}
-.ruler .rb.addressed{background:repeating-linear-gradient(135deg,var(--c) 0 2px,transparent 2px 4px)}
-.ruler .rb.approved{background:transparent;opacity:.5}
-.ruler .rb:hover,.ruler .rb.on{box-shadow:inset 0 0 0 1px var(--c),0 0 0 2px var(--card),0 0 0 3px var(--c);opacity:1}
+.ruler .rb{position:absolute;height:9px;min-width:9px;padding:0;border:0;border-radius:5px;cursor:pointer;z-index:2;background:var(--card);box-shadow:inset 0 0 0 2px var(--c)}
+.ruler .rb.pt{width:11px;height:11px;margin:-1px 0 0 -5.5px;border-radius:50%}
+.ruler .rb.addressed,.ruler .rb.approved{background:var(--c)}
+.ruler .rb.approved{opacity:.45}
+.ruler .rb:hover,.ruler .rb.on{box-shadow:inset 0 0 0 2px var(--c),0 0 0 2px var(--card),0 0 0 3.5px var(--c);opacity:1}
 .ruler .rb.faded{opacity:.15}
-.ruler .rl,.ruler .rsel{position:absolute;top:0;bottom:0;background:color-mix(in srgb,var(--foreground) 8%,transparent);border-inline:1px solid var(--foreground);pointer-events:none}
+.ruler .rl{position:absolute;top:0;bottom:0;background:color-mix(in srgb,var(--foreground) 8%,transparent);border-inline:1px solid var(--foreground);pointer-events:none}
+.ruler .rg,.scrub .rg{position:absolute;top:0;bottom:0;border:1px dashed var(--foreground);border-left-style:solid;opacity:.5;pointer-events:none}
 .ruler .rph{position:absolute;top:0;bottom:0;width:2px;margin-left:-1px;background:var(--foreground);pointer-events:none;z-index:3}
 .ruler .rph::before{content:"";position:absolute;top:0;left:-4px;border:5px solid transparent;border-top-color:var(--foreground)}
-.strip{flex:none;display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;scrollbar-width:thin;scrollbar-color:var(--input) transparent}
-.cc2{flex:none;display:grid;grid-template-columns:44px 104px;grid-template-rows:auto auto;gap:0 8px;align-items:center;padding:5px;border:1px solid var(--border);border-radius:8px;background:var(--card);text-align:left;cursor:pointer}
-.cc2:hover{background:var(--accent)}
-.cc2[aria-current=true]{border-color:var(--foreground);box-shadow:inset 0 0 0 1px var(--foreground)}
-.cc2 .th{grid-row:span 2;position:relative;height:28px;border-radius:4px;background:linear-gradient(var(--a),var(--b))}
-.cc2 .th i{position:absolute;left:4px;bottom:4px;width:6px;height:6px;border-radius:50%;background:var(--c)}
-.cc2 .th b{position:absolute;right:3px;top:3px;min-width:14px;padding:0 3px;border-radius:7px;background:#fafafa;color:#0a0a0a;font:500 9.5px/14px var(--f-mono);text-align:center}
-.cc2 .nm{font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.cc2 small{font:400 10.5px var(--f-mono);color:var(--muted-foreground)}
-.view-clips .ci{opacity:1}
-.ci.cur{background:var(--accent)}
 /* drop targets for uploaded clips */
 .pop.drop{outline:2px dashed var(--foreground);outline-offset:3px;border-radius:12px}
 .cue.drop{outline:1px dashed var(--c);outline-offset:2px;background-size:100% 100%,100% 1px}
@@ -463,18 +483,16 @@ header .tg{height:24px;padding:0 8px;font:inherit;letter-spacing:inherit;text-tr
 <section class="script" aria-label="Script">
   <div class="pane"><main class="doc scroller" id="doc" tabindex="-1"></main>
     <section class="stage" id="stage" aria-label="Clips" hidden>
-      <div class="st-h" id="stHead"></div>
+      <div class="reel" id="reel"></div>
+      <div class="player" id="player"><div class="pm" id="stMedia"></div><div class="anc" id="stAnc"></div><div id="stTool"></div><div class="ptools"></div></div>
       <p class="st-note" id="stNote"></p>
-      <div class="st-p"><div class="player" id="player"><div class="pm" id="stMedia"></div><div class="anc" id="stAnc"></div><div id="stTool"></div><div class="ptools"></div></div></div>
-      <div class="ctl"><button class="btn btn-ghost btn-icon" data-sact="prev" aria-label="Previous clip ([)"></button><button class="btn btn-ghost btn-icon" id="stPP" data-sact="pp" aria-label="Play or pause (space)"></button><button class="btn btn-ghost btn-icon" data-sact="next" aria-label="Next clip (])"></button><span class="tc" id="stTc"></span><span class="hint">Drag across the ruler to comment on a range · B to draw a box</span></div>
-      <div class="ruler" id="ruler"></div>
-      <div class="strip" id="strip"></div>
+      <div class="ctl"><button class="btn btn-ghost btn-icon" id="stPP" data-sact="pp" aria-label="Play or pause (space)"></button><span class="tc" id="stTc"></span><div class="ruler" id="ruler" title="Click or drag to seek"></div></div>
     </section></div>
   <aside class="cuelist" id="cuelist" aria-label="Cues"><div class="cuelist-h"><span>Cues</span><span class="toggles" id="clTabs" role="group" aria-label="Show"><button class="tg" data-todo="0" aria-pressed="true">All</button><button class="tg" data-todo="1" aria-pressed="false">To record <b id="todoN">0</b></button></span></div><div class="cl-scroll" id="clScroll"></div></aside>
 </section>
 
 <section class="card score" aria-label="Score">
-  <div class="card-h"><div><div class="card-t">Score</div><div class="card-d">Drag across a clip to comment on a range. Drop a video on a clip to replace it.</div></div>
+  <div class="card-h"><div><div class="card-t">Score</div><div class="card-d"><span class="v-script">Click a clip to open it. Drop a video on a clip to replace it.</span><span class="v-clips">The clip in view opens up to show its cues and comments. Click a clip to jump to it, or empty space to size every clip the same.</span></div></div>
     <div class="filters"><div class="toggles" id="bar" role="group" aria-label="Filter by sound"></div><span class="vsep"></span><div class="toggles" id="pri" role="group" aria-label="Filter comments by priority"></div><span class="vsep"></span><button class="tg" id="autoP" aria-pressed="false">Auto-pause at comments</button></div></div>
   <div class="staff-wrap"><div class="staff"><div class="clef" id="clef"></div><div class="lanes" id="tl"></div></div></div>
 </section>
@@ -742,6 +760,7 @@ function drawClip(it,t){
 /* Playback interface. The comment layer only talks to this, so a carousel can hand it any player with the same shape:
    {el, duration, currentTime, paused, play(), pause(), reset(), seek(t), setLoop(a,b), clearLoop(), onTime(fn) → unsubscribe, destroy()} */
 const players=new Set();
+const standIn=(id,cv)=>{const r=rng(hash(id));return {cv,ctx:cv.getContext("2d"),q:CUES[id],col:col(`--${CUES[id].c}`),bk:Array.from({length:10},()=>[r()*480,r()*220+20,8+r()*24,r()])}};
 function makeClip(id){
   const q=CUES[id],wrap=document.createElement("div");wrap.className="media";
   const p={loop:null,subs:new Set(),last:-1},emit=t=>{if(t===p.last)return;p.last=t;p.subs.forEach(f=>f(t))};
@@ -753,7 +772,7 @@ function makeClip(id){
       get currentTime(){return v.currentTime},get paused(){return v.paused},destroy(){players.delete(p);v.pause();v.removeAttribute("src");v.load()}};
   }else{
     const cv=document.createElement("canvas");cv.width=480;cv.height=270;wrap.appendChild(cv);
-    const r=rng(hash(id)),it={cv,ctx:cv.getContext("2d"),q,col:col(`--${q.c}`),bk:Array.from({length:10},()=>[r()*480,r()*220+20,8+r()*24,r()])};
+    const it=standIn(id,cv);
     Object.assign(p,{pos:0,playing:false,t0:0});const now=()=>p.playing?p.pos+(NOW-p.t0):p.pos;
     p.tick=()=>{let t=now();if(p.playing){const b=p.loop?p.loop[1]:q.dur;if(t>=b){p.pos=p.loop?p.loop[0]:0;p.t0=NOW;t=p.pos}drawClip(it,t)}emit(t)};
     drawClip(it,0);
@@ -796,7 +815,7 @@ let overList=false;clScroll.addEventListener("pointerenter",()=>overList=true);c
 function settleList(){if(overList)return;cancelAnimationFrame(settleRaf);settleRaf=requestAnimationFrame(()=>{
   const on=$$(".ci.in",clScroll);if(!on.length)return;const H=clScroll.clientHeight,top=on[0].offsetTop,last=on[on.length-1],bot=last.offsetTop+last.offsetHeight;
   clScroll.scrollTo({top:cl(bot-top>H-48?top-24:(top+bot)/2-H/2,0,clScroll.scrollHeight-H),behavior:reduce?"auto":"smooth"})})}
-const io=new IntersectionObserver(es=>{es.forEach(e=>$(`.ci[data-id="${e.target.dataset.id}"]`).classList.toggle("in",e.isIntersecting));settleList()},{root:doc,rootMargin:"-40px 0px -56px 0px"});
+const io=new IntersectionObserver(es=>{if(VIEW==="clips")return;es.forEach(e=>$(`.ci[data-id="${e.target.dataset.id}"]`).classList.toggle("in",e.isIntersecting));settleList()},{root:doc,rootMargin:"-40px 0px -56px 0px"});
 $$(".cue").forEach(c=>io.observe(c));
 const RG={}; $$(".ci").forEach(b=>{const q=CUES[b.dataset.id];RG[b.dataset.id]=glyph(b.querySelector("canvas"),restKey(q),{color:restColor})});
 
@@ -814,32 +833,53 @@ function applyFilter(){const cat=curCat;doc.classList.toggle("filtering",cat!=="
 renderBar();
 
 /* score: one slot per clip, as wide as the clip is long, one bar line per set. Comments sit inside their clip's slot on their category lane */
-const tl=$("#tl"), NG={}, LANES=["score","ambience","hardfx","props","cloth","footsteps"], SLOTS={}, LY={};let TOTAL=1;
+const tl=$("#tl"), NG={}, LANES=["score","ambience","hardfx","props","cloth","footsteps"], SLOTS={}, LY={};let TOTAL=1,scoreEven=false;
 const X=p=>(p/TOTAL*100).toFixed(3)+"%";
-function cmHTML(m){const s=SLOTS[m.clip];if(!s)return"";const D=CUES[m.clip].dur,a=Math.min(m.t0,D),rg=m.t1!=null;
-  return `<button class="cm ${m.status}${rg?"":" pt"}${card?.cid===m.id?" on":""}" data-cid="${m.id}" aria-label="${esc(rangeTxt(m))}: ${esc(snip(m))}" style="left:${X(s.s+a)};${rg?`width:${X(Math.max(.2,Math.min(m.t1,D)-a))};`:""}top:${LY[m.cat]}px;--c:var(--${m.cat})"></button>`}
+/* a slot is {s,e,w} on the score's own scale; a time inside the clip maps across the slot's width, whatever the layout */
+const pAt=(id,t)=>{const s=SLOTS[id],D=CUES[id].dur;return s.s+cl(t,0,D)/D*s.w};
+const tIn=(id,p)=>{const s=SLOTS[id];return cl((p-s.s)/s.w,0,1)*CUES[id].dur};
+/* layouts: "time" (script view) sizes slots by clip length; in clip view "focus" gives the clip in view ~45% of the width and condenses the rest; "even" sizes every clip the same */
+const scoreMode=()=>VIEW!=="clips"?"time":scoreEven||!stage.id?"even":"focus";
+function computeSlots(){for(const k in SLOTS)delete SLOTS[k];const mode=scoreMode(),sets=[],bars=[],u=10;
+  let cueGap=1.5,setGap=8,w=id=>CUES[id].dur;
+  if(mode!=="time"){cueGap=1;setGap=4;w=()=>u;
+    if(mode==="focus"){const rest=(order.length-1)*(u+cueGap)+(new Set(order.map(id=>CUES[id].act)).size-1)*setGap,F=Math.max(u,rest*.8);w=id=>id===stage.id?F:u}}
+  let pos=1,last=null;
+  order.forEach(id=>{const q=CUES[id];if(last!==null&&q.act!==last){const end=pos-cueGap;pos=end+setGap;bars.push(end+setGap/2)}
+    if(q.act!==last)sets.push([pos,q.act]);const ww=w(id);SLOTS[id]={s:pos,e:pos+ww,w:ww};pos+=ww+cueGap;last=q.act});
+  TOTAL=pos;$(".staff").style.minWidth=mode==="time"?Math.round(Math.max(960,84+TOTAL*5))+"px":"0px";tl.classList.toggle("even",mode==="even");return {sets,bars}}
+const cmPos=m=>{const a=pAt(m.clip,m.t0);return m.t1!=null?`left:${X(a)};width:${X(Math.max(TOTAL*.002,pAt(m.clip,m.t1)-a))};`:`left:${X(a)};`};
+function cmHTML(m){if(!SLOTS[m.clip])return"";const rg=m.t1!=null;
+  return `<button class="cm ${m.status}${rg?"":" pt"}${card?.cid===m.id?" on":""}" data-cid="${m.id}" aria-label="${esc(rangeTxt(m))}: ${esc(snip(m))}" style="${cmPos(m)}top:${LY[m.cat]}px;--c:var(--${m.cat})"></button>`}
+/* the slot's own label and second ticks, shown when it's the clip in view or hovered */
+function slotInner(id){const D=CUES[id].dur,st=D>30?5:1;let tk="";for(let t=st;t<D-.05;t+=st)tk+=`<i class="${t%5?"":"l"}" style="left:${(t/D*100).toFixed(2)}%"></i>`;
+  return `<span class="sl">${esc(CUES[id].n)}<small>${tc(D).replace(/\.0$/,"")}</small></span><span class="stk">${tk}</span>`}
+/* move everything already on the score to the current layout; the CSS transitions animate the change */
+function layoutScore(){const {sets,bars}=computeSlots();
+  $$(".slot",tl).forEach(el=>{const s=SLOTS[el.dataset.id];if(!s)return;el.style.left=X(s.s);el.style.width=X(s.w);el.classList.toggle("rt",s.s>TOTAL/2);el.classList.toggle("focus",VIEW==="clips"&&el.dataset.id===stage.id)});
+  $$(".mk",tl).forEach(el=>{const s=SLOTS[el.dataset.id];if(s)el.style.left=X(s.s)});
+  $$(".cm",tl).forEach(el=>{const m=COMMENTS[el.dataset.cid];if(m&&SLOTS[m.clip]){el.style.left="";el.style.width="";el.style.cssText+=cmPos(m)}});
+  $$(".barl",tl).forEach((el,i)=>{if(bars[i]!=null)el.style.left=X(bars[i])});$$(".sc",tl).forEach((el,i)=>{if(sets[i])el.style.left=X(sets[i][0])});
+  if(VIEW==="clips"&&stage.clip)phShow(stage.id,stage.clip.currentTime);else if(card)phShow(card.id,card.clip.currentTime)}
+function setEven(){if(VIEW!=="clips"||scoreEven)return;scoreEven=true;layoutScore()}
 function renderScore(){
   const top=22,step=11;LANES.forEach((c,i)=>LY[c]=top+i*step);const lines=[0,2,4,6].map(i=>top+i*step);
   $("#clef").innerHTML=LANES.map(c=>`<span style="top:${LY[c]}px;--c:var(--${c})"><i></i>${CATS[c]}</span>`).join("");
-  for(const k in SLOTS)delete SLOTS[k];
-  const cueGap=1.5,setGap=8,sets=[],bars=[];let pos=1,last=null;
-  order.forEach(id=>{const q=CUES[id];if(last!==null&&q.act!==last){const end=pos-cueGap;pos=end+setGap;bars.push(end+setGap/2)}
-    if(q.act!==last)sets.push([pos,q.act]);SLOTS[id]={s:pos,e:pos+q.dur};pos+=q.dur+cueGap;last=q.act});
-  TOTAL=pos;$(".staff").style.minWidth=Math.round(Math.max(960,84+TOTAL*5))+"px";
-  let out=order.map(id=>`<div class="slot${card?.open&&card.id===id?" cur":""}" data-id="${id}" style="left:${X(SLOTS[id].s)};width:${X(CUES[id].dur)}"></div>`).join("");
+  const {sets,bars}=computeSlots();
+  let out=order.map(id=>`<div class="slot${card?.open&&card.id===id?" cur":""}${VIEW==="clips"&&id===stage.id?" focus":""}${SLOTS[id].s>TOTAL/2?" rt":""}" data-id="${id}" style="left:${X(SLOTS[id].s)};width:${X(SLOTS[id].w)}">${slotInner(id)}</div>`).join("");
   out+=LANES.map(c=>`<div class="lane" data-lane="${c}" style="top:${LY[c]}px;--c:var(--${c})"></div>`).join("");
   out+=lines.map(y=>`<div class="ln" style="top:${y}px"></div>`).join("");
   out+=bars.map(p=>`<div class="barl" style="left:${X(p)};top:${lines[0]}px;height:${lines[3]-lines[0]}px"></div>`).join("");
   out+=sets.map(([p,a])=>`<span class="sc" style="left:${X(p)}">Set ${a+1}</span>`).join("");
-  out+=order.map(id=>{const q=CUES[id];return `<button class="mk" data-id="${id}" aria-label="Open ${esc(q.n)}" style="left:${X(SLOTS[id].s)};top:${LY[q.c]}px;--c:var(--${q.c})"><canvas class="g" style="width:14px;height:14px" aria-hidden="true"></canvas></button>`}).join("");
-  out+=Object.values(COMMENTS).map(cmHTML).join("")+`<div class="ph" hidden></div><div class="sel" hidden></div>`;
+  out+=order.map(id=>{const q=CUES[id];return `<button class="mk" data-id="${id}" aria-label="Open ${esc(q.n)}" style="left:${X(SLOTS[id].s)};top:${LY[q.c]}px;--c:var(--${q.c})"><canvas class="g" style="width:18px;height:18px" aria-hidden="true"></canvas></button>`}).join("");
+  out+=Object.values(COMMENTS).map(cmHTML).join("")+`<div class="ph" hidden></div>`;
   tl.innerHTML=out;
   $$(".mk",tl).forEach(m=>{const q=CUES[m.dataset.id];NG[m.dataset.id]=glyph(m.querySelector("canvas"),restKey(q),{color:ok(q)?`--${q.c}`:"--muted-foreground",base:.16})});
   if(card)phShow(card.id,card.clip.currentTime);
-  if(VIEW==="clips"&&stage.id){renderRuler();renderStrip(false)}
+  if(VIEW==="clips"&&stage.id)renderStage();
 }
 renderScore();
-function phShow(id,t){const ph=$(".ph",tl),s=SLOTS[id];if(!ph||!s)return;ph.hidden=false;ph.style.left=X(s.s+Math.min(t,CUES[id].dur))}
+function phShow(id,t){const ph=$(".ph",tl);if(!ph||!SLOTS[id])return;ph.hidden=false;ph.style.left=X(pAt(id,t))}
 function phHide(){const ph=$(".ph",tl);if(ph)ph.hidden=true;$$(".slot.cur",tl).forEach(x=>x.classList.remove("cur"))}
 /* bring a clip's slot into view when the staff is scrolled away from it */
 function revealSlot(id){const s=$(`.slot[data-id="${id}"]`,tl),w=$(".staff-wrap");if(!s)return;const r=s.getBoundingClientRect(),wr=w.getBoundingClientRect();
@@ -892,8 +932,9 @@ $("#clTabs").addEventListener("click",e=>{const b=e.target.closest("[data-todo]"
 function jumpTo(id,after){const cue=$(`.cue[data-id="${id}"]`),sec=cue.closest(".act"),was=sec.classList.contains("collapsed");if(was)toggleAct(sec,false);
   setTimeout(()=>{cue.scrollIntoView({behavior:reduce?"auto":"smooth",block:"center"});setTimeout(after,450)},280+(was?320:0))}
 
-/* score: tooltip on cue and comment markers. Click a marker to open it (a comment seeks and loops its range);
-   click an empty part of a clip's slot to seek there, drag across it to start a range comment */
+/* score: tooltip on cue and comment markers. Click a marker to open it (a comment seeks to its start);
+   click or drag along a clip's slot to scrub it, and the clip opens where you let go. In clip view, hovering a slot highlights it like the clip in view,
+   and a click on empty space (not a slot, marker or control) sizes every clip the same */
 let tip=null,sdrag=null;
 const showTip=(el,text)=>{tip?.remove();const r=el.getBoundingClientRect();tip=document.createElement("div");tip.className="tip";tip.textContent=text;tip.style.left=r.left+r.width/2+"px";tip.style.top=r.top+"px";document.body.appendChild(tip)};
 tl.addEventListener("pointerover",e=>{const t=e.target.closest(".mk,.cm");if(!t||t.contains(e.relatedTarget))return;
@@ -902,17 +943,23 @@ tl.addEventListener("pointerover",e=>{const t=e.target.closest(".mk,.cm");if(!t|
 tl.addEventListener("pointerout",e=>{const t=e.target.closest(".mk,.cm");if(t&&!t.contains(e.relatedTarget)){link(t.classList.contains("cm")?COMMENTS[t.dataset.cid].clip:t.dataset.id,false);tip?.remove();tip=null}});
 const tAt=e=>{const r=tl.getBoundingClientRect();return (e.clientX-r.left)/r.width*TOTAL};
 const slotAt=p=>order.find(id=>SLOTS[id]&&p>=SLOTS[id].s&&p<=SLOTS[id].e);
-tl.addEventListener("pointerdown",e=>{if(e.button||e.target.closest(".mk,.cm"))return;const p=tAt(e),id=slotAt(p);if(!id)return;e.preventDefault();tl.setPointerCapture(e.pointerId);sdrag={id,a:p-SLOTS[id].s,b:null,x:e.clientX}});
-tl.addEventListener("pointermove",e=>{if(!sdrag||sdrag.b==null&&Math.abs(e.clientX-sdrag.x)<4)return;const s=SLOTS[sdrag.id],sel=$(".sel",tl);sdrag.b=cl(tAt(e)-s.s,0,CUES[sdrag.id].dur);
-  const lo=Math.min(sdrag.a,sdrag.b),hi=Math.max(sdrag.a,sdrag.b);sel.hidden=false;sel.style.left=X(s.s+lo);sel.style.width=X(hi-lo)});
-tl.addEventListener("pointerup",()=>{if(!sdrag)return;const {id,a,b}=sdrag;sdrag=null;$(".sel",tl).hidden=true;
-  if(b==null||Math.abs(b-a)<.15)openCard(id,{anchor:"score",t:a});else openCard(id,{anchor:"score",draft:[Math.min(a,b),Math.max(a,b)]})});
-tl.addEventListener("pointercancel",()=>{sdrag=null;$(".sel",tl).hidden=true});
+/* the slot under the pointer, counting only its own height (above and below it is empty score) */
+const slotHit=e=>{const y=e.clientY-tl.getBoundingClientRect().top;return y>=14&&y<=86?slotAt(tAt(e)):undefined};
+let tlDown=null,hoverSlot=null;
+const setHover=id=>{if(hoverSlot===id)return;$(`.slot[data-id="${hoverSlot}"]`,tl)?.classList.remove("hover");hoverSlot=id;if(id&&VIEW==="clips")$(`.slot[data-id="${id}"]`,tl)?.classList.add("hover")};
+tl.addEventListener("pointerdown",e=>{tlDown=null;if(e.button||e.target.closest(".mk,.cm"))return;const p=tAt(e),id=slotHit(e);if(!id)return;tlDown=id;e.preventDefault();tl.setPointerCapture(e.pointerId);sdrag={id,t:tIn(id,p)};phShow(id,sdrag.t)});
+tl.addEventListener("pointermove",e=>{if(!sdrag){if(e.pointerType!=="touch")setHover(slotHit(e)||null);return}const id=sdrag.id,cp=VIEW==="clips"?stage.id===id&&stage.clip:card?.id===id&&card.clip;
+  sdrag.t=tIn(id,tAt(e));phShow(id,sdrag.t);if(cp)cp.seek(sdrag.t)});
+tl.addEventListener("pointerleave",()=>setHover(null));
+tl.addEventListener("pointerup",()=>{if(!sdrag)return;const {id,t}=sdrag;sdrag=null;
+  if(VIEW==="clips"){if(id!==stage.id&&!canLeave())return;if(scoreEven){scoreEven=false;layoutScore()}}openCard(id,{anchor:"score",t})});
+tl.addEventListener("pointercancel",()=>{sdrag=null});
 tl.addEventListener("click",e=>{e.stopPropagation();tip?.remove();tip=null;
   const c=e.target.closest(".cm");if(c){const m=COMMENTS[c.dataset.cid];openCard(m.clip,{anchor:"score",cid:m.id});return}
-  const mk=e.target.closest(".mk");if(!mk)return;const id=mk.dataset.id,cue=$(`.cue[data-id="${id}"]`);
+  const mk=e.target.closest(".mk");if(!mk){if(!tlDown&&!slotHit(e))setEven();return}const id=mk.dataset.id,cue=$(`.cue[data-id="${id}"]`);
   if(cue&&!cue.closest(".act.collapsed"))cue.scrollIntoView({behavior:reduce?"auto":"smooth",block:"center"});openCard(id,{anchor:"score",t:0})});
 $(".staff-wrap").addEventListener("scroll",()=>card&&place(card),{passive:true});
+$(".score").addEventListener("click",e=>{if(!e.target.closest("button,#tl"))setEven()});
 
 /* ---------- cue card: hover peek (clip only) and click-to-open (clip on top). Open, it has three modes: the cue, a comment thread, a new comment.
    In clip view the card has no clip of its own; it drives the stage player through the same playback interface ---------- */
@@ -995,6 +1042,7 @@ function tick(c,t){if(card!==c||!c.ui)return;const q=CUES[c.id];
   const pz=c.clip.paused;if(c.ui.pp&&pz!==c.ui.pz){c.ui.pz=pz;c.ui.pp.innerHTML=pz?ICON.play:ICON.pause}
   phShow(c.id,t);
   const html=anchorsHTML(c.id,t);if(html!==c.ancHTML){c.ancHTML=html;c.ui.anc.innerHTML=html}
+  draftTick(t);
   if(autoPause&&c.open&&c.mode==="cue"&&!pz&&t>c.lastT&&t-c.lastT<.5){const hit=commentsOf(c.id).find(m=>m.t0>c.lastT&&m.t0<=t);
     if(hit){c.clip.pause();c.clip.seek(hit.t0);t=hit.t0;toast("Paused at a comment",snip(hit,48),hit.cat,"seed")}}
   c.lastT=t}
@@ -1011,7 +1059,7 @@ function ancHTML(m){const who=avHTML(m.msgs?m.msgs[0].by:ME()),on=card?.cid===m.
 function render(){
   const {id,el,mode,ext}=card,q=CUES[id],c=`--${q.c}`,pl=!card.clip.paused,n=commentsOf(id).length;hideMn();
   el.classList.toggle("open",card.open);
-  const more=headHTML()+(mode==="thread"&&COMMENTS[card.cid]?threadHTML():mode==="draft"?composeHTML("Enter your comment"):cueHTML());
+  const more=headHTML()+(mode==="thread"&&COMMENTS[card.cid]?threadHTML():mode==="draft"?rangeHTML()+composeHTML("Enter your comment"):cueHTML());
   el.innerHTML=ext?`<div class="panel"><div class="more"><div>${more}</div></div></div>`:`<div class="panel">
     <div class="clipslot"><div class="mediaslot"></div><div class="anc"></div><div class="toolslot"></div><span class="cliptag" style="--c:var(${c})"><i></i><span class="tc"></span></span><div class="ptools">${toolsHTML()}</div></div>
     <div class="cap"><div><div class="peekcap"><span>Scene ${q.scene} · ${CATS[q.c]}</span><span>${n?`${n} comment${n>1?"s":""}`:""}</span></div></div></div>
@@ -1028,11 +1076,19 @@ function render(){
 const autosize=ta=>{ta.style.height="auto";ta.style.height=Math.min(120,ta.scrollHeight)+"px"};
 function scrubHTML(){const q=CUES[card.id],P=v=>(cl(v/q.dur,0,1)*100).toFixed(2)+"%",m=card.mode==="thread"?COMMENTS[card.cid]:card.mode==="draft"?card.draft:null;
   const rs=commentsOf(card.id).map(x=>`<i class="r" style="left:${P(x.t0)};${x.t1!=null?`width:${P(x.t1-x.t0)};`:""}--c:var(--${x.cat})"></i>`).join("");
-  return `<div class="sbar"><button class="btn btn-ghost btn-icon" data-act="pp" aria-label="Play or pause">${card.clip.paused?ICON.play:ICON.pause}</button><div class="scrub" title="Click to seek, drag to comment on a range">${rs}${m&&m.t1!=null?`<i class="lp" style="left:${P(m.t0)};width:${P(m.t1-m.t0)}"></i>`:""}<i class="phd"></i></div></div>`}
+  return `<div class="sbar"><button class="btn btn-ghost btn-icon" data-act="pp" aria-label="Play or pause">${card.clip.paused?ICON.play:ICON.pause}</button><div class="scrub" title="Click or drag to seek">${rs}${m?`<i class="lp" style="left:${P(m.t0)};width:${m.t1!=null?P(m.t1-m.t0):0}"></i>`:""}<i class="rg" hidden></i><i class="phd"></i></div></div>`}
+/* where the new comment sits: its start, and a button that makes the playhead its end */
+function rangeHTML(){const d=card.draft,t=card.clip.currentTime;
+  return `<div class="rng"><span>${d.t1!=null?`${tc(d.t0)} – ${tc(d.t1)}`:`At ${tc(d.t0)}`}</span>${d.t1!=null?`<button class="btn btn-ghost btn-icon" data-act="clrend" title="Back to a single moment" aria-label="Remove the end">${ICON.x}</button>`:""}
+    <button class="btn btn-ghost" data-act="setend" title="Play or scrub to where the sound ends, then click"${Math.abs(t-d.t0)<.15?" disabled":""}>${d.t1!=null?"Move end":"Set end"} to<b>${tc(t)}</b></button></div>`}
+/* every frame while writing: the end button follows the playhead, and a dashed range previews what it would set */
+function draftTick(t){if(card?.mode!=="draft")return;const d=card.draft,D=CUES[card.id].dur,b=$('[data-act="setend"]',card.el),g=card.ext?$("#ruler .rg"):$(".scrub .rg",card.el);
+  if(b){$("b",b).textContent=tc(t);b.disabled=Math.abs(t-d.t0)<.15}
+  if(g){const lo=Math.min(d.t0,t),hi=Math.max(d.t0,t);g.hidden=d.t1!=null||hi-lo<.15;g.style.left=cl(lo/D,0,1)*100+"%";g.style.width=cl((hi-lo)/D,0,1)*100+"%"}}
 /* header: what you're looking at, its state, close. Status lives in a chip whose menu only offers what your role can do */
 function headHTML(){const q=CUES[card.id];let back=false,title,meta,chip;
   if(card.mode==="thread"&&COMMENTS[card.cid]){const m=COMMENTS[card.cid];back=!card.ext;title=q.n;meta=`${rangeTxt(m)} · ${CATS[m.cat]} · ${PRI[m.pri].n} priority`;chip=statusChip(m)}
-  else if(card.mode==="draft"){const d=card.draft;back=!card.ext;title="Add comment";meta=`${q.n} · ${rangeTxt(d)} · ${CATS[d.cat]}`;
+  else if(card.mode==="draft"){const d=card.draft;back=!card.ext;title="Add comment";meta=`${q.n} · ${CATS[d.cat]}`;
     chip=d.box||d.edge?`<button class="stc" data-act="noanc" title="Remove from the frame">${d.box?ICON.box:ICON.edge}${d.box?"Box":`Off-screen ${d.edge}`}${ICON.x}</button>`:`<span class="kh">B box · E off-screen</span>`}
   else{title=q.n;meta=`Scene ${q.scene} · ${CATS[q.c]} · ${fmtD(q.dur)}`;chip=cueChip(q,"data-act")}
   return `<div class="ch">${back?`<button class="btn btn-ghost btn-icon bk" data-act="back" aria-label="Back to cue">${ICON.back}</button>`:""}<div class="tt"><b>${esc(title)}</b><small>${esc(meta)}</small></div>${chip}<button class="btn btn-ghost btn-icon" data-act="close" aria-label="Close">${ICON.x}</button></div>`}
@@ -1076,18 +1132,16 @@ function openCard(id,o={}){
 }
 function toCue(){const c=card;if(c.ext)return closeCard();stopAudio();stopMemo(true);c.mode="cue";c.cid=null;c.draft=null;c.pend=[];c.text="";c.clip.clearLoop();render();follow(c)}
 function openThread(cid){const c=card,m=COMMENTS[cid];stopAudio();stopMemo(true);c.mode="thread";c.cid=cid;c.draft=null;c.pend=[];c.text="";
-  c.clip.seek(m.t0);if(m.t1!=null){c.clip.setLoop(m.t0,m.t1);c.clip.play()}else{c.clip.clearLoop();c.clip.pause()}
-  render();follow(c)}
+  c.clip.clearLoop();c.clip.pause();c.clip.seek(m.t0);render();follow(c)}
 function openDraft(t0,t1,anc){const c=card,q=CUES[c.id];stopAudio();stopMemo(true);
   c.mode="draft";c.cid=null;c.draft={t0,t1:t1!=null&&t1-t0>=.15?t1:null,cat:q.c,pri:"med",box:anc?.box||null,edge:anc?.edge||null};c.pend=[];c.text="";
-  c.clip.pause();c.clip.seek(t0);if(c.draft.t1!=null)c.clip.setLoop(t0,c.draft.t1);else c.clip.clearLoop();c.focus=true;render();follow(c)}
+  c.clip.clearLoop();c.clip.pause();c.clip.seek(t0);c.focus=true;render();follow(c)}
 
-/* scrubber: click seeks, drag selects a range and starts a comment on it */
-function scrubDown(e,s){e.preventDefault();const c=card,D=CUES[c.id].dur,r=s.getBoundingClientRect(),T=ev=>cl((ev.clientX-r.left)/r.width)*D,a=T(e),x0=e.clientX;let b=null,lp=null;s.setPointerCapture(e.pointerId);
-  const mv=ev=>{if(b==null&&Math.abs(ev.clientX-x0)<4)return;b=T(ev);if(!lp){lp=document.createElement("i");lp.className="lp";s.appendChild(lp)}const lo=Math.min(a,b),hi=Math.max(a,b);lp.style.left=lo/D*100+"%";lp.style.width=(hi-lo)/D*100+"%";c.clip.seek(b)};
-  const up=()=>{s.removeEventListener("pointermove",mv);s.removeEventListener("pointerup",up);s.removeEventListener("pointercancel",up);
-    if(b==null||Math.abs(b-a)<.15)c.clip.seek(a);else openDraft(Math.min(a,b),Math.max(a,b),c.mode==="draft"?{box:c.draft.box,edge:c.draft.edge}:null)};
-  s.addEventListener("pointermove",mv);s.addEventListener("pointerup",up);s.addEventListener("pointercancel",up)}
+/* scrubbers (the card's and the clip view's ruler) only ever seek: comments start from C or the comment button, never from a drag */
+function scrubBind(s,clip,D,e){e.preventDefault();const r=s.getBoundingClientRect(),seek=ev=>clip.seek(cl((ev.clientX-r.left)/r.width)*D);s.setPointerCapture(e.pointerId);seek(e);
+  const up=()=>{s.removeEventListener("pointermove",seek);s.removeEventListener("pointerup",up);s.removeEventListener("pointercancel",up)};
+  s.addEventListener("pointermove",seek);s.addEventListener("pointerup",up);s.addEventListener("pointercancel",up)}
+const scrubDown=(e,s)=>scrubBind(s,card.clip,CUES[card.id].dur,e);
 
 /* ---------- frame tools, Google Drive style: press B (or the box button) and drag on the paused frame; press E and pick an edge.
    The comment card opens beside the mark with the input focused ---------- */
@@ -1124,6 +1178,8 @@ function cardAct(a){const c=card,id=c.id,act=a.dataset.act,m=c.cid&&COMMENTS[c.c
     case "cuemenu":return showMenu(a,cueMenu(id));
     case "stmenu":return showMenu(a,`<div class="mh">Status</div>${statusActs(m).map(([v,l])=>`<button data-m="st" data-v="${v}">${ICON.check}${l}</button>`).join("")}`);
     case "noanc":c.draft.box=c.draft.edge=null;return render();
+    case "setend":{const t=c.clip.currentTime,t0=c.draft.t0;if(Math.abs(t-t0)<.15)return;c.draft.t0=Math.min(t0,t);c.draft.t1=Math.max(t0,t);c.focus=true;return render()}
+    case "clrend":c.draft.t1=null;c.focus=true;return render();
     case "send":return send();
     case "memo":return memo();
     case "aplay":return playAud(a.dataset.aid);
@@ -1144,7 +1200,8 @@ document.addEventListener("click",e=>{
     setCue(id,done(q)?"approved":"recorded");return}
   const t=e.target.closest(".cue,.ci");
   if(t&&(doc.contains(t)||list.contains(t))){e.stopPropagation();const id=t.dataset.id;
-    if(VIEW==="clips"||!$(`.cue[data-id="${id}"]`))openCard(id,{anchor:"score"});
+    if(VIEW==="clips"){if(id===stage.id||canLeave())openCard(id)}
+    else if(!$(`.cue[data-id="${id}"]`))openCard(id,{anchor:"score"});
     else if(t.classList.contains("ci")&&!t.classList.contains("in")&&!t.classList.contains("open"))jumpTo(id,()=>openCard(id));else openCard(id);return}
   if(card&&card.open&&!path.some(n=>n===ftb||n===kbb||n===menu||n.tagName==="HEADER"||n.id==="ruler"||n.classList?.contains("score")||n.classList?.contains("toasts")))closeCard();
 });
@@ -1167,7 +1224,8 @@ addEventListener("resize",()=>card&&place(card));
 function sync(){const base=$$(".cue").map(c=>c.dataset.id);
   for(const id in CUES){const q=CUES[id];if(!q.virt)continue;let j=base.indexOf(q.after);if(j<0){base.push(id);continue}j++;while(j<base.length&&CUES[base[j]].virt)j++;base.splice(j,0,id)}
   order.splice(0,order.length,...base);ACTIDS.forEach((_,i)=>ACTIDS[i]=order.filter(id=>CUES[id].act===i));
-  renderBar();renderScore();applyFilter();tally();refreshCounts();settleList()}
+  renderBar();renderScore();applyFilter();tally();refreshCounts();settleList();
+  if(VIEW==="clips"){renderReel();if(!CUES[stage.id])stageLoad(order[0],true)}}
 /* resolve: the phrase goes back to plain script text and the cue disappears everywhere */
 function resolveCue(id){const q=CUES[id],span=$(`.cue[data-id="${id}"]`);if(!span)return;closeCard();io.unobserve(span);
   const par=span.parentNode;span.replaceWith(...span.childNodes);par.normalize();
@@ -1216,7 +1274,7 @@ function toast(msg,file,cat,key="set"){const t=document.createElement("div");t.c
 function setCue(id,s){const q=CUES[id],c=`--${q.c}`;q.s=s;
   if(s==="recorded"){setG(NG[id],"set",c);setG(RG[id],"set",c);setTimeout(()=>{NG[id]&&setG(NG[id],restKey(q),c);RG[id]&&setG(RG[id],restKey(q),restColor)},1200)}
   else{setG(NG[id],restKey(q),ok(q)?c:"--muted-foreground");setG(RG[id],restKey(q),restColor)}
-  tally();applyFilter();refreshCounts();if(card&&card.id===id)render();if(stage.id===id){renderStage();renderStrip()}
+  tally();applyFilter();refreshCounts();if(card&&card.id===id)render();if(stage.id===id)renderStage();
   toast(s==="approved"?"Cue approved":s==="recorded"?"Marked recorded":"Back to unapproved",s==="approved"?"Added to the recording checklist":q.n,q.c,s==="recorded"?"check":"set")}
 function setStatus(m,s,verb){m.status=s;m.msgs.push({sys:true,by:ME(),at:Date.now(),text:`${first(ME())} ${verb}`});
   renderScore();applyFilter();refreshCounts();card.scrollEnd=true;render();toast(`Comment ${STATUS[s].n.toLowerCase()}`,snip(m,48),m.cat,s==="approved"?"check":"set");
@@ -1322,13 +1380,13 @@ const isVideo=f=>/^video\//.test(f.type)||/\.(mp4|mov|m4v|webm)$/i.test(f.name);
 function setClip(id,f){const q=CUES[id];if(!q)return;if(!isVideo(f)){toast("Not a video file",f.name,q.c,"seed");return}
   if(q.clipUrl)URL.revokeObjectURL(q.clipUrl);q.clip=q.clipUrl=URL.createObjectURL(f);q.clipName=f.name;
   const v=document.createElement("video");v.preload="metadata";v.muted=true;v.onloadedmetadata=()=>{if(isFinite(v.duration))setDur(id,v.duration)};v.onerror=()=>toast("Couldn't play that video",f.name,q.c,"seed");v.src=q.clip;
-  if(stage.id===id)stageLoad(id,true);
+  if(VIEW==="clips")renderReel();if(stage.id===id)stageLoad(id,true);
   if(card&&card.id===id&&!card.ext){card.unsub?.();card.clip.destroy();card.clip=makeClip(id);const c=card;c.unsub=c.clip.onTime(t=>tick(c,t));c.clip.play();render()}
   toast(q.clipName===f.name?"Clip uploaded":"Clip replaced",f.name,q.c)}
 function setDur(id,d){const q=CUES[id];if(!q||Math.abs(q.dur-d)<.05)return;q.dur=d;renderScore();applyFilter();if(stage.id===id)renderStage();if(card&&card.id===id)render()}
 const dtFiles=e=>e.dataTransfer&&[...e.dataTransfer.types].includes("Files");
 let dropEl=null;const setDrop=el=>{if(dropEl!==el){dropEl?.classList.remove("drop");dropEl=el;el?.classList.add("drop")}};
-const dropT=e=>e.target.closest?.(".cue,.ci,.pop,.slot");
+const dropT=e=>e.target.closest?.(".cue,.ci,.pop,.slot,.reel-i");
 document.addEventListener("dragover",e=>{if(!dtFiles(e))return;e.preventDefault();const t=dropT(e);setDrop(t);e.dataTransfer.dropEffect=t?"copy":"none"});
 document.addEventListener("dragleave",e=>{if(!e.relatedTarget)setDrop(null)});
 document.addEventListener("drop",e=>{if(!dtFiles(e))return;e.preventDefault();const t=dropT(e),f=e.dataTransfer.files[0];setDrop(null);if(!t||!f)return;
@@ -1354,36 +1412,47 @@ function sketch(out,cat,t,k=1){
 function renderSketch(cat,seed=0){const sr=22050,len=cat==="ambience"||cat==="score"?2.2:1.6,oc=new OfflineAudioContext(1,Math.round(sr*len),sr),out=oc.createGain();
   out.gain.value=.7;out.connect(oc.destination);sketch(out,cat,.03,1+(seed%7-3)*.07);return oc.startRendering()}
 
-/* ---------- clip view: the cut as a player with a timecode ruler and a strip of clips. A stand-in for the carousel;
-   it plays through the same makeClip() interface, and the comment card drives it the same way ---------- */
-function setView(v){VIEW=v;try{localStorage.setItem("svsd-view",v)}catch(e){}closeCard();TOOL=null;renderTool();
+/* ---------- clip view: every clip in one sideways reel, its cue's title riding above it. The centred clip is the player (the reel scrolls,
+   snaps, and whatever settles in the middle loads); the others show a still. It plays through the same makeClip() interface, and the comment card drives it the same way ---------- */
+function setView(v){VIEW=v;$$(".ci.in").forEach(c=>c.classList.remove("in"));try{localStorage.setItem("svsd-view",v)}catch(e){}closeCard();TOOL=null;renderTool();
   document.body.classList.toggle("view-clips",v==="clips");doc.hidden=v==="clips";$("#stage").hidden=v!=="clips";$(".pane").classList.toggle("clips",v==="clips");
   $$("#view button").forEach(b=>b.setAttribute("aria-selected",b.dataset.view===v));
-  if(v==="clips"){stageLoad(stage.id&&CUES[stage.id]?stage.id:order[0],true);fitPlayer()}else{stage.clip?.pause();phHide();$$(".ci.cur").forEach(x=>x.classList.remove("cur"))}}
+  if(v==="clips"){renderReel();stageLoad(stage.id&&CUES[stage.id]?stage.id:order[0],true);fitPlayer()}else{stage.clip?.pause();setHover(null);layoutScore();phHide()}}
+function reelTitle(id){const q=CUES[id],cur=id===stage.id,n=commentsOf(id).filter(m=>m.status!=="approved").length;
+  return `<div class="tt"><b>${esc(q.n)}</b><small>Scene ${q.scene} · ${CATS[q.c]}${n?` · ${n} unresolved`:""}${cur&&q.clipName?` · ${esc(q.clipName)}`:""}</small></div>`+
+    (cur?`${cueChip(q,"data-sact")}<button class="btn btn-outline" data-sact="clipup">${ICON.film}${q.clip?"Replace clip":"Upload clip"}</button>`:"")}
+function still(id){const q=CUES[id];if(q.clip){const v=document.createElement("video");v.src=q.clip+"#t=0.5";v.muted=true;v.playsInline=true;v.preload="metadata";return v}
+  const cv=document.createElement("canvas");cv.width=480;cv.height=270;drawClip(standIn(id,cv),.6);return cv}
+function renderReel(){const R=$("#reel"),pl=$("#player");pl.remove();
+  R.innerHTML=order.map(id=>`<div class="reel-i" data-id="${id}" aria-current="${id===stage.id}"><div class="reel-t">${reelTitle(id)}</div><div class="reel-f"></div></div>`).join("");
+  $$(".reel-f",R).forEach(f=>f.appendChild(still(f.parentNode.dataset.id)));
+  ($(`.reel-i[data-id="${stage.id}"] .reel-f`,R)||$("#stage")).appendChild(pl)}
 function stageLoad(id,force){if(!CUES[id]||stage.id===id&&!force&&stage.clip)return;if(card?.ext)closeCard();
   stage.unsub?.();stage.clip?.destroy();stage.id=id;stage.clip=makeClip(id);$("#stMedia").replaceChildren(stage.clip.el);stage.unsub=stage.clip.onTime(stageTick);stage.anc=null;stage.pz=null;stage.lastT=0;
-  $$(".ci.cur").forEach(x=>x.classList.remove("cur"));$(`.ci[data-id="${id}"]`)?.classList.add("cur");revealSlot(id);
-  renderStage();renderStrip(true)}
-const stageStep=d=>{const i=order.indexOf(stage.id);stageLoad(order[(i+d+order.length)%order.length])};
-function renderStage(){const id=stage.id,q=CUES[id],i=order.indexOf(id);
-  $("#stHead").innerHTML=`<div class="tt"><b>${esc(q.n)}</b><small>Scene ${q.scene} · ${CATS[q.c]} · ${fmtD(q.dur)} · clip ${i+1} of ${order.length}${q.clipName?` · ${esc(q.clipName)}`:""}</small></div>${cueChip(q,"data-sact")}<button class="btn btn-outline" data-sact="clipup">${ICON.film}${q.clip?"Replace clip":"Upload clip"}</button>`;
+  $$("#reel .reel-i").forEach(x=>{const cur=x.dataset.id===id;if(x.getAttribute("aria-current")!==String(cur)){x.setAttribute("aria-current",cur);$(".reel-t",x).innerHTML=reelTitle(x.dataset.id)}});
+  $(`#reel .reel-i[data-id="${id}"] .reel-f`)?.appendChild($("#player"));
+  $$(".ci").forEach(c=>c.classList.toggle("in",c.dataset.id===id));settleList();
+  scoreEven=false;layoutScore();revealSlot(id);renderStage();centerReel(true)}
+/* switching clips closes the comment card, so don't let a stray swipe throw away a comment being written */
+function canLeave(){if(!(card?.ext&&card.mode==="draft"&&(card.text.trim()||card.pend.length)))return true;
+  toast("Finish or close your comment first","Switching clips would discard it",CUES[stage.id].c,"seed");return false}
+const stageStep=d=>{if(!canLeave())return;const i=order.indexOf(stage.id);stageLoad(order[cl(i+d,0,order.length-1)])};
+function centerReel(smooth){const R=$("#reel"),it=$(`.reel-i[data-id="${stage.id}"]`,R);if(it)R.scrollTo({left:it.offsetLeft+it.offsetWidth/2-R.clientWidth/2,behavior:smooth&&!reduce?"smooth":"auto"})}
+function renderStage(){const id=stage.id,q=CUES[id],t=$(`#reel .reel-i[data-id="${id}"] .reel-t`);if(t)t.innerHTML=reelTitle(id);
   $("#stNote").innerHTML=`<span>Director's note</span>${esc(q.d)}`;$("#stNote").title=q.d;
   renderRuler()}
 function renderRuler(){if(VIEW!=="clips"||!stage.id)return;const q=CUES[stage.id],D=q.dur,P=v=>(cl(v/D,0,1)*100).toFixed(3)+"%",step=D>40?5:D>20?2:1;
   let tk="";for(let s=0;s<=D+1e-6;s+=.5){const maj=Math.abs(s/step-Math.round(s/step))<1e-6;if(!maj&&(step>1||s%1===0))continue;tk+=`<i class="tk${maj?" l":""}" style="left:${P(s)}">${maj?`<span>${tc(s).replace(/\.0$/,"")}</span>`:""}</i>`}
   const rows=[],bars=commentsOf(stage.id).map(m=>{let r=rows.findIndex(e=>e<m.t0-.1);if(r<0){r=rows.length;rows.push(0)}rows[r]=Math.max(m.t1??m.t0,m.t0+.4);
     const hit=(curCat==="all"||m.cat===curCat)&&(curPri==="all"||m.pri===curPri);
-    return `<button class="rb ${m.status}${m.t1!=null?"":" pt"}${card?.cid===m.id?" on":""}${hit?"":" faded"}" data-sact="cm" data-cid="${m.id}" title="${esc(first(m.msgs[0].by))} · ${esc(rangeTxt(m))} · ${esc(snip(m,60))}" style="left:${P(m.t0)};${m.t1!=null?`width:${P(m.t1-m.t0)};`:""}top:${28+Math.min(r,2)*10}px;--c:var(--${m.cat})"></button>`});
+    return `<button class="rb ${m.status}${m.t1!=null?"":" pt"}${card?.cid===m.id?" on":""}${hit?"":" faded"}" data-sact="cm" data-cid="${m.id}" title="${esc(first(m.msgs[0].by))} · ${esc(rangeTxt(m))} · ${esc(snip(m,60))}" style="left:${P(m.t0)};${m.t1!=null?`width:${P(m.t1-m.t0)};`:""}top:${22+Math.min(r,2)*8}px;--c:var(--${m.cat})"></button>`});
   const L=card?.ext?(card.mode==="thread"?COMMENTS[card.cid]:card.mode==="draft"?card.draft:null):null;
-  $("#ruler").innerHTML=tk+(L&&L.t1!=null?`<i class="rl" style="left:${P(L.t0)};width:${P(L.t1-L.t0)}"></i>`:"")+bars.join("")+`<i class="rsel" hidden></i><i class="rph"></i>`;
+  $("#ruler").innerHTML=tk+(L?`<i class="rl" style="left:${P(L.t0)};width:${L.t1!=null?P(L.t1-L.t0):0}"></i>`:"")+bars.join("")+`<i class="rg" hidden></i><i class="rph"></i>`;
   stage.ph=$(".rph",$("#ruler"));stage.pz=null;stageTick(stage.clip.currentTime)}
-function renderStrip(scroll){$("#strip").innerHTML=order.map((id,i)=>{const q=CUES[id],L=LOCS[q.loc]||LOCS.lobby,n=commentsOf(id).filter(m=>m.status!=="approved").length;
-    return `<button class="cc2" data-sact="clip" data-id="${id}" aria-current="${id===stage.id}" style="--a:${L.a};--b:${L.b};--c:var(--${q.c})"><span class="th"><i></i>${n?`<b>${n}</b>`:""}</span><span class="nm">${esc(q.n)}</span><small>${i+1} · ${fmtD(q.dur)}</small></button>`}).join("");
-  if(scroll){const c=$('#strip [aria-current="true"]'),s=$("#strip");if(c)s.scrollTo({left:c.offsetLeft-s.clientWidth/2+c.offsetWidth/2,behavior:reduce?"auto":"smooth"})}}
 function stageTick(t){if(!stage.clip)return;const q=CUES[stage.id],pz=stage.clip.paused;
   $("#stTc").textContent=`${tc(t)} / ${tc(q.dur)}`;if(stage.ph)stage.ph.style.left=cl(t/q.dur*100,0,100)+"%";
   if(pz!==stage.pz){stage.pz=pz;$("#stPP").innerHTML=pz?ICON.play:ICON.pause}
-  phShow(stage.id,t);
+  phShow(stage.id,t);if(card?.ext)draftTick(t);
   const html=anchorsHTML(stage.id,t);if(html!==stage.anc){stage.anc=html;$("#stAnc").innerHTML=html;if(card?.ext)place(card)}
   if(autoPause&&!pz&&!(card?.ext&&card.mode!=="cue")&&t>stage.lastT&&t-stage.lastT<.5){const hit=commentsOf(stage.id).find(m=>m.t0>stage.lastT&&m.t0<=t);
     if(hit){stage.clip.pause();stage.clip.seek(hit.t0);t=hit.t0;toast("Paused at a comment",snip(hit,48),hit.cat,"seed")}}
@@ -1391,23 +1460,35 @@ function stageTick(t){if(!stage.clip)return;const q=CUES[stage.id],pz=stage.clip
 $("#view").addEventListener("click",e=>{const b=e.target.closest("[data-view]");if(b&&b.dataset.view!==VIEW)setView(b.dataset.view)});
 $("#stage").addEventListener("click",e=>{const b=e.target.closest("[data-sact]");if(!b)return;e.stopPropagation();const k=b.dataset.sact,id=stage.id;
   if(k==="pp")stage.clip.paused?stage.clip.play():stage.clip.pause();
-  else if(k==="prev"||k==="next")stageStep(k==="next"?1:-1);
-  else if(k==="clip")stageLoad(b.dataset.id);
   else if(k==="cm")openCard(id,{cid:b.dataset.cid});
   else if(k==="cuemenu")showMenu(b,cueMenu(id));
   else if(k==="clipup"){clipIn._id=id;clipIn.click()}});
-/* ruler: click to seek, drag to select a range and comment on it */
-$("#ruler").addEventListener("pointerdown",e=>{if(e.button||e.target.closest(".rb"))return;e.preventDefault();const R=e.currentTarget,r=R.getBoundingClientRect(),D=CUES[stage.id].dur,
-  T=ev=>cl((ev.clientX-r.left)/r.width)*D,a=T(e),x0=e.clientX,sel=$(".rsel",R);let b=null;R.setPointerCapture(e.pointerId);stage.clip.seek(a);
-  const mv=ev=>{if(b==null&&Math.abs(ev.clientX-x0)<4)return;b=T(ev);const lo=Math.min(a,b),hi=Math.max(a,b);sel.hidden=false;sel.style.left=lo/D*100+"%";sel.style.width=(hi-lo)/D*100+"%";stage.clip.seek(b)};
-  const up=()=>{R.removeEventListener("pointermove",mv);R.removeEventListener("pointerup",up);R.removeEventListener("pointercancel",up);sel.hidden=true;
-    if(b!=null&&Math.abs(b-a)>=.15)openCard(stage.id,{draft:[Math.min(a,b),Math.max(a,b)]})};
-  R.addEventListener("pointermove",mv);R.addEventListener("pointerup",up);R.addEventListener("pointercancel",up)});
-/* the player keeps 16:9 inside whatever room the pane leaves it */
-function fitPlayer(){const w=$(".st-p"),p=$("#player"),r=w.getBoundingClientRect();if(!r.width)return;const pw=Math.min(r.width,r.height*16/9);p.style.width=pw+"px";p.style.height=pw*9/16+"px";if(card?.ext)place(card)}
-new ResizeObserver(fitPlayer).observe($(".st-p"));
+/* reel: click a neighbour to bring it to the middle. A wheel flick or trackpad swipe on either axis moves exactly one clip,
+   anywhere over the clip view (native snapping needed a swipe past halfway and often bounced back). Touch scrolls natively and loads what settles in the middle */
+const reel=$("#reel");let reelT=0,reelTouch=false;
+reel.addEventListener("click",e=>{const it=e.target.closest(".reel-i");if(it&&it.dataset.id!==stage.id){e.stopPropagation();if(canLeave())stageLoad(it.dataset.id)}});
+function settleReel(){if(!reelTouch)return;reelTouch=false;const c=reel.scrollLeft+reel.clientWidth/2;let best=null,bd=Infinity;
+  for(const x of reel.children){const d=Math.abs(x.offsetLeft+x.offsetWidth/2-c);if(d<bd){bd=d;best=x}}
+  if(best&&best.dataset.id!==stage.id&&canLeave())stageLoad(best.dataset.id);else centerReel(true)}
+reel.addEventListener("touchstart",()=>{reelTouch=true},{passive:true});
+reel.addEventListener("scroll",()=>{if(card?.ext)place(card);clearTimeout(reelT);reelT=setTimeout(settleReel,"onscrollend" in window?600:160)},{passive:true});
+reel.addEventListener("scrollend",()=>{clearTimeout(reelT);settleReel()});
+/* one step per gesture: a gesture starts after a pause, or when a push is clearly stronger than the momentum still decaying from the last one
+   (not in the first 150ms, while a swipe is still ramping up);
+   a mouse wheel held spinning keeps stepping about twice a second */
+let wAcc=0,wLock=false,wLast=0,wPrev=0,wStep=0;
+$("#stage").addEventListener("wheel",e=>{if(e.ctrlKey)return;e.preventDefault();
+  const k=e.deltaMode===1?16:e.deltaMode===2?reel.clientWidth:1,dx=e.deltaX*k,dy=e.deltaY*k,d=Math.abs(dx)>Math.abs(dy)?dx:dy,a=Math.abs(d),now=performance.now();
+  if(now-wLast>180||wLock&&now-wStep>150&&a>wPrev*1.8&&a>8||wLock&&now-wStep>500&&a>=60){wLock=false;wAcc=0}
+  wLast=now;wPrev=a;if(wLock||!a)return;if(Math.sign(d)!==Math.sign(wAcc))wAcc=0;wAcc+=d;
+  if(Math.abs(wAcc)>=24){wLock=true;wAcc=0;wStep=now;stageStep(Math.sign(d))}},{passive:false});
+/* ruler: click or drag to scrub */
+$("#ruler").addEventListener("pointerdown",e=>{if(e.button||e.target.closest(".rb"))return;scrubBind(e.currentTarget,stage.clip,CUES[stage.id].dur,e)});
+/* each clip is as wide as the reel's height allows (16:9 under its title), leaving room for the neighbours to peek in */
+function fitPlayer(){const r=reel.getBoundingClientRect();if(!r.width)return;const fw=Math.round(Math.max(200,Math.min(r.width*.72,(r.height-36)*16/9)))+"px";
+  if(reel.style.getPropertyValue("--fw")!==fw)reel.style.setProperty("--fw",fw);centerReel(false);if(card?.ext)place(card)}
+new ResizeObserver(fitPlayer).observe(reel);
 $("#player .ptools").innerHTML=toolsHTML();
-$('[data-sact="prev"]').innerHTML=ICON.back;$('[data-sact="next"]').innerHTML=ICON.next;
 
 /* role toggle: the director approves comments and cues, the foley artist addresses comments and checks off recorded cues */
 function renderRole(){$("#role").innerHTML=[["director","Director"],["foley","Foley"]].map(([k,n])=>`<button class="tg" data-role="${k}" aria-pressed="${ROLE===k}">${n}</button>`).join("")}
