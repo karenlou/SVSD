@@ -9,7 +9,7 @@
   --background:#f1efeb; --score-bg:#e8e5df; --foreground:#0c0a09; --card:#ffffff; --card-foreground:#0c0a09; --popover:#ffffff;
   --primary:#1c1917; --primary-foreground:#fafaf9; --secondary:#f5f3f0; --muted:#f5f3f0; --muted-foreground:#78716c;
   --accent:#f3f1ed; --border:#e5e2dd; --input:#e2ded8; --ring:#a1a1a1; --well:#0a0a0a; --well-fg:#fafafa;
-  --radius:.625rem;
+  --radius:.625rem; --link:#2b8ff0;
   --ambience:#7f9460; --footsteps:#c2643f; --props:#d69726; --cloth:#cf7f8b; --hardfx:#e0552b; --score:#8a5a7e;
   --shadow-sm:0 1px 2px rgba(0,0,0,.05); --shadow-md:0 4px 6px -1px rgba(0,0,0,.1),0 2px 4px -2px rgba(0,0,0,.1);
   --f-sans:"Geist",ui-sans-serif,system-ui,-apple-system,sans-serif; --f-mono:"Geist Mono",ui-monospace,Menlo,monospace;
@@ -37,7 +37,7 @@ header.top{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;ga
 .meta{justify-self:end;display:flex;gap:16px;color:var(--muted-foreground)}
 .meta b{font-weight:500;color:var(--foreground)}
 .scr{display:inline-block}
-@media (max-width:760px){header.top{grid-template-columns:1fr auto}.meta{display:none}}
+@media (max-width:760px){header.top{grid-template-columns:1fr auto}.meta>span{display:none}}
 
 /* shadcn: Button */
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:32px;padding:0 12px;border-radius:calc(var(--radius) - 2px);font-size:13px;font-weight:500;cursor:pointer;border:1px solid transparent;white-space:nowrap;transition:background .15s,opacity .15s}
@@ -97,6 +97,22 @@ header.top{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;ga
 .mk:hover::before,.mk.hot::before{opacity:1;transform:none}
 .mk.match::before{opacity:1;transform:scale(.85)}
 .mk.faded{opacity:.2}
+/* the staff is also the timeline: one slot per clip, as long as the clip; comments ride their category lane inside it */
+.lanes .slot{position:absolute;top:14px;height:72px;border-left:1px solid color-mix(in srgb,var(--foreground) 16%,var(--score-bg));background:color-mix(in srgb,var(--foreground) 3%,transparent);cursor:crosshair;transition:background .15s}
+.lanes .slot:hover{background:color-mix(in srgb,var(--foreground) 6%,transparent)}
+.lanes .slot.cur{background:color-mix(in srgb,var(--foreground) 9%,transparent)}
+.lanes .slot.drop{outline:1px dashed var(--foreground);outline-offset:-1px}
+.cm{position:absolute;height:8px;min-width:8px;margin-top:-4px;padding:0;border:0;border-radius:4px;cursor:pointer;z-index:2;
+  background:color-mix(in srgb,var(--c) 45%,transparent);box-shadow:inset 0 0 0 1px var(--c);transition:opacity .2s,box-shadow .15s}
+.cm.pt{width:8px;margin-left:-4px;border-radius:50%;background:var(--c)}
+.cm.addressed{background:repeating-linear-gradient(135deg,var(--c) 0 2px,transparent 2px 4px)}
+.cm.approved{background:transparent;opacity:.5}
+.cm:hover,.cm.on{z-index:4;opacity:1;box-shadow:inset 0 0 0 1px var(--c),0 0 0 2px var(--score-bg),0 0 0 3px var(--c)}
+.cm.faded{opacity:.12}
+.lanes .ph{position:absolute;top:10px;height:80px;width:2px;margin-left:-1px;border-radius:1px;background:var(--foreground);pointer-events:none;z-index:5}
+.lanes .sel{position:absolute;top:14px;height:72px;background:color-mix(in srgb,var(--foreground) 12%,transparent);border-inline:1px solid var(--foreground);pointer-events:none;z-index:3}
+.filters{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px}
+.vsep{width:1px;height:16px;background:color-mix(in srgb,var(--foreground) 18%,transparent)}
 
 /* shadcn: Tooltip */
 .tip{position:fixed;z-index:50;pointer-events:none;background:var(--primary);color:var(--primary-foreground);font-size:12px;line-height:16px;border-radius:calc(var(--radius) - 2px);padding:6px 10px;white-space:nowrap;transform:translate(-50%,-100%);margin-top:-10px;animation:tipin .12s ease-out}
@@ -142,6 +158,16 @@ header.top{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;ga
 .ci.in,.ci.open,.ci:hover{opacity:1}
 .ci .lbl{font-size:13px;font-weight:500;line-height:18px;min-width:0}
 .ci .cat{display:block;font-size:12px;font-weight:400;color:var(--muted-foreground)}
+/* cue list: unresolved-comment count, and a checkbox per approved cue in the "To record" view */
+.cuelist-h{display:flex;align-items:center;justify-content:space-between;gap:6px}
+.cuelist-h .tg{height:24px;padding:0 7px;font:500 12px var(--f-sans);letter-spacing:0;text-transform:none}
+.ci{position:relative;padding-right:30px}
+.ci .cc{position:absolute;right:8px;top:8px;min-width:18px;padding:0 5px;border:1px solid var(--border);border-radius:999px;background:var(--card);font:400 10.5px/16px var(--f-mono);color:var(--muted-foreground);text-align:center}
+.ck{display:none;position:absolute;right:9px;top:50%;width:16px;height:16px;margin-top:-8px;border:1.5px solid var(--input);border-radius:4px;background:var(--card);cursor:pointer}
+.ck[aria-checked=true]{background:var(--foreground);border-color:var(--foreground)}
+.ck[aria-checked=true]::after{content:"";position:absolute;left:4px;top:1px;width:4px;height:8px;border:solid var(--background);border-width:0 1.5px 1.5px 0;transform:rotate(45deg)}
+.cuelist.todo .ck{display:block}.cuelist.todo .cc{display:none}
+.cuelist.todo .ci.match{opacity:1}
 
 /* highlight */
 .cue{cursor:pointer;border-radius:3px;-webkit-box-decoration-break:clone;box-decoration-break:clone;
@@ -157,7 +183,7 @@ header.top{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;ga
 
 /* shadcn: Popover: the cue card (fixed, follows its cue while the script scrolls) */
 .pop{position:fixed;z-index:30;width:248px;animation:popin .16s ease-out;transition:width .3s cubic-bezier(.22,1,.36,1)}
-.pop.open{width:320px}
+.pop.open{width:340px}
 .pop{cursor:grab;user-select:none;-webkit-user-select:none}
 .pop .btn{cursor:pointer}
 .pop.dragging,.pop.dragging *{cursor:grabbing!important}
@@ -189,32 +215,6 @@ header.top{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;ga
 @keyframes ring{from{transform:scale(1.5);opacity:0}30%{opacity:1}to{transform:scale(.8);opacity:.2}}
 @keyframes cdpop{0%{opacity:0;transform:scale(1.4)}25%{opacity:1;transform:scale(1)}80%{opacity:1}100%{opacity:.1;transform:scale(.9)}}
 
-/* hero: waveform / glyph */
-.hero{position:relative;height:88px;background:var(--well);display:grid;place-items:center;margin:6px 6px 0;border-radius:calc(var(--radius) - 3px);overflow:hidden}
-.hero canvas.big{width:48px;height:48px}
-.hero .tag{position:absolute;left:8px;top:7px;z-index:2;display:flex;align-items:center;gap:6px;font:400 10.5px var(--f-mono);color:#a3a3a3}
-.hero .tag i{width:6px;height:6px;border-radius:50%;background:#a3a3a3}
-.hero .tag.rec i{background:#ef4444;animation:blink 1s steps(2) infinite}
-.hero .tag.rec{color:#fafafa}
-@keyframes blink{50%{opacity:.15}}
-.hero .tl{position:absolute;right:6px;top:4px;z-index:2;display:flex;gap:2px}
-.hero .btn-ghost{color:#d4d4d4;height:28px;width:28px}
-.hero .btn-ghost:hover{background:#262626;color:#fafafa}
-.wave{position:absolute;inset:0}
-.wave .bars{position:absolute;inset:0;display:flex;align-items:center;gap:2px;padding:24px 14px 12px;transition:opacity .2s}
-.wave .bars span{flex:1;height:var(--h);min-height:2px;border-radius:2px;background:var(--c);opacity:.9}
-.wave.playing::after{content:"";position:absolute;top:22px;bottom:10px;width:2px;border-radius:1px;background:#fafafa;left:14px;animation:sweep 1.7s linear forwards}
-@keyframes sweep{to{left:calc(100% - 16px)}}
-.wave.playing::after{animation-duration:var(--d,1.7s)}
-.hero .tag{max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.wave .clear{position:absolute;left:50%;top:55%;transform:translate(-50%,-50%) scale(.96);opacity:0;pointer-events:none;
-  background:rgba(10,10,10,.82);border-color:#404040;color:#fafafa;transition:opacity .15s,transform .15s,background .15s}
-.wave .clear svg{color:#f87171}
-.wave .clear:hover{background:#1f1f1f;border-color:#6b2c2c}
-.wave:hover .clear,.wave:focus-within .clear{opacity:1;pointer-events:auto;transform:translate(-50%,-50%)}
-.wave:hover .bars,.wave:focus-within .bars{opacity:.2}
-@media (hover:none){.wave .clear{opacity:1;pointer-events:auto;transform:translate(-50%,-50%)}.wave .bars{opacity:.3}}
-
 .pop .head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding:12px 14px 0}
 .pop h3{margin:0;font-size:14px;font-weight:600;line-height:20px}
 .pop .sub{color:var(--muted-foreground);font-size:12px;line-height:16px}
@@ -223,7 +223,200 @@ header.top{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;ga
 .pop .note{margin:4px 0 0;font:400 13px/20px var(--f-script)}
 .pop .line{margin:10px 0 0;padding-top:10px;border-top:1px solid var(--border);font-size:12px;color:var(--muted-foreground)}
 .pop .line em{font-style:normal;font-family:var(--f-script);color:var(--foreground)}
-.pop .acts{display:flex;justify-content:center;gap:8px;padding:0 14px 14px}
+.pop.open .more>div{overflow-y:auto;max-height:calc(100dvh - 250px);scrollbar-width:thin;scrollbar-color:var(--input) transparent}
+.pop textarea,.pop .thread{user-select:text;-webkit-user-select:text;cursor:auto}
+.pop .acts{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;padding:0 14px 14px}
+.pop .empty{margin:4px 0;color:var(--muted-foreground);font-size:12.5px}
+
+/* voice memos in a dark well */
+.hero{position:relative;height:88px;background:var(--well);display:grid;place-items:center;margin:6px 6px 0;border-radius:calc(var(--radius) - 3px);overflow:hidden}
+.hero .tag{position:absolute;left:8px;top:7px;z-index:2;display:flex;align-items:center;gap:6px;max-width:190px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:400 10.5px var(--f-mono);color:#a3a3a3}
+.hero .tag i{flex:none;width:6px;height:6px;border-radius:50%;background:#a3a3a3}
+.hero .tl{position:absolute;right:6px;top:4px;z-index:2;display:flex;align-items:center;gap:2px}
+.hero .btn-ghost{color:#d4d4d4;height:28px;width:28px}
+.hero .btn-ghost:hover{background:#262626;color:#fafafa}
+.wave{position:absolute;inset:0}
+.wave .bars{position:absolute;inset:0;display:flex;align-items:center;gap:2px;padding:24px 14px 12px;transition:opacity .2s}
+.wave .bars span{flex:1;height:var(--h);min-height:2px;border-radius:2px;background:var(--c);opacity:.9}
+.wave.playing::after{content:"";position:absolute;top:22px;bottom:10px;width:2px;border-radius:1px;background:#fafafa;left:14px;animation:sweep var(--d,1.7s) linear forwards}
+@keyframes sweep{to{left:calc(100% - 16px)}}
+.hero.sm{height:60px;margin:8px 0 0}
+.hero.sm .wave .bars{padding:26px 10px 6px}
+.hero.sm .wave.playing::after{top:24px;bottom:4px;left:10px}
+
+/* scrubber under the clip: comment ranges, the loop, the playhead. Click to seek, drag to select a range */
+.sbar{display:flex;align-items:center;gap:4px;margin:4px 6px 0}
+.sbar .btn-icon{width:28px;height:28px;flex:none}
+.scrub{position:relative;flex:1;height:24px;border-radius:4px;background:var(--muted);cursor:crosshair;touch-action:none}
+.scrub .r{position:absolute;bottom:3px;height:4px;min-width:4px;border-radius:2px;background:var(--c);opacity:.8;pointer-events:none}
+.scrub .lp{position:absolute;top:0;bottom:0;background:color-mix(in srgb,var(--foreground) 10%,transparent);border-inline:1px solid var(--foreground);pointer-events:none}
+.scrub .phd{position:absolute;top:2px;bottom:2px;width:2px;margin-left:-1px;border-radius:1px;background:var(--foreground);pointer-events:none}
+
+/* spatial anchors on the frame: a box, or an off-screen edge */
+.anc{position:absolute;inset:0;pointer-events:none;z-index:1}
+.abox{position:absolute;border:1.5px solid var(--c);border-radius:4px;background:color-mix(in srgb,var(--c) 12%,transparent);box-shadow:0 0 0 1px rgba(0,0,0,.4)}
+.abox.on{border-width:2px}
+.anc .av,.draw .av{position:absolute;width:18px;height:18px;font-size:7.5px;box-shadow:0 0 0 1.5px #000}
+.abox .av{left:-8px;top:-8px}
+.aedge{position:absolute;display:flex;align-items:center;justify-content:center;gap:6px;font:500 9.5px var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:#fafafa;text-shadow:0 1px 2px rgba(0,0,0,.6)}
+.aedge .av{position:static}
+.aedge.left,.aedge.right{top:30px;bottom:26px;width:40px;writing-mode:vertical-rl}
+.aedge.left{left:0;background:linear-gradient(90deg,color-mix(in srgb,var(--c) 80%,transparent),transparent)}
+.aedge.right{right:0;background:linear-gradient(270deg,color-mix(in srgb,var(--c) 80%,transparent),transparent)}
+.aedge.top,.aedge.bottom{left:0;right:0;height:32px}
+.aedge.top{top:0;background:linear-gradient(180deg,color-mix(in srgb,var(--c) 80%,transparent),transparent)}
+.aedge.bottom{bottom:0;background:linear-gradient(0deg,color-mix(in srgb,var(--c) 80%,transparent),transparent)}
+.draw{position:absolute;inset:0;z-index:3;cursor:crosshair;touch-action:none;background:rgba(0,0,0,.28)}
+.draw .abox{pointer-events:none}
+.draw>small{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font:400 10.5px var(--f-mono);color:#e5e5e5;background:rgba(0,0,0,.6);padding:2px 7px;border-radius:4px;white-space:nowrap;pointer-events:none}
+.ep{position:absolute;display:grid;place-items:center;padding:0;border:1px dashed rgba(255,255,255,.6);border-radius:4px;background:rgba(0,0,0,.35);color:#fafafa;font-size:13px;cursor:pointer}
+.ep:hover,.ep[aria-pressed=true]{background:color-mix(in srgb,var(--c) 75%,transparent);border-style:solid}
+.ep.left{left:6px;top:38px;bottom:38px;width:30px}.ep.right{right:6px;top:38px;bottom:38px;width:30px}
+.ep.top{top:6px;left:42px;right:42px;height:26px}.ep.bottom{bottom:6px;left:42px;right:42px;height:26px}
+
+/* comment card, after the references: header, a thread joined by a line, an input with a round send button */
+.av{flex:none;width:32px;height:32px;border-radius:50%;font-size:0;
+  background:radial-gradient(circle,var(--c) 0 38%,transparent 44%) 0 0/4px 4px,radial-gradient(circle,color-mix(in srgb,var(--c) 60%,#000) 0 30%,transparent 36%) 2px 2px/4px 4px,color-mix(in srgb,var(--c) 40%,#fff)}
+.pop .panel{border-radius:20px;box-shadow:0 14px 34px -12px rgba(0,0,0,.24),0 2px 6px rgba(0,0,0,.05)}
+.pop .clipslot{border-radius:14px}
+.ch{display:flex;align-items:center;gap:8px;padding:14px 10px 12px 18px;border-bottom:1px solid var(--border);background:color-mix(in srgb,var(--muted) 55%,var(--popover))}
+.pop:not(.ext) .ch{margin-top:6px;border-top:1px solid var(--border)}
+.ch .tt{flex:1;min-width:0}
+.ch b{display:block;font-size:15px;font-weight:500;line-height:20px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ch small{display:block;font:400 11px/16px var(--f-mono);color:var(--muted-foreground);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ch .btn-icon{width:30px;height:30px;flex:none;color:var(--muted-foreground)}
+.ch .btn-icon svg{width:16px;height:16px}
+.ch .bk{margin-left:-10px}
+.stc{display:inline-flex;align-items:center;gap:5px;flex:none;height:26px;padding:0 9px;border:1px solid var(--border);border-radius:999px;background:var(--popover);font:500 12px var(--f-sans);color:var(--foreground);white-space:nowrap}
+button.stc{cursor:pointer}button.stc:hover{background:var(--accent)}
+.stc i{width:6px;height:6px;border-radius:50%;background:var(--c)}
+.stc svg{width:12px;height:12px;color:var(--muted-foreground)}
+.kh{flex:none;font:400 10.5px var(--f-mono);color:var(--muted-foreground);white-space:nowrap}
+.cnote{all:unset;box-sizing:border-box;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;width:100%;padding:12px 18px 0;font:400 12.5px/19px var(--f-script);color:var(--muted-foreground);cursor:pointer}
+.cnote[aria-expanded=true]{-webkit-line-clamp:unset}
+.cnote b{font:500 11.5px var(--f-sans);color:var(--foreground);margin-right:6px}
+.thread{padding:6px 18px 8px}
+.msg{position:relative;display:grid;grid-template-columns:32px minmax(0,1fr);gap:12px;padding:12px 0}
+.msg:has(+.msg:not(.sys))::before{content:"";position:absolute;left:15.25px;top:52px;bottom:-4px;width:1.5px;border-radius:1px;background:var(--border)}
+.msg .who{display:flex;align-items:baseline;flex-wrap:wrap;gap:0 8px;font-size:14px;font-weight:600;line-height:20px}
+.msg .who small{font-size:12.5px;font-weight:400;color:var(--muted-foreground)}
+.msg p{margin:2px 0 0;font-size:14px;line-height:21px;color:color-mix(in srgb,var(--foreground) 78%,transparent);white-space:pre-wrap;overflow-wrap:anywhere}
+.msg.sys{display:block;padding:6px 0;text-align:center;font-size:11.5px;color:var(--muted-foreground)}
+.mention{color:var(--link);font-weight:500}
+.rxs{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px}
+.rx{display:inline-flex;align-items:center;gap:4px;height:24px;padding:0 8px;border:1px solid var(--border);border-radius:999px;background:transparent;font-size:12.5px;cursor:pointer}
+.rx:hover{background:var(--accent)}
+.rx[aria-pressed=true]{background:color-mix(in srgb,var(--link) 10%,transparent);border-color:color-mix(in srgb,var(--link) 45%,transparent)}
+.rx b{font:400 11px var(--f-mono);color:var(--muted-foreground)}
+.chips{display:flex;flex-wrap:wrap;gap:4px}
+.chip{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--border);background:transparent;border-radius:999px;padding:3px 9px;font:inherit;font-size:12px;color:var(--muted-foreground);cursor:pointer}
+.chip i{width:6px;height:6px;border-radius:50%;background:var(--c)}
+.chip:hover{background:var(--accent)}
+.chip[aria-pressed=true]{background:var(--foreground);color:var(--background);border-color:var(--foreground)}
+.compose{position:relative;padding:12px 12px 12px 18px;border-top:1px solid var(--border);background:var(--popover)}
+.pend{margin-bottom:8px}.pend .hero.sm:first-child{margin-top:0}
+.cin{display:flex;align-items:flex-end;gap:10px}
+.cin .av{width:28px;height:28px;margin-bottom:2px}
+.cin textarea{flex:1;min-width:0;min-height:32px;max-height:120px;padding:6px 0;border:0;outline:0;resize:none;background:transparent;color:inherit;font:inherit;font-size:14px;line-height:20px;caret-color:var(--link)}
+.cin textarea::placeholder{color:var(--muted-foreground)}
+.cin .btn{width:34px;height:34px;padding:0;border-radius:50%;flex:none}
+.cin .btn svg{width:16px;height:16px}
+.cin .mic{color:var(--muted-foreground)}
+.cin .mic.rec{width:auto;padding:0 10px;border-radius:17px;background:#ef4444;color:#fff;font:500 11px var(--f-mono)}
+.cin .send{background:var(--link);color:#fff}
+.cin .send:hover{opacity:.9}
+.clist{padding:6px 10px 8px}
+.crow{display:grid;grid-template-columns:24px minmax(0,1fr) auto;gap:10px;align-items:center;width:100%;padding:8px;border:0;border-radius:10px;background:transparent;text-align:left;font-size:13.5px;cursor:pointer}
+.crow:hover{background:var(--accent)}
+.crow .av{width:24px;height:24px}
+.crow>span:nth-child(2){white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.crow small{display:flex;align-items:center;gap:6px;font:400 11px var(--f-mono);color:var(--muted-foreground)}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--c)}
+.clist .empty{padding:6px 8px;margin:0}
+
+/* floating toolbar under the open card: react / tag / AI, and a keyboard-shortcuts button */
+.ftb{position:fixed;z-index:31;display:flex;gap:4px;padding:6px;background:var(--popover);border:1px solid var(--border);border-radius:999px;box-shadow:0 12px 26px -10px rgba(0,0,0,.22);animation:popin .12s ease-out}
+.ftb[hidden],.kbb[hidden]{display:none}
+.ftb .btn{width:40px;height:40px;padding:0;border-radius:50%;color:var(--muted-foreground)}
+.ftb .btn:hover{color:var(--foreground)}
+.ftb .btn svg,.kbb svg{width:20px;height:20px}
+.ftb .ai{color:var(--score)}
+.kbb{position:fixed;z-index:31;width:36px;height:36px;padding:0;border:0;border-radius:8px;background:transparent;color:var(--muted-foreground);cursor:pointer}
+.kbb:hover{background:var(--accent);color:var(--foreground)}
+/* tools on a player: box (B), off-screen (E), comment (C) */
+.ptools{position:absolute;right:8px;bottom:8px;z-index:4;display:flex;gap:2px;padding:3px;border-radius:999px;background:rgba(10,10,10,.6);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.clipslot .ptools{top:6px;bottom:auto;right:6px}
+.player .ptools{top:10px;left:10px;right:auto;bottom:auto}
+.pop:not(.open) .ptools{display:none}
+.ptools .btn{width:30px;height:30px;padding:0;border-radius:50%;background:transparent;color:#e5e5e5}
+.ptools .btn:hover,.ptools .btn[aria-pressed=true]{background:rgba(255,255,255,.2);color:#fff}
+.ptools .btn svg{width:15px;height:15px}
+/* menus reuse the right-click menu */
+.ctx.menu{width:260px;border-radius:14px;padding:6px}
+.ctx.mn{position:absolute;left:8px;right:8px;bottom:calc(100% - 4px);min-width:0;max-height:240px;overflow-y:auto;padding:6px;border-radius:16px}
+.ctx.mn button{gap:10px;padding:8px 10px;font-size:14px;border-radius:10px}
+.ctx.mn .av{width:28px;height:28px}
+.ctx button.on{background:var(--accent)}
+.ctx button small{margin-left:auto;color:var(--muted-foreground);font-size:11.5px;white-space:nowrap}
+.ctx button:disabled{opacity:.45;pointer-events:none}
+.ctx .mh{padding:6px 10px 4px;font-size:11.5px;color:var(--muted-foreground)}
+.ctx .chips{padding:2px 8px 8px}
+.ctx .chip{width:auto;padding:3px 9px;font-size:12px;color:var(--muted-foreground)}
+.ctx .chip[aria-pressed=true]{background:var(--foreground);color:var(--background)}
+.ctx .emo{display:flex;gap:2px}
+.ctx .emo button{justify-content:center;padding:6px 0;font-size:18px}
+.ctx .kr{display:flex;align-items:center;gap:10px;padding:5px 10px;font-size:12.5px}
+.ctx kbd{min-width:24px;padding:1px 6px;border:1px solid var(--border);border-bottom-width:2px;border-radius:5px;background:var(--card);font:500 11px var(--f-mono);text-align:center}
+
+/* clip view: the cut as a player, a timecode ruler with comments, and a strip of clips */
+.pane.clips::after{display:none}
+.stage{flex:1;min-height:0;display:flex;flex-direction:column;gap:10px;padding:14px 16px 12px}
+.st-h{display:flex;align-items:center;gap:10px}
+.st-h .tt{flex:1;min-width:0}
+.st-h b{display:block;font-size:15px;font-weight:500;line-height:20px}
+.st-h small{display:block;font:400 11px/16px var(--f-mono);color:var(--muted-foreground);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.st-h .btn{height:28px;padding:0 10px;font-size:12.5px}
+.st-note{margin:-4px 0 0;font:400 12.5px/19px var(--f-script);color:var(--muted-foreground);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.st-note span{font:500 11.5px var(--f-sans);color:var(--foreground);margin-right:6px}
+.st-p{flex:1;min-height:120px;display:grid;place-items:center}
+.player{position:relative;background:#000;border-radius:10px;overflow:hidden}
+.player .pm,.player .media{position:absolute;inset:0}
+.player .media canvas,.player .media video{display:block;width:100%;height:100%;object-fit:cover}
+.player .abox .av{width:22px;height:22px;left:-10px;top:-10px}
+.ctl{display:flex;align-items:center;gap:4px}
+.ctl .btn-icon{width:30px;height:30px}
+.ctl .tc{margin-left:6px;font:500 12px var(--f-mono)}
+.ctl .hint{margin-left:auto;font-size:12px}
+.ruler{position:relative;flex:none;height:60px;border:1px solid var(--border);border-radius:8px;background:var(--card);cursor:crosshair;touch-action:none;overflow:hidden}
+.ruler .tk{position:absolute;top:0;width:1px;height:5px;background:var(--input)}
+.ruler .tk.l{height:9px;background:var(--ring)}
+.ruler .tk span{position:absolute;top:9px;left:3px;font:400 10px var(--f-mono);color:var(--muted-foreground);white-space:nowrap}
+.ruler .rb{position:absolute;height:7px;min-width:7px;padding:0;border:0;border-radius:4px;cursor:pointer;z-index:2;background:color-mix(in srgb,var(--c) 45%,transparent);box-shadow:inset 0 0 0 1px var(--c)}
+.ruler .rb.pt{width:9px;height:9px;margin:-1px 0 0 -4.5px;border-radius:50%;background:var(--c)}
+.ruler .rb.addressed{background:repeating-linear-gradient(135deg,var(--c) 0 2px,transparent 2px 4px)}
+.ruler .rb.approved{background:transparent;opacity:.5}
+.ruler .rb:hover,.ruler .rb.on{box-shadow:inset 0 0 0 1px var(--c),0 0 0 2px var(--card),0 0 0 3px var(--c);opacity:1}
+.ruler .rb.faded{opacity:.15}
+.ruler .rl,.ruler .rsel{position:absolute;top:0;bottom:0;background:color-mix(in srgb,var(--foreground) 8%,transparent);border-inline:1px solid var(--foreground);pointer-events:none}
+.ruler .rph{position:absolute;top:0;bottom:0;width:2px;margin-left:-1px;background:var(--foreground);pointer-events:none;z-index:3}
+.ruler .rph::before{content:"";position:absolute;top:0;left:-4px;border:5px solid transparent;border-top-color:var(--foreground)}
+.strip{flex:none;display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;scrollbar-width:thin;scrollbar-color:var(--input) transparent}
+.cc2{flex:none;display:grid;grid-template-columns:44px 104px;grid-template-rows:auto auto;gap:0 8px;align-items:center;padding:5px;border:1px solid var(--border);border-radius:8px;background:var(--card);text-align:left;cursor:pointer}
+.cc2:hover{background:var(--accent)}
+.cc2[aria-current=true]{border-color:var(--foreground);box-shadow:inset 0 0 0 1px var(--foreground)}
+.cc2 .th{grid-row:span 2;position:relative;height:28px;border-radius:4px;background:linear-gradient(var(--a),var(--b))}
+.cc2 .th i{position:absolute;left:4px;bottom:4px;width:6px;height:6px;border-radius:50%;background:var(--c)}
+.cc2 .th b{position:absolute;right:3px;top:3px;min-width:14px;padding:0 3px;border-radius:7px;background:#fafafa;color:#0a0a0a;font:500 9.5px/14px var(--f-mono);text-align:center}
+.cc2 .nm{font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cc2 small{font:400 10.5px var(--f-mono);color:var(--muted-foreground)}
+.view-clips .ci{opacity:1}
+.ci.cur{background:var(--accent)}
+/* drop targets for uploaded clips */
+.pop.drop{outline:2px dashed var(--foreground);outline-offset:3px;border-radius:12px}
+.cue.drop{outline:1px dashed var(--c);outline-offset:2px;background-size:100% 100%,100% 1px}
+.ci.drop{background:var(--accent);outline:1px dashed var(--ring)}
+header .tg{height:24px;padding:0 8px;font:inherit;letter-spacing:inherit;text-transform:inherit}
+.meta{align-items:center}
 
 /* right-click menu */
 .ctx{position:fixed;z-index:50;min-width:150px;padding:4px;background:var(--popover);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-md);animation:popin .12s ease-out}
@@ -231,54 +424,6 @@ header.top{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;ga
 .ctx button{display:flex;align-items:center;gap:8px;width:100%;border:0;background:transparent;padding:7px 10px;border-radius:calc(var(--radius) - 3px);font:inherit;font-size:13px;color:var(--foreground);cursor:pointer;text-align:left}
 .ctx button:hover,.ctx button:focus-visible{background:var(--accent);outline:0}
 .ctx svg{width:14px;height:14px}
-/* drop targets, upload zone, library */
-.btn-drop{background:transparent;color:var(--foreground);border:1px dashed var(--ring)}
-.btn-drop:hover{background:var(--accent);border-color:var(--foreground)}
-.hero.dz{background:transparent;border:1px dashed var(--input);margin:6px 8px 0;height:86px}
-.dzb{all:unset;box-sizing:border-box;position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;color:var(--foreground);font-size:13px;border-radius:inherit}
-.dzb svg{width:18px;height:18px;margin-bottom:3px;color:var(--muted-foreground)}
-.dzb small{color:var(--muted-foreground);font-size:12px}
-.dzb:hover,.dzb:focus-visible{background:var(--accent)}
-.pop.drop{outline:2px dashed var(--foreground);outline-offset:3px;border-radius:12px}
-.pop.drop .hero.dz{background:var(--accent);border-color:var(--foreground)}
-.cue.drop{outline:1px dashed var(--c);outline-offset:2px;background-size:100% 100%,100% 1px}
-.ci.drop{background:var(--accent);outline:1px dashed var(--ring)}
-.lib{padding:10px 12px 12px}
-.lib-h{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:500;margin-bottom:8px}
-.lib-h small{margin-left:auto;color:var(--muted-foreground);font:400 11px var(--f-mono)}
-.lib-h .btn{width:26px;height:26px;margin-left:-6px}
-.chips{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px}
-.chip{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--border);background:transparent;border-radius:999px;padding:2px 8px;font:inherit;font-size:11.5px;color:var(--muted-foreground);cursor:pointer}
-.chip i{width:6px;height:6px;border-radius:50%;background:var(--c)}
-.chip:hover{background:var(--accent)}
-.chip[aria-pressed=true]{background:var(--foreground);color:var(--background);border-color:var(--foreground)}
-.lrows{max-height:206px;overflow-y:auto;margin:0 -4px;padding-right:2px}
-.lr{display:grid;grid-template-columns:26px minmax(0,1fr) auto;gap:6px;align-items:center;padding:3px 4px;border-radius:6px}
-.lr:hover{background:var(--accent)}
-.lr .btn-icon{width:26px;height:26px}
-.lr .lm{min-width:0}.lr .n{font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.lr small{display:block;color:var(--muted-foreground);font-size:11.5px}
-.lr .btn-outline{height:24px;padding:0 9px;font-size:12px}
-.lr.fit{background:color-mix(in srgb,var(--accent) 70%,transparent)}
-.fitb{display:inline-flex;align-items:center;margin-right:6px;padding:0 6px;border-radius:999px;background:var(--foreground);color:var(--background);font-size:10.5px;line-height:16px;font-weight:500}
-/* library section */
-.libsec{background:transparent;border:1px solid var(--border);border-radius:3px;box-shadow:none;margin:0}
-.libsec.drop{outline:2px dashed var(--foreground);outline-offset:-4px;background:var(--accent)}
-.libh{display:flex;align-items:center;gap:10px;padding:0 8px 0 0}
-.libt{all:unset;box-sizing:border-box;flex:1;display:flex;align-items:center;gap:10px;padding:11px 20px;cursor:pointer;font:500 11px/16px var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--foreground);border-radius:3px}
-.libt:hover{background:var(--accent)}
-.libt .chev{width:14px;height:14px;color:var(--muted-foreground);transition:transform .25s cubic-bezier(.22,1,.36,1)}
-.libsec.collapsed .libt .chev{transform:rotate(-90deg)}
-.libt small{color:var(--muted-foreground);font:inherit}
-.libbody{display:grid;grid-template-rows:1fr;transition:grid-template-rows .3s cubic-bezier(.22,1,.36,1)}
-.libsec.collapsed .libbody{grid-template-rows:0fr}
-.libbody>div{overflow:hidden;min-height:0}
-.libin{padding:2px 20px 14px}
-.libsec .chips{margin:0 0 8px}
-.libgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:0 14px;max-height:150px;overflow-y:auto}
-.lr.lone{grid-template-columns:26px minmax(0,1fr);cursor:grab}
-.lr.lone:active{cursor:grabbing}
-.lib .empty{margin:12px 4px;color:var(--muted-foreground);font-size:12.5px}
 /* highlighter: appears over a text selection */
 .hl{position:fixed;z-index:40;display:flex;gap:7px;padding:7px 9px;background:var(--popover);border:1px solid var(--border);border-radius:999px;box-shadow:var(--shadow-md);transform:translateX(-50%);animation:popin .12s ease-out}
 .hl[hidden]{display:none}
@@ -310,23 +455,27 @@ header.top{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;ga
 
 <div class="wrap">
 <header class="top">
-  <div class="brand"><canvas class="g" id="garden" width="16" height="16" style="width:16px;height:16px" aria-hidden="true"></canvas><span class="scr" data-scr>Spotting</span><span class="crumb">/ <span class="scr" data-scr>Challengers</span></span></div>
+  <div class="brand"><canvas class="g" id="garden" width="16" height="16" style="width:16px;height:16px" aria-hidden="true"></canvas><span class="scr" data-scr>Spotting</span><span class="crumb">/ <span class="scr" data-scr>Challengers</span></span><nav class="nav" id="view" role="tablist" aria-label="View"><button role="tab" data-view="script" aria-selected="true">Script</button><button role="tab" data-view="clips" aria-selected="false">Clips</button></nav></div>
   <nav class="nav" role="tablist" aria-label="Stage"><button role="tab" aria-selected="true"><span class="scr" data-scr>Spot</span></button><button role="tab" aria-selected="false"><span class="scr" data-scr>Perform</span></button><button role="tab" aria-selected="false"><span class="scr" data-scr>Review</span></button></nav>
-  <div class="meta"><span><span class="scr" data-scr>Takes</span> <b id="navTally">0/0</b></span><span class="scr" data-scr>Set 1–3</span></div>
+  <div class="meta"><div class="toggles" id="role" role="group" aria-label="View as"></div><span><span class="scr" data-scr>Takes</span> <b id="navTally">0/0</b></span><span class="scr" data-scr>Set 1–3</span></div>
 </header>
 
 <section class="script" aria-label="Script">
-  <div class="pane"><main class="doc scroller" id="doc" tabindex="-1"></main></div>
-  <aside class="cuelist" id="cuelist" aria-label="Cues"><div class="cuelist-h">Cues</div><div class="cl-scroll" id="clScroll"></div></aside>
-</section>
-
-<section class="card libsec collapsed" id="libsec" aria-label="Library">
-  <div class="libh"><button class="libt" id="libT" aria-expanded="false"><svg class="chev" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6l4 4 4-4"/></svg>Library <small id="libN"></small></button><button class="btn btn-drop" id="libUp"></button></div>
-  <div class="libbody"><div><div class="libin"><div class="chips" id="libChips"></div><div class="libgrid" id="libGrid"></div></div></div></div>
+  <div class="pane"><main class="doc scroller" id="doc" tabindex="-1"></main>
+    <section class="stage" id="stage" aria-label="Clips" hidden>
+      <div class="st-h" id="stHead"></div>
+      <p class="st-note" id="stNote"></p>
+      <div class="st-p"><div class="player" id="player"><div class="pm" id="stMedia"></div><div class="anc" id="stAnc"></div><div id="stTool"></div><div class="ptools"></div></div></div>
+      <div class="ctl"><button class="btn btn-ghost btn-icon" data-sact="prev" aria-label="Previous clip ([)"></button><button class="btn btn-ghost btn-icon" id="stPP" data-sact="pp" aria-label="Play or pause (space)"></button><button class="btn btn-ghost btn-icon" data-sact="next" aria-label="Next clip (])"></button><span class="tc" id="stTc"></span><span class="hint">Drag across the ruler to comment on a range · B to draw a box</span></div>
+      <div class="ruler" id="ruler"></div>
+      <div class="strip" id="strip"></div>
+    </section></div>
+  <aside class="cuelist" id="cuelist" aria-label="Cues"><div class="cuelist-h"><span>Cues</span><span class="toggles" id="clTabs" role="group" aria-label="Show"><button class="tg" data-todo="0" aria-pressed="true">All</button><button class="tg" data-todo="1" aria-pressed="false">To record <b id="todoN">0</b></button></span></div><div class="cl-scroll" id="clScroll"></div></aside>
 </section>
 
 <section class="card score" aria-label="Score">
-  <div class="card-h"><div><div class="card-t">Score</div></div><div class="toggles" id="bar" role="group" aria-label="Filter cues"></div></div>
+  <div class="card-h"><div><div class="card-t">Score</div><div class="card-d">Drag across a clip to comment on a range. Drop a video on a clip to replace it.</div></div>
+    <div class="filters"><div class="toggles" id="bar" role="group" aria-label="Filter by sound"></div><span class="vsep"></span><div class="toggles" id="pri" role="group" aria-label="Filter comments by priority"></div><span class="vsep"></span><button class="tg" id="autoP" aria-pressed="false">Auto-pause at comments</button></div></div>
   <div class="staff-wrap"><div class="staff"><div class="clef" id="clef"></div><div class="lanes" id="tl"></div></div></div>
 </section>
 </div>
@@ -336,11 +485,11 @@ header.top{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;ga
 const CATS={ambience:"Ambience",footsteps:"Footsteps",props:"Props",cloth:"Cloth",hardfx:"Hard FX",score:"Score"};
 /* loc picks the look of the stand-in clip. Add clip:"url.mp4" to any cue to use a real video instead. */
 const CUES={
- crowd:{c:"ambience",n:"Challenger crowd murmur",s:"library",loc:"court",d:"Small crowd, big feeling. Keep it thin: more folding chairs than stadium."},
+ crowd:{c:"ambience",n:"Challenger crowd murmur",s:"approved",loc:"court",d:"Small crowd, big feeling. Keep it thin: more folding chairs than stadium."},
  racket:{c:"props",n:"Ball in the racket throat",s:"none",loc:"court",d:"A tiny, private click. His ritual before the violence."},
- serve:{c:"hardfx",n:"Serve thwack",s:"upload",loc:"court",d:"The sound the whole film rhymes with. Hard, dry, a little too loud."},
+ serve:{c:"hardfx",n:"Serve thwack",s:"approved",loc:"court",d:"The sound the whole film rhymes with. Hard, dry, a little too loud."},
  pounce:{c:"footsteps",n:"Pounce off the baseline",s:"none",loc:"court",d:"Sneaker bite on hard court, then the flat whop of the forehand."},
- alarm:{c:"hardfx",n:"Alarm clock blare",s:"upload",loc:"hotel",d:"Cut hard from black. Harsh and mechanical, no cozy snooze tone."},
+ alarm:{c:"hardfx",n:"Alarm clock blare",s:"approved",loc:"hotel",d:"Cut hard from black. Harsh and mechanical, no cozy snooze tone."},
  lotion:{c:"props",n:"Body lotion in the mirror",s:"none",loc:"hotel",d:"Soft, slick, intimate. Her routine, her armor."},
  tv:{c:"ambience",n:"TV match commentary",s:"none",loc:"home",d:"Off-screen and flat. The room is a broadcast he can't escape."},
  sharpie:{c:"props",n:"Sharpie on the mockup",s:"none",loc:"home",d:"One squeak of felt tip. A tiny act of rebellion; let it land."},
@@ -352,7 +501,7 @@ const CUES={
  knocking:{c:"hardfx",n:"Knuckles on car glass",s:"none",loc:"night",d:"Sudden and close. Snap us out of black on the first knock."},
  fh:{c:"hardfx",n:"Forehand winner, down the line",s:"none",loc:"court",d:"2007 is crisper and brighter. Let the ball ring."},
  heckle:{c:"ambience",n:"Heckler, off-screen",s:"none",loc:"court",d:"Far, loud, and distinctly Patrick. Place him just outside the frame."},
- ace:{c:"hardfx",n:"Ace",s:"upload",loc:"court",d:"Art's answer. Cleaner than the heckles, then silence."},
+ ace:{c:"hardfx",n:"Ace",s:"none",loc:"court",d:"Art's answer. Cleaner than the heckles, then silence."},
  snack:{c:"ambience",n:"Empty snack bar room tone",s:"none",loc:"snack",d:"Fridge hum, far-off practice. Nobody here but the two of them."},
  churros:{c:"props",n:"Paper bag of churros",s:"none",loc:"snack",d:"Crinkle and a bite. A small gesture of care."},
  shirt:{c:"cloth",n:"T-shirt hits the floor",s:"none",loc:"dorm",d:"Cotton, soft landing. The shirt returns later; make it count."},
@@ -360,10 +509,10 @@ const CUES={
  rally:{c:"hardfx",n:"Slugfest rally",s:"none",loc:"court",d:"Ugly, punishing, no musical shaping. Just bodies and ball."},
  sail:{c:"hardfx",n:"Shot sails past Tashi",s:"none",loc:"court",d:"The ball she chose to miss. A whisper, then the fence rattle."},
  monster:{c:"hardfx",n:"Monstrous forehand",s:"none",loc:"court",d:"The release. Heavier than any thwack before it."},
- wind:{c:"ambience",n:"Wind rising, chairs flying",s:"library",loc:"court",d:"Builds across the scene. Debris, flapping banners, fold-up chairs."},
+ wind:{c:"ambience",n:"Wind rising, chairs flying",s:"approved",loc:"court",d:"Builds across the scene. Debris, flapping banners, fold-up chairs."},
  saunadoor:{c:"props",n:"Sauna door opens",s:"none",loc:"sauna",d:"Wood on wood, a rush of cooler air. Then steam."},
  towel:{c:"cloth",n:"Towel over his face",s:"none",loc:"sauna",d:"Damp terry, slow breath. Art hiding in plain sight."},
- whiskey:{c:"props",n:"Ice in a whiskey glass",s:"upload",loc:"bar",d:"Quiet, late, closer to the mic."},
+ whiskey:{c:"props",n:"Ice in a whiskey glass",s:"recorded",loc:"bar",d:"Quiet, late, closer to the mic."},
  bartv:{c:"ambience",n:"Bar TV highlights",s:"none",loc:"bar",d:"Crowd roar through a small speaker. Art's win, played to an empty room."},
  elevator:{c:"hardfx",n:"Elevator ding and doors",s:"none",loc:"lobby",d:"Bright ding, doors slide. Art arrives right after the kiss."}
 };
@@ -438,8 +587,67 @@ const SCRIPT=[
    ["a","He looks in at the bar just after Tashi and Patrick have broken apart."]]}
  ]}
 ];
-const done=q=>q.s!=="none";
-const fileOf=q=>q.f?.name||q.n.toLowerCase().replace(/[^a-z]+/g,"_").replace(/_$/,"")+".wav";
+/* cue state: "none" → "approved" (director; it joins the recording checklist) → "recorded" (foley ticks it off) */
+const ok=q=>q.s!=="none", done=q=>q.s==="recorded";
+/* clip lengths in seconds; a linked or uploaded video replaces this with its real duration */
+const DUR={crowd:16,serve:7,alarm:6,tv:12,knocking:9,heckle:8,wind:18,whiskey:10};
+for(const id in CUES)CUES[id].dur??=DUR[id]||6+hash(id)%15;
+
+/* ---------- comments: anchored to a clip's time (clip + t0, optional t1), optionally to a box or off-screen edge on its frame ---------- */
+const PEOPLE={
+ maya:{n:"Maya Ortiz",r:"Director",i:"MO",c:"--score"},
+ theo:{n:"Theo Lindqvist",r:"Foley artist",i:"TL",c:"--footsteps"},
+ priya:{n:"Priya Nair",r:"Sound supervisor",i:"PN",c:"--ambience"},
+ sam:{n:"Sam Okafor",r:"Re-recording mixer",i:"SO",c:"--props"}};
+let ROLE="director";try{if(localStorage.getItem("svsd-role")==="foley")ROLE="foley"}catch(e){}
+const ME=()=>ROLE==="director"?"maya":"theo", first=k=>PEOPLE[k].n.split(" ")[0];
+const STATUS={open:{n:"Open",c:"--muted-foreground"},addressed:{n:"Addressed",c:"--props"},approved:{n:"Approved",c:"--ambience"}};
+const PRI={high:{n:"High",c:"--hardfx"},med:{n:"Medium",c:"--props"},low:{n:"Low",c:"--muted-foreground"}};
+const KIND={memo:"Voice memo"}, EMO=["👍","🔥","👀","🎧","✅","❓"], ARROW={left:"←",right:"→",top:"↑",bottom:"↓"};
+/* voice memos: {kind, name, cat, buf?, peaks?, url?}. The seeded memo is rendered from the sound sketches */
+const AUD={};let aidN=0;const newAud=o=>{const id="a"+(++aidN);AUD[id]={id,...o};return id};
+/* comment: {id, clip, t0, t1|null, cat, pri, status, box|null ({x,y,w,h} in 0–1), edge|null, cue?, msgs:[{by, at, text, audio:[ids], react:{emoji:[people]}} | {sys}]} */
+const COMMENTS={};let cuid=0, card=null, showT=null, hideT=null;
+/* VIEW: "script" or "clips" (a player standing in for the carousel). TOOL: "box" | "edge" while marking the frame */
+let VIEW="script",TOOL=null;try{if(localStorage.getItem("svsd-view")==="clips")VIEW="clips"}catch(e){}
+const stage={id:null,clip:null,unsub:null,lastT:0,anc:null,pz:null,ph:null};
+{const ago=min=>Date.now()-min*6e4, say=(by,min,text,audio=[],react={})=>({by,at:ago(min),text,audio,react}), sys=(by,min,text)=>({sys:true,by,at:ago(min),text}), aud=(kind,name,cat)=>newAud({kind,name,cat});
+ [{clip:"crowd",t0:2,t1:9.5,cat:"ambience",pri:"med",status:"open",msgs:[
+    say("maya",190,"Crowd reads too big here. Think 200 people on folding chairs, not a stadium. @Theo can we thin the walla?",[],{"👍":["priya"]}),
+    say("theo",150,"Agreed. Thinking a thin murmur bed with a few close coughs and chair creaks on top, so it feels intimate.")]},
+  {clip:"serve",t0:3.1,t1:3.9,cat:"hardfx",pri:"high",status:"addressed",box:{x:.38,y:.26,w:.2,h:.36},msgs:[
+    say("maya",1560,"This thwack is the sound the whole film rhymes with. A little too loud, and dry.",[],{"🔥":["priya","theo"]}),
+    say("theo",1200,"Two directions: keep some of the string ring, or go bone-dry with almost no tail. I'm leaning dry."),
+    sys("theo",1200,"Theo marked this addressed"),
+    say("priya",1080,"Dry for me. @Maya?")]},
+  {clip:"alarm",t0:0,t1:1.4,cat:"hardfx",pri:"high",status:"open",msgs:[
+    say("maya",300,"Cut hard from black. Mechanical and harsh, nothing cozy about it."),
+    say("maya",298,"Roughly this rhythm:",[aud("memo","0:02","hardfx")])]},
+  {clip:"knocking",t0:1.2,cat:"hardfx",pri:"high",status:"open",edge:"left",msgs:[
+    say("priya",95,"The knock comes from off-screen left, the passenger window. It should feel right on top of him.")]},
+  {clip:"heckle",t0:.8,cat:"ambience",pri:"med",status:"open",edge:"right",msgs:[
+    say("maya",80,"Patrick is just outside frame right. @Sam let's pan him there, not centered.")]},
+  {clip:"wind",t0:4,t1:14,cat:"ambience",pri:"med",status:"addressed",msgs:[
+    say("maya",2880,"Build across the whole shot: debris, flapping banners, the chairs going over."),
+    say("theo",1440,"Plan: three wind layers plus chair scrapes, with the ramp starting around 0:06."),
+    sys("theo",1440,"Theo marked this addressed")]},
+  {clip:"whiskey",t0:1.5,t1:3,cat:"props",pri:"low",status:"approved",msgs:[
+    say("theo",4320,"Ice in a rocks glass, close-miked. Keep it quiet."),
+    sys("theo",4320,"Theo marked this addressed"),
+    say("maya",3600,"Perfect.",[],{"✅":["priya"]}),
+    sys("maya",3600,"Maya approved")]},
+  {clip:"tv",t0:0,t1:8,cat:"ambience",pri:"low",status:"open",msgs:[
+    say("sam",45,"The broadcast should be narrow-band, like it's coming out of a TV speaker across the room. @Theo is this one yours or mine?")]}
+ ].forEach(m=>{const id="c"+(++cuid);COMMENTS[id]={id,t1:null,box:null,edge:null,...m}})}
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const tc=t=>{t=Math.max(0,t);const s=(t%60).toFixed(1);return Math.floor(t/60)+":"+s.padStart(4,"0")};
+const rel=at=>{const s=(Date.now()-at)/1000;return s<45?"just now":s<3600?Math.round(s/60)+"m ago":s<86400?Math.round(s/3600)+"h ago":Math.round(s/86400)+"d ago"};
+const rangeTxt=m=>m.t1!=null?`${tc(m.t0)} – ${tc(m.t1)}`:`at ${tc(m.t0)}`;
+const snip=(m,n=60)=>{const x=m.msgs.find(x=>!x.sys&&(x.text||x.audio?.length));const t=x?.text||(x?.audio?.length?KIND[AUD[x.audio[0]].kind]:"");return t.length>n?t.slice(0,n-2).trimEnd()+"…":t};
+const commentsOf=id=>Object.values(COMMENTS).filter(m=>m.clip===id).sort((a,b)=>a.t0-b.t0);
+const short=t=>t.length>34?t.slice(0,33).trimEnd()+"…":t[0].toUpperCase()+t.slice(1);
+const FIRST=Object.fromEntries(Object.keys(PEOPLE).map(k=>[first(k).toLowerCase(),k]));
+const fmtText=t=>esc(t).replace(/@(\w+)/g,(s,w)=>FIRST[w.toLowerCase()]?`<b class="mention">@${w}</b>`:s);
 const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
 const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
 
@@ -493,18 +701,18 @@ const LOCS={
   night:{a:"#1c2a48",b:"#05070c",k:"streak"}, lobby:{a:"#3d3529",b:"#0e0c09",k:"bokeh"}, snack:{a:"#3b4c55",b:"#0c1215",k:"window"},
   dorm:{a:"#4b3041",b:"#130a0f",k:"bokeh"}, hospital:{a:"#34494c",b:"#0a1112",k:"diag"}, sauna:{a:"#704019",b:"#1b0d04",k:"slats"}, bar:{a:"#3c2336",b:"#0a050a",k:"bokeh"}
 };
-const CLIP_LEN=4, clips=new Set();
+const CLIP_LEN=4; /* period of the stand-in motion; the clip itself runs q.dur seconds */
 function hash(s){let h=2166136261;for(const ch of s)h=Math.imul(h^ch.charCodeAt(0),16777619);return h>>>0}
 function rng(seed){return()=>{seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
 function drawClip(it,t){
   const c=it.ctx,W=480,H=270,q=it.q,L=LOCS[q.loc]||LOCS.lobby,sw=Math.sin(t/CLIP_LEN*TAU);
-  c.save();const z=1+.05*(t/CLIP_LEN);c.translate(W/2,H/2);c.scale(z,z);c.translate(-W/2,-H/2);
+  c.save();const z=1+.05*(t/q.dur);c.translate(W/2,H/2);c.scale(z,z);c.translate(-W/2,-H/2);
   const g=c.createLinearGradient(0,0,0,H);g.addColorStop(0,L.a);g.addColorStop(1,L.b);c.fillStyle=g;c.fillRect(-20,-20,W+40,H+40);
   if(L.k==="court"){
     c.fillStyle="rgba(0,0,0,.28)";c.fillRect(0,150,W,H);c.strokeStyle="rgba(255,255,255,.35)";c.lineWidth=1.5;c.beginPath();
     c.moveTo(0,172);c.lineTo(W,172);c.moveTo(0,226);c.lineTo(W,226);c.moveTo(W/2,150);c.lineTo(W/2,H);c.stroke();
     c.fillStyle="rgba(255,255,255,.1)";c.fillRect(70,118,340,32);c.strokeStyle="rgba(255,255,255,.45)";c.beginPath();c.moveTo(70,118);c.lineTo(410,118);c.stroke();
-    const bx=((t/CLIP_LEN)*1.3-.15)*W,by=176-Math.abs(Math.sin(t*PI*1.5))*84;c.fillStyle="#dbe84e";c.shadowColor="#dbe84e";c.shadowBlur=10;c.beginPath();c.arc(bx,by,4,0,TAU);c.fill();c.shadowBlur=0;
+    const bx=(((t/CLIP_LEN)%1)*1.3-.15)*W,by=176-Math.abs(Math.sin(t*PI*1.5))*84;c.fillStyle="#dbe84e";c.shadowColor="#dbe84e";c.shadowBlur=10;c.beginPath();c.arc(bx,by,4,0,TAU);c.fill();c.shadowBlur=0;
   }else if(L.k==="window"){
     c.fillStyle="rgba(255,236,200,.85)";c.fillRect(310,40,110,110);c.fillStyle="rgba(255,236,200,.07)";c.beginPath();c.moveTo(310,40);c.lineTo(420,40);c.lineTo(250,270);c.lineTo(80,270);c.closePath();c.fill();
     c.fillStyle="rgba(0,0,0,.35)";c.fillRect(363,40,3,110);c.fillRect(310,93,110,3);
@@ -528,22 +736,39 @@ function drawClip(it,t){
   const v=c.createRadialGradient(W/2,H/2,H*.35,W/2,H/2,W*.66);v.addColorStop(0,"transparent");v.addColorStop(1,"rgba(0,0,0,.55)");c.fillStyle=v;c.fillRect(0,0,W,H);
   c.fillStyle="rgba(255,255,255,.05)";for(let i=0;i<70;i++)c.fillRect(Math.random()*W,Math.random()*H,1.5,1.5);
   c.fillStyle="#000";c.fillRect(0,0,W,24);c.fillRect(0,H-24,W,24);
-  const s=Math.floor(t),f=Math.floor((t%1)*24);c.fillStyle="#cfcfcf";c.font="11px ui-monospace,Menlo,monospace";c.fillText(`00:00:0${s}:${String(f).padStart(2,"0")}`,12,H-8);
-  c.fillStyle=it.col;c.fillRect(0,H-2,W*t/CLIP_LEN,2);
+  const s=Math.floor(t),f=Math.floor((t%1)*24);c.fillStyle="#cfcfcf";c.font="11px ui-monospace,Menlo,monospace";c.fillText(`00:00:${String(s).padStart(2,"0")}:${String(f).padStart(2,"0")}`,12,H-8);
+  c.fillStyle=it.col;c.fillRect(0,H-2,W*t/q.dur,2);
 }
+/* Playback interface. The comment layer only talks to this, so a carousel can hand it any player with the same shape:
+   {el, duration, currentTime, paused, play(), pause(), reset(), seek(t), setLoop(a,b), clearLoop(), onTime(fn) → unsubscribe, destroy()} */
+const players=new Set();
 function makeClip(id){
   const q=CUES[id],wrap=document.createElement("div");wrap.className="media";
-  if(q.clip){const v=document.createElement("video");v.src=q.clip;v.muted=true;v.loop=true;v.playsInline=true;v.preload="metadata";wrap.appendChild(v);
-    return{el:wrap,play(){v.play().catch(()=>{})},pause(){v.pause()},reset(){v.currentTime=0},destroy(){v.pause();v.removeAttribute("src");v.load()}}}
-  const cv=document.createElement("canvas");cv.width=480;cv.height=270;wrap.appendChild(cv);
-  const r=rng(hash(id)),it={cv,ctx:cv.getContext("2d"),q,playing:false,t0:0,col:col(`--${q.c}`),bk:Array.from({length:10},()=>[r()*480,r()*220+20,8+r()*24,r()])};
-  clips.add(it);drawClip(it,.9);
-  return{el:wrap,play(){if(reduce)return;if(!it.playing){it.playing=true;it.t0=NOW}},pause(){it.playing=false;drawClip(it,.9)},reset(){it.t0=NOW;if(!it.playing)drawClip(it,0)},destroy(){it.playing=false;clips.delete(it)}};
+  const p={loop:null,subs:new Set(),last:-1},emit=t=>{if(t===p.last)return;p.last=t;p.subs.forEach(f=>f(t))};
+  let api;
+  if(q.clip){const v=document.createElement("video");v.src=q.clip;v.muted=true;v.loop=true;v.playsInline=true;v.preload="auto";wrap.appendChild(v);
+    v.addEventListener("loadedmetadata",()=>{if(isFinite(v.duration))setDur(id,v.duration)});
+    p.tick=()=>{if(p.loop&&!v.paused&&v.currentTime>=p.loop[1])v.currentTime=p.loop[0];emit(v.currentTime)};
+    api={play(){v.play().catch(()=>{})},pause(){v.pause()},reset(){v.currentTime=p.loop?p.loop[0]:0},seek(t){v.currentTime=cl(t,0,q.dur)},
+      get currentTime(){return v.currentTime},get paused(){return v.paused},destroy(){players.delete(p);v.pause();v.removeAttribute("src");v.load()}};
+  }else{
+    const cv=document.createElement("canvas");cv.width=480;cv.height=270;wrap.appendChild(cv);
+    const r=rng(hash(id)),it={cv,ctx:cv.getContext("2d"),q,col:col(`--${q.c}`),bk:Array.from({length:10},()=>[r()*480,r()*220+20,8+r()*24,r()])};
+    Object.assign(p,{pos:0,playing:false,t0:0});const now=()=>p.playing?p.pos+(NOW-p.t0):p.pos;
+    p.tick=()=>{let t=now();if(p.playing){const b=p.loop?p.loop[1]:q.dur;if(t>=b){p.pos=p.loop?p.loop[0]:0;p.t0=NOW;t=p.pos}drawClip(it,t)}emit(t)};
+    drawClip(it,0);
+    api={play(){if(reduce||p.playing)return;p.playing=true;p.t0=NOW},pause(){if(p.playing){p.pos=now();p.playing=false}},
+      reset(){p.pos=p.loop?p.loop[0]:0;p.t0=NOW;drawClip(it,p.pos)},seek(t){p.pos=cl(t,0,q.dur);p.t0=NOW;drawClip(it,p.pos)},
+      get currentTime(){return now()},get paused(){return !p.playing},destroy(){players.delete(p)}};
+  }
+  api.el=wrap;api.setLoop=(a,b)=>{p.loop=b>a?[a,b]:null};api.clearLoop=()=>{p.loop=null};api.onTime=f=>{p.subs.add(f);return()=>p.subs.delete(f)};
+  Object.defineProperty(api,"duration",{get:()=>q.dur});
+  players.add(p);return api;
 }
 (function loop(now){NOW=now/1000;for(const it of insts){if(!it.cv.isConnected){insts.delete(it);continue}draw(it)}
-  for(const it of clips){if(it.playing)drawClip(it,(NOW-it.t0)%CLIP_LEN)}
+  for(const p of players)p.tick();
   requestAnimationFrame(loop)})(performance.now());
-const restKey=q=>done(q)?"check":"seed";
+const restKey=q=>done(q)?"check":ok(q)?"bud":"seed";
 const restColor="--muted-foreground";
 
 /* ---------- render script: one sticky section per set ---------- */
@@ -563,7 +788,7 @@ doc.innerHTML=SCRIPT.map((act,ai)=>{
     rows.map(r=>`<div class="row"><div class="gut">${r.gut}</div><div class="page">${r.page}</div></div>`).join("")+`</div></div></section>`;
 }).join("");
 const list=$("#cuelist"), clScroll=$("#clScroll");
-const ciHTML=id=>{const q=CUES[id];return `<button class="ci" data-id="${id}" aria-label="${q.n}"><canvas class="g" style="width:16px;height:16px" aria-hidden="true"></canvas><span class="lbl">${q.n}<span class="cat">${CATS[q.c]}</span></span></button>`};
+const ciHTML=id=>{const q=CUES[id];return `<button class="ci" data-id="${id}" aria-label="${q.n}"><canvas class="g" style="width:16px;height:16px" aria-hidden="true"></canvas><span class="lbl">${q.n}<span class="cat">${CATS[q.c]}</span></span><span class="cc" hidden></span><span class="ck" role="checkbox" aria-checked="false" aria-label="Recorded" hidden></span></button>`};
 clScroll.insertAdjacentHTML("beforeend",order.map(ciHTML).join(""));
 /* Every cue has an entry. Entries whose phrase is on screen are full strength, the rest are faded, and the list scrolls so the active ones sit mid-list with neighbours filling the space. */
 let settleRaf=0;
@@ -575,37 +800,54 @@ const io=new IntersectionObserver(es=>{es.forEach(e=>$(`.ci[data-id="${e.target.
 $$(".cue").forEach(c=>io.observe(c));
 const RG={}; $$(".ci").forEach(b=>{const q=CUES[b.dataset.id];RG[b.dataset.id]=glyph(b.querySelector("canvas"),restKey(q),{color:restColor})});
 
-/* filters */
-let curCat="all";
+/* filters: sound category (cues and comments), comment priority, and the cue list's "To record" checklist */
+let curCat="all",curPri="all",todo=false,autoPause=false;
 function renderBar(){const counts={};order.forEach(id=>counts[CUES[id].c]=(counts[CUES[id].c]||0)+1);
   $("#bar").innerHTML=`<button class="tg" data-cat="all" aria-pressed="${curCat==="all"}">All <b>${order.length}</b></button>`+Object.keys(CATS).map(k=>`<button class="tg" data-cat="${k}" aria-pressed="${curCat===k}" style="--c:var(--${k})"><i></i>${CATS[k]} <b>${counts[k]||0}</b></button>`).join("")}
-function applyFilter(){const cat=curCat;doc.classList.toggle("filtering",cat!=="all");list.classList.toggle("filtering",cat!=="all");
-  $$(".cue,.ci").forEach(el=>el.classList.toggle("match",cat==="all"||CUES[el.dataset.id].c===cat));
+function renderPri(){$("#pri").innerHTML=[["all","Any priority"],...Object.entries(PRI).map(([k,p])=>[k,p.n])].map(([k,n])=>`<button class="tg" data-pri="${k}" aria-pressed="${curPri===k}"${k==="all"?"":` style="--c:var(${PRI[k].c})"`}>${k==="all"?"":"<i></i>"}${n}</button>`).join("")}
+function applyFilter(){const cat=curCat;doc.classList.toggle("filtering",cat!=="all");list.classList.toggle("filtering",cat!=="all"||todo);list.classList.toggle("todo",todo);
+  $$(".cue").forEach(el=>el.classList.toggle("match",cat==="all"||CUES[el.dataset.id].c===cat));
+  $$(".ci").forEach(el=>{const q=CUES[el.dataset.id];el.classList.toggle("match",(cat==="all"||q.c===cat)&&(!todo||ok(q)))});
   $$(".mk",tl).forEach(m=>{const hit=CUES[m.dataset.id].c===cat;m.classList.toggle("faded",cat!=="all"&&!hit);m.classList.toggle("match",cat!=="all"&&hit)});
+  $$(".cm",tl).forEach(el=>{const m=COMMENTS[el.dataset.cid];el.classList.toggle("faded",!((cat==="all"||m.cat===cat)&&(curPri==="all"||m.pri===curPri)))});
   $$(".lane",tl).forEach(l=>l.classList.toggle("on",l.dataset.lane===cat))}
 renderBar();
 
-/* score: one bar line per set */
-const tl=$("#tl"), NG={}, LANES=["score","ambience","hardfx","props","cloth","footsteps"];
+/* score: one slot per clip, as wide as the clip is long, one bar line per set. Comments sit inside their clip's slot on their category lane */
+const tl=$("#tl"), NG={}, LANES=["score","ambience","hardfx","props","cloth","footsteps"], SLOTS={}, LY={};let TOTAL=1;
+const X=p=>(p/TOTAL*100).toFixed(3)+"%";
+function cmHTML(m){const s=SLOTS[m.clip];if(!s)return"";const D=CUES[m.clip].dur,a=Math.min(m.t0,D),rg=m.t1!=null;
+  return `<button class="cm ${m.status}${rg?"":" pt"}${card?.cid===m.id?" on":""}" data-cid="${m.id}" aria-label="${esc(rangeTxt(m))}: ${esc(snip(m))}" style="left:${X(s.s+a)};${rg?`width:${X(Math.max(.2,Math.min(m.t1,D)-a))};`:""}top:${LY[m.cat]}px;--c:var(--${m.cat})"></button>`}
 function renderScore(){
-  const top=22,step=11,Y={};LANES.forEach((c,i)=>Y[c]=top+i*step);const lines=[0,2,4,6].map(i=>top+i*step);
-  $("#clef").innerHTML=LANES.map(c=>`<span style="top:${Y[c]}px;--c:var(--${c})"><i></i>${CATS[c]}</span>`).join("");
-  const gap=2.2,total=order.length+gap*(SCRIPT.length-1)+1;let pos=.6,last=null,out="";
-  out+=LANES.map(c=>`<div class="lane" data-lane="${c}" style="top:${Y[c]}px;--c:var(--${c})"></div>`).join("");
+  const top=22,step=11;LANES.forEach((c,i)=>LY[c]=top+i*step);const lines=[0,2,4,6].map(i=>top+i*step);
+  $("#clef").innerHTML=LANES.map(c=>`<span style="top:${LY[c]}px;--c:var(--${c})"><i></i>${CATS[c]}</span>`).join("");
+  for(const k in SLOTS)delete SLOTS[k];
+  const cueGap=1.5,setGap=8,sets=[],bars=[];let pos=1,last=null;
+  order.forEach(id=>{const q=CUES[id];if(last!==null&&q.act!==last){const end=pos-cueGap;pos=end+setGap;bars.push(end+setGap/2)}
+    if(q.act!==last)sets.push([pos,q.act]);SLOTS[id]={s:pos,e:pos+q.dur};pos+=q.dur+cueGap;last=q.act});
+  TOTAL=pos;$(".staff").style.minWidth=Math.round(Math.max(960,84+TOTAL*5))+"px";
+  let out=order.map(id=>`<div class="slot${card?.open&&card.id===id?" cur":""}" data-id="${id}" style="left:${X(SLOTS[id].s)};width:${X(CUES[id].dur)}"></div>`).join("");
+  out+=LANES.map(c=>`<div class="lane" data-lane="${c}" style="top:${LY[c]}px;--c:var(--${c})"></div>`).join("");
   out+=lines.map(y=>`<div class="ln" style="top:${y}px"></div>`).join("");
-  const X=p=>(p/total*100).toFixed(2)+"%";
-  order.forEach(id=>{const q=CUES[id];
-    if(last!==null&&q.act!==last){pos+=gap/2;out+=`<div class="barl" style="left:${X(pos)};top:${lines[0]}px;height:${lines[3]-lines[0]}px"></div>`;pos+=gap/2}
-    if(q.act!==last)out+=`<span class="sc" style="left:${X(Math.max(pos-.9,0))}">Set ${q.act+1}</span>`;
-    out+=`<button class="mk" data-id="${id}" aria-label="Jump to ${q.n}" style="left:${X(pos)};top:${Y[q.c]}px;--c:var(--${q.c})"><canvas class="g" style="width:14px;height:14px" aria-hidden="true"></canvas></button>`;
-    pos++;last=q.act});
+  out+=bars.map(p=>`<div class="barl" style="left:${X(p)};top:${lines[0]}px;height:${lines[3]-lines[0]}px"></div>`).join("");
+  out+=sets.map(([p,a])=>`<span class="sc" style="left:${X(p)}">Set ${a+1}</span>`).join("");
+  out+=order.map(id=>{const q=CUES[id];return `<button class="mk" data-id="${id}" aria-label="Open ${esc(q.n)}" style="left:${X(SLOTS[id].s)};top:${LY[q.c]}px;--c:var(--${q.c})"><canvas class="g" style="width:14px;height:14px" aria-hidden="true"></canvas></button>`}).join("");
+  out+=Object.values(COMMENTS).map(cmHTML).join("")+`<div class="ph" hidden></div><div class="sel" hidden></div>`;
   tl.innerHTML=out;
-  $$(".mk",tl).forEach(m=>{const q=CUES[m.dataset.id];NG[m.dataset.id]=glyph(m.querySelector("canvas"),restKey(q),{color:done(q)?`--${q.c}`:"--muted-foreground",base:.16})});
+  $$(".mk",tl).forEach(m=>{const q=CUES[m.dataset.id];NG[m.dataset.id]=glyph(m.querySelector("canvas"),restKey(q),{color:ok(q)?`--${q.c}`:"--muted-foreground",base:.16})});
+  if(card)phShow(card.id,card.clip.currentTime);
+  if(VIEW==="clips"&&stage.id){renderRuler();renderStrip(false)}
 }
 renderScore();
+function phShow(id,t){const ph=$(".ph",tl),s=SLOTS[id];if(!ph||!s)return;ph.hidden=false;ph.style.left=X(s.s+Math.min(t,CUES[id].dur))}
+function phHide(){const ph=$(".ph",tl);if(ph)ph.hidden=true;$$(".slot.cur",tl).forEach(x=>x.classList.remove("cur"))}
+/* bring a clip's slot into view when the staff is scrolled away from it */
+function revealSlot(id){const s=$(`.slot[data-id="${id}"]`,tl),w=$(".staff-wrap");if(!s)return;const r=s.getBoundingClientRect(),wr=w.getBoundingClientRect();
+  if(r.left<wr.left+84||r.right>wr.right)w.scrollTo({left:w.scrollLeft+r.left+Math.min(r.width,wr.width/2)/2-(wr.left+wr.width/2),behavior:reduce?"auto":"smooth"})}
 const garden=glyph($("#garden"),"garden",{count:0,base:.14});
-function tally(){const n=order.filter(id=>done(CUES[id])).length;garden.count=Math.round(n/order.length*9);const nt=$("#navTally");if(nt)nt.textContent=`${n}/${order.length}`;
-  $$(".at").forEach(el=>{const ids=ACTIDS[el.dataset.act];el.textContent=`${ids.filter(id=>done(CUES[id])).length} / ${ids.length} takes`})}
+/* checklist progress: recorded out of approved */
+function tally(){const ap=order.filter(id=>ok(CUES[id])),n=ap.filter(id=>done(CUES[id])).length;garden.count=ap.length?Math.round(n/ap.length*9):0;const nt=$("#navTally");if(nt)nt.textContent=`${n}/${ap.length}`;
+  $$(".at").forEach(el=>{const ids=ACTIDS[el.dataset.act],a=ids.filter(id=>ok(CUES[id]));el.textContent=a.length?`${a.filter(id=>done(CUES[id])).length} / ${a.length} recorded`:`${ids.length} cues`})}
 tally();
 
 /* nav: characters scramble through glyphs, then resolve left to right */
@@ -618,20 +860,19 @@ function scramble(el){
     el.textContent=out; if(e<settle){el._raf=requestAnimationFrame(step)}else{el.textContent=final;el.style.width="";el._raf=null}})(t0);
 }
 $$("[data-scr]").forEach(el=>{const host=el.closest("button")||el; host.addEventListener("pointerenter",()=>scramble(el))});
-$$(".nav button").forEach(b=>b.addEventListener("click",()=>{$$(".nav button").forEach(x=>x.setAttribute("aria-selected",x===b));scramble(b.querySelector("[data-scr]"))}));
+$$(".nav:not(#view) button").forEach(b=>b.addEventListener("click",()=>{$$(".nav:not(#view) button").forEach(x=>x.setAttribute("aria-selected",x===b));scramble(b.querySelector("[data-scr]"))}));
 setTimeout(()=>$$("[data-scr]").forEach((el,i)=>setTimeout(()=>scramble(el),i*60)),200);
 
 /* ---------- hover: zoom-up highlight, focus pull, glyph unfurl ---------- */
-let card=null, showT=null, hideT=null;
 function toggleAct(sec,force){const c=force??!sec.classList.contains("collapsed");sec.classList.toggle("collapsed",c);sec.querySelector(".act-h").setAttribute("aria-expanded",String(!c));closeCard()}
 doc.addEventListener("click",e=>{const h=e.target.closest(".act-h");if(h)toggleAct(h.closest(".act"))});
 function link(id,on){
-  const span=$(`.cue[data-id="${id}"]`),item=$(`.ci[data-id="${id}"]`),mk=$(`.mk[data-id="${id}"]`),q=CUES[id];if(!span)return;
-  span.classList.toggle("hot",on);item.classList.toggle("hot",on);mk&&mk.classList.toggle("hot",on);
+  const span=$(`.cue[data-id="${id}"]`),item=$(`.ci[data-id="${id}"]`),mk=$(`.mk[data-id="${id}"]`),q=CUES[id];if(!q)return;
+  span?.classList.toggle("hot",on);item?.classList.toggle("hot",on);mk&&mk.classList.toggle("hot",on);
   tl.querySelectorAll(`.trail[data-id="${id}"]`).forEach(t=>t.remove());
   if(on&&mk){const tr=document.createElement("div");tr.className="trail";tr.dataset.id=id;tr.style.top=mk.style.top;tr.style.width=mk.style.left;tr.style.setProperty("--c",`var(--${q.c})`);tl.insertBefore(tr,tl.firstChild)}
-  if(mk)setG(NG[id],on?(done(q)?"set":"unfurl"):restKey(q),on||done(q)?`--${q.c}`:"--muted-foreground");
-  span.closest(".row").classList.toggle("focus-row",on);doc.classList.toggle("focusing",on);
+  if(mk)setG(NG[id],on?(done(q)?"set":"unfurl"):restKey(q),on||ok(q)?`--${q.c}`:"--muted-foreground");
+  if(span){span.closest(".row").classList.toggle("focus-row",on);doc.classList.toggle("focusing",on)}
   if(card&&card.open&&card.id===id)return;
   if(on)setG(RG[id],done(q)?"set":"unfurl",`--${q.c}`);else setG(RG[id],restKey(q),restColor);
 }
@@ -643,200 +884,294 @@ function link(id,on){
 /* filters */
 $("#bar").addEventListener("click",e=>{const b=e.target.closest(".tg");if(!b)return;curCat=b.dataset.cat;renderBar();applyFilter();
   order.forEach(id=>{const q=CUES[id];if(curCat!=="all"&&q.c===curCat)setG(RG[id],"unfurl",`--${q.c}`);else setG(RG[id],restKey(q),restColor)})});
+$("#pri").addEventListener("click",e=>{const b=e.target.closest(".tg");if(!b)return;curPri=b.dataset.pri;renderPri();applyFilter()});
+$("#autoP").addEventListener("click",e=>{autoPause=!autoPause;e.currentTarget.setAttribute("aria-pressed",autoPause)});
+$("#clTabs").addEventListener("click",e=>{const b=e.target.closest("[data-todo]");if(!b)return;todo=b.dataset.todo==="1";$$("#clTabs .tg").forEach(x=>x.setAttribute("aria-pressed",x===b));applyFilter();settleList()});
 
 /* scroll the script to a cue (opening its set if collapsed), then run a callback */
 function jumpTo(id,after){const cue=$(`.cue[data-id="${id}"]`),sec=cue.closest(".act"),was=sec.classList.contains("collapsed");if(was)toggleAct(sec,false);
   setTimeout(()=>{cue.scrollIntoView({behavior:reduce?"auto":"smooth",block:"center"});setTimeout(after,450)},280+(was?320:0))}
 
-/* score: tooltip, then a bar zooms upward from the note and the script scrolls to the cue */
-let tip=null;
-tl.addEventListener("pointerover",e=>{const m=e.target.closest(".mk");if(!m||m.contains(e.relatedTarget))return;link(m.dataset.id,true);tip?.remove();const r=m.getBoundingClientRect();
-  tip=document.createElement("div");tip.className="tip";tip.textContent=CUES[m.dataset.id].n;tip.style.left=r.left+r.width/2+"px";tip.style.top=r.top+"px";document.body.appendChild(tip)});
-tl.addEventListener("pointerout",e=>{const m=e.target.closest(".mk");if(m&&!m.contains(e.relatedTarget)){link(m.dataset.id,false);tip?.remove();tip=null}});
-tl.addEventListener("click",e=>{const m=e.target.closest(".mk");if(!m)return;const id=m.dataset.id;tip?.remove();tip=null;
-  jumpTo(id,()=>{link(id,true);setTimeout(()=>link(id,false),1500)})});
+/* score: tooltip on cue and comment markers. Click a marker to open it (a comment seeks and loops its range);
+   click an empty part of a clip's slot to seek there, drag across it to start a range comment */
+let tip=null,sdrag=null;
+const showTip=(el,text)=>{tip?.remove();const r=el.getBoundingClientRect();tip=document.createElement("div");tip.className="tip";tip.textContent=text;tip.style.left=r.left+r.width/2+"px";tip.style.top=r.top+"px";document.body.appendChild(tip)};
+tl.addEventListener("pointerover",e=>{const t=e.target.closest(".mk,.cm");if(!t||t.contains(e.relatedTarget))return;
+  if(t.classList.contains("cm")){const m=COMMENTS[t.dataset.cid];link(m.clip,true);showTip(t,`${first(m.msgs[0].by)} · ${rangeTxt(m)} · ${snip(m,48)}`)}
+  else{link(t.dataset.id,true);showTip(t,CUES[t.dataset.id].n)}});
+tl.addEventListener("pointerout",e=>{const t=e.target.closest(".mk,.cm");if(t&&!t.contains(e.relatedTarget)){link(t.classList.contains("cm")?COMMENTS[t.dataset.cid].clip:t.dataset.id,false);tip?.remove();tip=null}});
+const tAt=e=>{const r=tl.getBoundingClientRect();return (e.clientX-r.left)/r.width*TOTAL};
+const slotAt=p=>order.find(id=>SLOTS[id]&&p>=SLOTS[id].s&&p<=SLOTS[id].e);
+tl.addEventListener("pointerdown",e=>{if(e.button||e.target.closest(".mk,.cm"))return;const p=tAt(e),id=slotAt(p);if(!id)return;e.preventDefault();tl.setPointerCapture(e.pointerId);sdrag={id,a:p-SLOTS[id].s,b:null,x:e.clientX}});
+tl.addEventListener("pointermove",e=>{if(!sdrag||sdrag.b==null&&Math.abs(e.clientX-sdrag.x)<4)return;const s=SLOTS[sdrag.id],sel=$(".sel",tl);sdrag.b=cl(tAt(e)-s.s,0,CUES[sdrag.id].dur);
+  const lo=Math.min(sdrag.a,sdrag.b),hi=Math.max(sdrag.a,sdrag.b);sel.hidden=false;sel.style.left=X(s.s+lo);sel.style.width=X(hi-lo)});
+tl.addEventListener("pointerup",()=>{if(!sdrag)return;const {id,a,b}=sdrag;sdrag=null;$(".sel",tl).hidden=true;
+  if(b==null||Math.abs(b-a)<.15)openCard(id,{anchor:"score",t:a});else openCard(id,{anchor:"score",draft:[Math.min(a,b),Math.max(a,b)]})});
+tl.addEventListener("pointercancel",()=>{sdrag=null;$(".sel",tl).hidden=true});
+tl.addEventListener("click",e=>{e.stopPropagation();tip?.remove();tip=null;
+  const c=e.target.closest(".cm");if(c){const m=COMMENTS[c.dataset.cid];openCard(m.clip,{anchor:"score",cid:m.id});return}
+  const mk=e.target.closest(".mk");if(!mk)return;const id=mk.dataset.id,cue=$(`.cue[data-id="${id}"]`);
+  if(cue&&!cue.closest(".act.collapsed"))cue.scrollIntoView({behavior:reduce?"auto":"smooth",block:"center"});openCard(id,{anchor:"score",t:0})});
+$(".staff-wrap").addEventListener("scroll",()=>card&&place(card),{passive:true});
 
-/* ---------- cue card: hover peek (clip only) and click-to-open (clip on top) ---------- */
-const ICON={up:'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 10.5V3M5 5.5L8 2.5l3 3M3 10.5v2h10v-2"/></svg>',back:'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3.5L5.5 8l4.5 4.5"/></svg>',rec:'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="5.5"/><circle cx="8" cy="8" r="2.5" fill="currentColor" stroke="none"/></svg>',
-  lib:'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M2.5 3h3v10h-3zM6.5 3h3v10h-3zM11 3.5l2.6.7-2.3 9.1-2.6-.7"/></svg>',
-  play:'<svg viewBox="0 0 16 16"><path d="M5 3.5v9l7.5-4.5z" fill="currentColor"/></svg>',
+/* ---------- cue card: hover peek (clip only) and click-to-open (clip on top). Open, it has three modes: the cue, a comment thread, a new comment.
+   In clip view the card has no clip of its own; it drives the stage player through the same playback interface ---------- */
+const ICON={rec:'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="5.5"/><circle cx="8" cy="8" r="2.5" fill="currentColor" stroke="none"/></svg>',
   stop:'<svg viewBox="0 0 16 16"><rect x="4" y="4" width="8" height="8" rx="1.5" fill="currentColor"/></svg>',
-  trash:'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4.5h10M6.5 4.5V3h3v1.5M4.5 4.5l.6 8.5h5.8l.6-8.5M7 7v4M9 7v4"/></svg>',
-  x:'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M4 4l8 8M12 4l-8 8"/></svg>'};
+  x:'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M4 4l8 8M12 4l-8 8"/></svg>',
+  play:'<svg viewBox="0 0 16 16"><path d="M5 3.5v9l7.5-4.5z" fill="currentColor"/></svg>',
+  pause:'<svg viewBox="0 0 16 16"><path d="M4.5 3.5h2.5v9H4.5zM9 3.5h2.5v9H9z" fill="currentColor"/></svg>',
+  back:'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3.5L5.5 8l4.5 4.5"/></svg>',
+  next:'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5L10.5 8 6 12.5"/></svg>',
+  down:'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 6.5L8 10l3.5-3.5"/></svg>',
+  check:'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5l3.2 3L13 4.5"/></svg>',
+  film:'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><rect x="2.5" y="3.5" width="11" height="9" rx="1.5"/><path d="M5.5 3.5v9M10.5 3.5v9M2.5 6.5h3M2.5 9.5h3M10.5 6.5h3M10.5 9.5h3"/></svg>',
+  mic:'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="6" y="2" width="4" height="7.5" rx="2"/><path d="M3.8 7.5a4.2 4.2 0 0 0 8.4 0M8 11.7V14"/></svg>',
+  send:'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 13V3.5M4 7.5l4-4 4 4"/></svg>',
+  box:'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="2.2 1.6"><rect x="2.5" y="3.5" width="11" height="9" rx="1.5"/></svg>',
+  edge:'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5H3.5v9H6M13 8H7.5M10 5.5L7.5 8l2.5 2.5"/></svg>',
+  bubble:'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M2.5 3.5h11v7.5h-6L4.5 13.5V11h-2z"/></svg>',
+  smile:'<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M17 10.5A7 7 0 1 1 9.5 3"/><path d="M6.8 11.8a3.6 3.6 0 0 0 5.4 0"/><path d="M7.3 8.2h.01M12 8.2h.01" stroke-width="2.4"/><path d="M15.5 1.8v5M13 4.3h5"/></svg>',
+  tag:'<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M3 3h6.5l7.5 7.5-6.5 6.5L3 9.5z"/><circle cx="6.8" cy="6.8" r="1.2" fill="currentColor" stroke="none"/></svg>',
+  spark:'<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 16.5l9-9 2 2-9 9zM11 9l2 2"/><path d="M15 2.5l.7 1.8 1.8.7-1.8.7L15 7.5l-.7-1.8-1.8-.7 1.8-.7zM6 2.5l.4 1.1 1.1.4-1.1.4L6 5.5l-.4-1.1L4.5 4l1.1-.4z"/></svg>',
+  kbd:'<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="2.5" y="3.5" width="15" height="10" rx="2"/><path d="M5.5 7h.01M8.5 7h.01M11.5 7h.01M14.5 7h.01M6.5 10.5h7" stroke-width="1.8"/><path d="M8 16.5l2 1.5 2-1.5"/></svg>'};
 function wave(id,c,pk){if(pk)return pk.map(p=>`<span style="--h:${Math.round(10+p*90)}%"></span>`).join("");const r=rng(hash(id)+7),env=c==="hardfx"?i=>Math.exp(-i/9):c==="ambience"?()=>.55:c==="score"?i=>.4+.5*Math.sin(i/6):i=>Math.max(.1,Math.sin(i/47*PI*3)**2);
   return Array.from({length:48},(_,i)=>`<span style="--h:${Math.round(10+Math.min(1,env(i)*(.5+r()*.6))*90)}%"></span>`).join("")}
+const toolsHTML=()=>`<button class="btn" data-tool="box" title="Draw a box (B)" aria-label="Draw a box (B)" aria-pressed="${TOOL==="box"}">${ICON.box}</button><button class="btn" data-tool="edge" title="Sound from off-screen (E)" aria-label="Sound from off-screen (E)" aria-pressed="${TOOL==="edge"}">${ICON.edge}</button><button class="btn" data-tool="comment" title="Comment at the playhead (C)" aria-label="Comment at the playhead (C)">${ICON.bubble}</button>`;
 
-/* (Once dragged, the card keeps the spot it was dropped in.) The card sits beside the cue: to its right when the cue is in the left half of the script pane, to its left otherwise; its top edge
+/* (Once dragged, the card keeps the spot it was dropped in.) Opened from the script, the card sits beside the cue: to its right when the cue is in the left half of the script pane, to its left otherwise; its top edge
    lines up with the cue when the cue is in the upper half, its bottom edge when in the lower half (so it grows upward from there).
-   The anchor is the visible part of the cue, so the card stays on screen when the cue is partly scrolled out. */
+   The anchor is the visible part of the cue, so the card stays on screen when the cue is partly scrolled out. Opened from the score, it sits above the marker;
+   in clip view, beside the comment's box on the frame, or beside the player. */
 function place(c){
-  const sp=$(`.cue[data-id="${c.id}"]`);if(!sp)return;
-  const r=sp.getClientRects()[0],sr=doc.getBoundingClientRect(),vw=document.documentElement.clientWidth,vh=innerHeight,w=c.el.offsetWidth,h=c.el.offsetHeight,
-    y0=cl(r.top,sr.top+$(".act-h").offsetHeight,sr.bottom),y1=cl(r.bottom,y0,sr.bottom);
-  c.el.style.left=cl(c.free?c.fx:c.right?r.right+10:r.left-10-w,16,vw-16-w)+"px";
-  c.el.style.top=cl(c.free?c.fy:c.up?y1-h:y0,8,vh-h-8)+"px";
+  const vw=document.documentElement.clientWidth,vh=innerHeight,w=c.el.offsetWidth,h=c.el.offsetHeight;let x,y;
+  if(c.free){x=c.fx;y=c.fy}
+  else if(c.anchor==="stage"){const p=$("#player").getBoundingClientRect(),bx=$("#stAnc .abox.on");
+    if(bx){const r=bx.getBoundingClientRect();x=r.right+14;y=r.top-6;if(x+w>vw-16)x=r.left-14-w}else{x=p.right+14;y=p.top;if(x+w>vw-16)x=p.right-w-14}}
+  else if(c.anchor==="score"){const a=(c.acid&&$(`.cm[data-cid="${c.acid}"]`,tl))||$(`.mk[data-id="${c.id}"]`,tl);if(!a)return;const r=a.getBoundingClientRect();x=r.left+r.width/2-w/2;y=r.top-h-14}
+  else{const sp=$(`.cue[data-id="${c.id}"]`),r=sp?.getClientRects()[0];if(!r)return;const sr=doc.getBoundingClientRect(),
+    y0=cl(r.top,sr.top+$(".act-h").offsetHeight,sr.bottom),y1=cl(r.bottom,y0,sr.bottom);x=c.right?r.right+10:r.left-10-w;y=c.up?y1-h:y0}
+  c.el.style.left=cl(x,16,vw-16-w)+"px";c.el.style.top=cl(y,8,vh-h-8)+"px";placeBar(c);
 }
 function follow(c,ms=400){const t0=performance.now();(function f(){if(card!==c)return;place(c);if(performance.now()-t0<ms)requestAnimationFrame(f)})()}
 const clipPlay=c=>{c.clipOn=true;c.clip.play()}, clipPause=c=>{c.clipOn=false;c.clip.pause()};
 
 /* one container: hover shows the clip, click stretches the same container open */
-function mount(id){
-  closeCard();const el=document.createElement("div");el.className="pop";document.body.appendChild(el);
-  const r0=$(`.cue[data-id="${id}"]`).getClientRects()[0],sr=doc.getBoundingClientRect();
-  card={id,el,mode:"idle",open:false,right:(r0.left+r0.right)/2<sr.left+sr.width/2,up:(r0.top+r0.bottom)/2>sr.top+sr.height/2,free:false,fx:0,fy:0,dragged:false,
-    clip:makeClip(id),clipOn:false,playing:false,hover:false};
-  const c=card;el.addEventListener("pointerenter",()=>{c.hover=true;clearTimeout(hideT);if(!c.open)link(c.id,true)});
+function mount(id,anchor){
+  closeCard();const el=document.createElement("div"),ext=anchor==="stage";el.className="pop"+(ext?" ext":"");document.body.appendChild(el);
+  const r0=$(`.cue[data-id="${id}"]`)?.getClientRects()[0],sr=doc.getBoundingClientRect();
+  card={id,el,ext,open:false,mode:"cue",anchor:anchor||(r0?"script":"score"),right:r0?(r0.left+r0.right)/2<sr.left+sr.width/2:true,up:r0?(r0.top+r0.bottom)/2>sr.top+sr.height/2:false,
+    free:false,fx:0,fy:0,dragged:false,clip:ext?stage.clip:makeClip(id),clipOn:false,hover:false,pend:[],text:"",lastT:0};
+  const c=card;c.unsub=c.clip.onTime(t=>tick(c,t));
+  el.addEventListener("pointerenter",()=>{c.hover=true;clearTimeout(hideT);if(!c.open)link(c.id,true)});
   el.addEventListener("pointerleave",()=>{c.hover=false;if(!c.open){link(c.id,false);peekHide()}});
-  el.addEventListener("pointerdown",e=>{if(e.button||e.target.closest("button"))return;
+  el.addEventListener("pointerdown",e=>{
+    const sb=e.target.closest(".scrub");if(sb)return scrubDown(e,sb);
+    if(e.button||e.target.closest("button,textarea,.thread,.draw"))return;
     const x0=e.clientX,y0=e.clientY,bb=el.getBoundingClientRect();c.dragged=false;el.setPointerCapture(e.pointerId);
     const mv=ev=>{const mx=ev.clientX-x0,my=ev.clientY-y0;if(!c.dragged&&Math.hypot(mx,my)<4)return;c.dragged=true;el.classList.add("dragging");c.free=true;c.fx=bb.left+mx;c.fy=bb.top+my;place(c)};
     const up=()=>{el.classList.remove("dragging");el.removeEventListener("pointermove",mv);el.removeEventListener("pointerup",up);el.removeEventListener("pointercancel",up);setTimeout(()=>{c.dragged=false},0)};
     el.addEventListener("pointermove",mv);el.addEventListener("pointerup",up);el.addEventListener("pointercancel",up)});
-  clipPlay(card);render();
+  el.addEventListener("input",e=>{if(e.target.tagName!=="TEXTAREA")return;c.text=e.target.value;autosize(e.target);mentionCheck(e.target)});
+  el.addEventListener("keydown",e=>{if(e.target.tagName!=="TEXTAREA")return;
+    if(mn){if(e.key==="ArrowDown"||e.key==="ArrowUp"){e.preventDefault();mnMove(e.key==="ArrowDown"?1:-1);return}
+      if(e.key==="Enter"||e.key==="Tab"){e.preventDefault();pickMn(mn.items[mn.i]);return}
+      if(e.key==="Escape"){e.stopPropagation();hideMn();return}}
+    if(e.key==="Escape"){e.stopPropagation();e.target.blur();return}
+    if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();send()}});
+  if(!ext)clipPlay(card);render();
 }
-function peekShow(id){clearTimeout(hideT);if(card&&(card.open||card.id===id))return;clearTimeout(showT);showT=setTimeout(()=>mount(id),70)}
+function peekShow(id){if(VIEW==="clips")return;clearTimeout(hideT);if(card&&(card.open||card.id===id))return;clearTimeout(showT);showT=setTimeout(()=>mount(id),70)}
 function peekHide(){clearTimeout(showT);clearTimeout(hideT);hideT=setTimeout(()=>{if(card&&!card.open&&!card.hover)closeCard()},220)}
-function closeCard(){clearTimeout(showT);clearTimeout(hideT);if(!card)return;const id=card.id;clearInterval(card.timer);clearInterval(card.cd);clearTimeout(card.auto);card.clip.destroy();card.el.remove();card=null;
-  $$(".ci.open").forEach(c=>c.classList.remove("open"));setG(RG[id],restKey(CUES[id]),restColor)}
+function closeCard(){clearTimeout(showT);clearTimeout(hideT);if(!card)return;const id=card.id,ext=card.ext;stopAudio();stopMemo(true);hideMn();hideMenu();
+  card.unsub?.();if(ext)card.clip.clearLoop();else card.clip.destroy();card.el.remove();card=null;ftb.hidden=kbb.hidden=true;$$(".cm.on",tl).forEach(x=>x.classList.remove("on"));
+  if(TOOL&&!ext){TOOL=null;renderTool()}
+  if(VIEW==="clips"){stage.anc=null;renderRuler()}else phHide();
+  $$(".ci.open").forEach(c=>c.classList.remove("open"));if(CUES[id])setG(RG[id],restKey(CUES[id]),restColor)}
+
+/* every frame the card's clip reports its time: move the playheads, show frame anchors in range, auto-pause at comments (the stage does the same for itself) */
+function tick(c,t){if(card!==c||!c.ui)return;const q=CUES[c.id];
+  c.ui.tc.textContent=`${tc(t)} / ${tc(q.dur)}`;if(c.ui.phd)c.ui.phd.style.left=cl(t/q.dur*100,0,100)+"%";
+  const pz=c.clip.paused;if(c.ui.pp&&pz!==c.ui.pz){c.ui.pz=pz;c.ui.pp.innerHTML=pz?ICON.play:ICON.pause}
+  phShow(c.id,t);
+  const html=anchorsHTML(c.id,t);if(html!==c.ancHTML){c.ancHTML=html;c.ui.anc.innerHTML=html}
+  if(autoPause&&c.open&&c.mode==="cue"&&!pz&&t>c.lastT&&t-c.lastT<.5){const hit=commentsOf(c.id).find(m=>m.t0>c.lastT&&m.t0<=t);
+    if(hit){c.clip.pause();c.clip.seek(hit.t0);t=hit.t0;toast("Paused at a comment",snip(hit,48),hit.cat,"seed")}}
+  c.lastT=t}
+const avHTML=k=>`<span class="av" style="--c:var(${PEOPLE[k].c})" title="${PEOPLE[k].n} · ${PEOPLE[k].r}">${PEOPLE[k].i}</span>`;
+/* frame anchors visible at time t: the open comment's always, others while the playhead is inside their range; plus the box or edge of a comment being written */
+function anchorsHTML(id,t){const writing=card?.id===id&&card.mode==="draft";
+  const vis=commentsOf(id).filter(m=>(m.box||m.edge)&&(card?.cid===m.id||!writing&&t>=m.t0-.1&&t<=(m.t1??m.t0+1.5)));
+  if(writing&&(card.draft.box||card.draft.edge))vis.push({id:"draft",cat:card.draft.cat,box:card.draft.box,edge:card.draft.edge});
+  return vis.map(ancHTML).join("")}
+function ancHTML(m){const who=avHTML(m.msgs?m.msgs[0].by:ME()),on=card?.cid===m.id||m.id==="draft";
+  if(m.box){const b=m.box;return `<div class="abox${on?" on":""}" style="left:${b.x*100}%;top:${b.y*100}%;width:${b.w*100}%;height:${b.h*100}%;--c:var(--${m.cat})">${who}</div>`}
+  return `<div class="aedge ${m.edge}" style="--c:var(--${m.cat})">${who}<span>${ARROW[m.edge]} Off-screen ${m.edge}</span></div>`}
+
 function render(){
-  const {id,el,mode}=card,q=CUES[id],has=done(q),c=`--${q.c}`;
+  const {id,el,mode,ext}=card,q=CUES[id],c=`--${q.c}`,pl=!card.clip.paused,n=commentsOf(id).length;hideMn();
   el.classList.toggle("open",card.open);
-  const status=has?(q.s==="library"?"From library":"Uploaded"):"No file yet";
-  let more;
-  if(mode==="lib"){
-    const rows=ranked(q,card.cat);
-    more=`<div class="lib"><div class="lib-h"><button class="btn btn-ghost btn-icon" data-act="lback" aria-label="Back">${ICON.back}</button>Library<small>${rows.length} files</small></div>
-      <div class="chips">${["all",...Object.keys(CATS)].map(k=>`<button class="chip" data-act="lcat" data-cat="${k}" aria-pressed="${card.cat===k}"${k==="all"?"":` style="--c:var(--${k})"`}>${k==="all"?"All":`<i></i>${CATS[k]}`}</button>`).join("")}</div>
-      <div class="lrows">${rows.map(l=>`<div class="lr${l.fit?" fit":""}"><button class="btn btn-ghost btn-icon" data-act="lprev" data-lid="${l.id}" aria-label="Preview ${l.n}">${ICON.play}</button><div class="lm"><div class="n">${l.n}</div><small>${l.fit?`<span class="fitb">Best fit</span>`:""}${CATS[l.c]} · ${fmtD(l.dur)}${l.user?" · yours":""}</small></div><button class="btn btn-outline" data-act="luse" data-lid="${l.id}">Use</button></div>`).join("")||`<p class="empty">No files in this category yet.</p>`}</div></div>`;
-  }else{
-    more=`<div class="hero${has?"":" dz"}" style="--c:var(${c})">${has
-      ?`<div class="wave${card.playing?" playing":""}" style="--d:${card.pdur||1.7}s"><div class="bars">${wave(id,q.c,q.f?.peaks)}</div><button class="btn clear" data-act="clear">${ICON.trash}Remove file</button></div><span class="tag"><i style="background:var(${c})"></i>${fileOf(q)}</span><div class="tl"><button class="btn btn-ghost btn-icon" data-act="play" aria-label="Preview sound">${ICON.play}</button></div>`
-      :`<button class="dzb" data-act="upload">${ICON.up}<b>Drop an audio file</b><small>or click to browse</small></button>`}</div>
-      <div class="head"><div><h3>${q.n}</h3><div class="sub">Scene ${q.scene} · ${CATS[q.c]}</div></div><span class="badge" style="--c:var(${c})"><i></i>${status}</span></div>
-      <div class="body"><div class="lab">Director's note</div><p class="note">${q.d}</p>
-        <p class="line">In the script: <em>“${$(`.cue[data-id="${id}"]`).textContent}”</em></p></div>
-      <div class="acts"><button class="btn btn-drop" data-act="upload">${ICON.up}${has?"Replace file":"Upload audio"}</button>
-      <button class="btn btn-outline" data-act="lib">${ICON.lib}${has?"Swap from library":"Find from library"}</button></div>`;
-  }
-  el.innerHTML=`<div class="panel">
-    <div class="clipslot"><div class="mediaslot"></div><span class="cliptag" style="--c:var(${c})"><i></i>Clip · 0:04</span><button class="btn btn-ghost btn-icon x" data-act="close" aria-label="Close">${ICON.x}</button></div>
-    <div class="cap"><div><div class="peekcap"><span>Scene ${q.scene} · ${CATS[q.c]}</span></div></div></div>
-    <div class="more"><div>${more}</div></div></div>`;
-  el.querySelector(".mediaslot").replaceWith(card.clip.el);if(card.clipOn)card.clip.play();
-  place(card);
+  const more=headHTML()+(mode==="thread"&&COMMENTS[card.cid]?threadHTML():mode==="draft"?composeHTML("Enter your comment"):cueHTML());
+  el.innerHTML=ext?`<div class="panel"><div class="more"><div>${more}</div></div></div>`:`<div class="panel">
+    <div class="clipslot"><div class="mediaslot"></div><div class="anc"></div><div class="toolslot"></div><span class="cliptag" style="--c:var(${c})"><i></i><span class="tc"></span></span><div class="ptools">${toolsHTML()}</div></div>
+    <div class="cap"><div><div class="peekcap"><span>Scene ${q.scene} · ${CATS[q.c]}</span><span>${n?`${n} comment${n>1?"s":""}`:""}</span></div></div></div>
+    <div class="more"><div>${scrubHTML()}${more}</div></div></div>`;
+  if(ext){card.ui=null;stage.anc=null;renderRuler()}
+  else{el.querySelector(".mediaslot").replaceWith(card.clip.el);if(pl)card.clip.play();
+    card.ui={tc:$(".tc",el),phd:$(".phd",el),anc:$(".anc",el),pp:$('[data-act="pp"]',el),pz:null};card.ancHTML=null;tick(card,card.clip.currentTime)}
+  $$(".cm.on",tl).forEach(x=>x.classList.remove("on"));if(card.cid)$(`.cm[data-cid="${card.cid}"]`,tl)?.classList.add("on");
+  $$(".slot.cur",tl).forEach(x=>x.classList.remove("cur"));if(card.open)$(`.slot[data-id="${id}"]`,tl)?.classList.add("cur");
+  const ta=$("textarea",el);if(ta){autosize(ta);if(card.focus){ta.focus();ta.setSelectionRange(ta.value.length,ta.value.length);card.focus=false}}
+  if(card.scrollEnd){const m=$(".more>div",el);m.scrollTop=m.scrollHeight;card.scrollEnd=false}
+  renderTool();place(card);
 }
-function openCard(id){
+const autosize=ta=>{ta.style.height="auto";ta.style.height=Math.min(120,ta.scrollHeight)+"px"};
+function scrubHTML(){const q=CUES[card.id],P=v=>(cl(v/q.dur,0,1)*100).toFixed(2)+"%",m=card.mode==="thread"?COMMENTS[card.cid]:card.mode==="draft"?card.draft:null;
+  const rs=commentsOf(card.id).map(x=>`<i class="r" style="left:${P(x.t0)};${x.t1!=null?`width:${P(x.t1-x.t0)};`:""}--c:var(--${x.cat})"></i>`).join("");
+  return `<div class="sbar"><button class="btn btn-ghost btn-icon" data-act="pp" aria-label="Play or pause">${card.clip.paused?ICON.play:ICON.pause}</button><div class="scrub" title="Click to seek, drag to comment on a range">${rs}${m&&m.t1!=null?`<i class="lp" style="left:${P(m.t0)};width:${P(m.t1-m.t0)}"></i>`:""}<i class="phd"></i></div></div>`}
+/* header: what you're looking at, its state, close. Status lives in a chip whose menu only offers what your role can do */
+function headHTML(){const q=CUES[card.id];let back=false,title,meta,chip;
+  if(card.mode==="thread"&&COMMENTS[card.cid]){const m=COMMENTS[card.cid];back=!card.ext;title=q.n;meta=`${rangeTxt(m)} · ${CATS[m.cat]} · ${PRI[m.pri].n} priority`;chip=statusChip(m)}
+  else if(card.mode==="draft"){const d=card.draft;back=!card.ext;title="Add comment";meta=`${q.n} · ${rangeTxt(d)} · ${CATS[d.cat]}`;
+    chip=d.box||d.edge?`<button class="stc" data-act="noanc" title="Remove from the frame">${d.box?ICON.box:ICON.edge}${d.box?"Box":`Off-screen ${d.edge}`}${ICON.x}</button>`:`<span class="kh">B box · E off-screen</span>`}
+  else{title=q.n;meta=`Scene ${q.scene} · ${CATS[q.c]} · ${fmtD(q.dur)}`;chip=cueChip(q,"data-act")}
+  return `<div class="ch">${back?`<button class="btn btn-ghost btn-icon bk" data-act="back" aria-label="Back to cue">${ICON.back}</button>`:""}<div class="tt"><b>${esc(title)}</b><small>${esc(meta)}</small></div>${chip}<button class="btn btn-ghost btn-icon" data-act="close" aria-label="Close">${ICON.x}</button></div>`}
+const chipHTML=(label,c,attr,acts,wait)=>acts.length?`<button class="stc" ${attr} style="--c:var(${c})" title="Change status"><i></i>${label}${ICON.down}</button>`:`<span class="stc" style="--c:var(${c})" title="${wait||""}"><i></i>${label}</span>`;
+/* open → addressed (foley artist) → approved (director only) */
+const statusActs=m=>ROLE==="foley"?(m.status==="open"?[["addressed","Mark addressed"]]:[]):m.status==="addressed"?[["approved","Approve"],["open","Reopen"]]:m.status==="approved"?[["open","Reopen"]]:[];
+const statusChip=m=>chipHTML(STATUS[m.status].n,STATUS[m.status].c,'data-act="stmenu"',statusActs(m),ROLE==="foley"?"Waiting on the director":"Waiting on the foley artist");
+/* approving a cue puts it on the foley artist's recording checklist; the foley artist ticks it off once it's recorded */
+const cueActs=q=>ROLE==="director"?(q.s==="none"?[["approved","Approve cue"]]:[["none","Undo approval"]]):q.s==="approved"?[["recorded","Mark recorded"]]:q.s==="recorded"?[["approved","Not recorded yet"]]:[];
+const CUEST={none:["Not approved","--muted-foreground"],approved:["To record","--props"],recorded:["Recorded","--ambience"]};
+const cueChip=(q,attr)=>chipHTML(CUEST[q.s][0],CUEST[q.s][1],`${attr}="cuemenu"`,cueActs(q),"Waiting on director approval");
+const cueMenu=id=>`<div class="mh">Cue</div>${cueActs(CUES[id]).map(([v,l])=>`<button data-m="cue" data-id="${id}" data-v="${v}">${ICON.check}${l}</button>`).join("")}`;
+function cueHTML(){const id=card.id,q=CUES[id],cs=commentsOf(id);
+  return `<button class="cnote" data-act="note" aria-expanded="${!!card.noteOpen}"><b>Director's note</b>${esc(q.d)}</button>
+    <div class="clist">${cs.map(m=>`<button class="crow" data-act="thread" data-cid="${m.id}">${avHTML(m.msgs[0].by)}<span>${esc(snip(m))}</span><small><i class="dot" style="--c:var(${STATUS[m.status].c})" title="${STATUS[m.status].n}"></i>${m.t1!=null?`${tc(m.t0)}–${tc(m.t1)}`:tc(m.t0)}</small></button>`).join("")||`<p class="empty">No comments yet.</p>`}</div>
+    ${composeHTML(`Comment at ${tc(card.clip.currentTime)}`)}`}
+function threadHTML(){const m=COMMENTS[card.cid];return `<div class="thread">${m.msgs.map(msgHTML).join("")}</div>${composeHTML("Reply… @ to mention")}`}
+function msgHTML(x,i){if(x.sys)return `<div class="msg sys">${esc(x.text)} · ${rel(x.at)}</div>`;const p=PEOPLE[x.by],rx=Object.entries(x.react||{}).filter(([,a])=>a.length);
+  return `<div class="msg">${avHTML(x.by)}<div><div class="who">${p.n}<small>${p.r} · ${rel(x.at)}</small></div>${x.text?`<p>${fmtText(x.text)}</p>`:""}${(x.audio||[]).map(a=>audHTML(a)).join("")}
+    ${rx.length?`<div class="rxs">${rx.map(([e,a])=>`<button class="rx" data-act="rx" data-mi="${i}" data-e="${e}" aria-pressed="${a.includes(ME())}" title="${a.map(first).join(", ")}">${e}<b>${a.length}</b></button>`).join("")}</div>`:""}</div></div>`}
+function audHTML(aid,pend){const a=AUD[aid];
+  return `<div class="hero sm" data-aid="${aid}" style="--c:var(--${a.cat})"><div class="wave"><div class="bars">${wave(aid,a.cat,a.peaks)}</div></div><span class="tag"><i style="background:var(--${a.cat})"></i>${KIND[a.kind]} · ${esc(a.name)}</span>
+    <div class="tl"><button class="btn btn-ghost btn-icon" data-act="aplay" data-aid="${aid}" aria-label="Play ${esc(a.name)}">${ICON.play}</button>${pend?`<button class="btn btn-ghost btn-icon" data-act="unpend" data-aid="${aid}" aria-label="Remove">${ICON.x}</button>`:""}</div></div>`}
+const composeHTML=ph=>`<div class="compose">${card.pend.length?`<div class="pend">${card.pend.map(a=>audHTML(a,true)).join("")}</div>`:""}
+  <div class="cin">${avHTML(ME())}<textarea rows="1" placeholder="${ph}" aria-label="${ph}">${esc(card.text)}</textarea>
+    ${card.rec?`<button class="btn mic rec" data-act="memo" aria-label="Stop recording">${ICON.stop}<span class="rt">0:00</span></button>`:`<button class="btn btn-ghost mic" data-act="memo" title="Voice memo" aria-label="Record a voice memo">${ICON.mic}</button>`}
+    <button class="btn send" data-act="send" aria-label="Send">${ICON.send}</button></div></div>`;
+
+/* open the card (o.anchor: "script" | "score"; o.t: seek; o.cid: open that thread; o.draft: [t0,t1] start a new comment; o.anc: {box}|{edge} for it).
+   In clip view the stage is the player: seeking or picking a clip needs no card, only threads and new comments do */
+function openCard(id,o={}){
   clearTimeout(showT);clearTimeout(hideT);
-  if(card&&card.open&&card.id===id)return;
-  if(!card||card.id!==id)mount(id);
-  card.open=true;$(`.ci[data-id="${id}"]`).classList.add("open");setG(RG[id],"bud",`--${CUES[id].c}`);
-  card.el.classList.add("open");follow(card);
+  if(VIEW==="clips"){stageLoad(id);if(o.t!=null)stage.clip.seek(o.t);if(!o.cid&&!o.draft){closeCard();return}}
+  const anchor=VIEW==="clips"?"stage":o.anchor;
+  if(!card||card.id!==id)mount(id,anchor);else if(anchor&&!card.free&&!card.ext)card.anchor=anchor;
+  card.acid=o.cid||null;card.open=true;$(`.ci[data-id="${id}"]`)?.classList.add("open");setG(RG[id],"bud",`--${CUES[id].c}`);card.el.classList.add("open");revealSlot(id);
+  if(o.cid)return openThread(o.cid);
+  if(o.draft)return openDraft(o.draft[0],o.draft[1],o.anc);
+  if(o.t!=null)card.clip.seek(o.t);
+  if(card.mode!=="cue")toCue();else{render();follow(card)}
 }
-/* library of files the designer already owns (stand-ins), plus anything uploaded this session */
-const LIBSRC={ambience:[["Crowd murmur, small",14],["Stadium bed, distant",32],["Hotel corridor room tone",20],["Living room TV bleed",18],["Wind through fence",12],["Night street hum",26],["Lobby chatter",22]],
-  footsteps:[["Sneakers on hard court",6],["Heels on tile",8],["Bare feet on wood",5],["Gravel walk",9],["Stairwell steps",7],["Dress shoes on carpet",6]],
-  props:[["Racket string pluck",2],["Lotion pump",3],["Marker on paper",4],["Ball bounce, hard floor",5],["Keys on counter",3],["Towel snap",2],["Cup set down",2]],
-  cloth:[["Jacket rustle",4],["Towel wipe",3],["Sheets shift",6],["Skirt swish",3],["Sleeve brush",2]],
-  hardfx:[["Ball impact crack",2],["Alarm clock buzz",5],["Door slam",3],["Racket smash",4],["Low impact thud",3],["Glass crash",4]],
-  score:[["Pulse synth drone",48],["Tension strings swell",24],["Low brass hit",6],["Techno loop 128bpm",32],["Piano motif, sparse",40]]};
-const LIB=[];let lid=0;Object.entries(LIBSRC).forEach(([c,a])=>a.forEach(([n,d])=>LIB.push({id:"l"+lid++,c,n,dur:d})));
-const fmtD=t=>Math.floor(t/60)+":"+String(Math.round(t%60)).padStart(2,"0");
-let curSrc=null;
-function playFile(f,cat){actx();ac.resume();try{curSrc&&curSrc.stop()}catch(e){}curSrc=null;
-  if(f&&f.buf){const src=ac.createBufferSource(),g=ac.createGain();src.buffer=f.buf;g.gain.value=.8;src.connect(g).connect(ac.destination);src.start();curSrc=src}else play(cat)}
+function toCue(){const c=card;if(c.ext)return closeCard();stopAudio();stopMemo(true);c.mode="cue";c.cid=null;c.draft=null;c.pend=[];c.text="";c.clip.clearLoop();render();follow(c)}
+function openThread(cid){const c=card,m=COMMENTS[cid];stopAudio();stopMemo(true);c.mode="thread";c.cid=cid;c.draft=null;c.pend=[];c.text="";
+  c.clip.seek(m.t0);if(m.t1!=null){c.clip.setLoop(m.t0,m.t1);c.clip.play()}else{c.clip.clearLoop();c.clip.pause()}
+  render();follow(c)}
+function openDraft(t0,t1,anc){const c=card,q=CUES[c.id];stopAudio();stopMemo(true);
+  c.mode="draft";c.cid=null;c.draft={t0,t1:t1!=null&&t1-t0>=.15?t1:null,cat:q.c,pri:"med",box:anc?.box||null,edge:anc?.edge||null};c.pend=[];c.text="";
+  c.clip.pause();c.clip.seek(t0);if(c.draft.t1!=null)c.clip.setLoop(t0,c.draft.t1);else c.clip.clearLoop();c.focus=true;render();follow(c)}
 
-/* best fit: words (and loose synonyms) shared between the cue and a file's name, with a nudge for matching category */
-const SYN=[["thwack","hit","crack","impact","smash","slam","thud","whop","strike","pounce"],["alarm","blare","buzz","clock","ring"],["crowd","murmur","chatter","audience","stadium","tone","room"],["towel","cloth","rustle","sheet","jacket","sleeve","brush","wipe","swish"],["step","sneaker","shoe","heel","gravel","stair","baseline","walk"],["drone","pulse","score","synth","strings","brass","piano","techno","music","tension"],["glass","crash","shatter","drop"],["racket","ball","bounce","tennis"],["lotion","pump","marker","mirror","sharpie"]];
-const toks=t=>{const o=new Set;(t.toLowerCase().match(/[a-z]+/g)||[]).forEach(w=>{if(w.length<3)return;w=w.length>4?w.replace(/s$/,""):w;o.add(w);SYN.forEach((g,i)=>g.includes(w)&&o.add("#"+i))});return o};
-function ranked(q,cat){const id=card.id,ct=toks(q.n+" "+q.d+" "+($(`.cue[data-id="${id}"]`)?.textContent||""));
-  const sc=LIB.map((l,i)=>{let n=0;toks(l.n).forEach(t=>ct.has(t)&&n++);return{l,i,v:n*2+(l.c===q.c?1:0)}});
-  const best=new Set(sc.filter(x=>x.v>=3).sort((a,b)=>b.v-a.v||a.i-b.i).slice(0,3).map(x=>x.l.id));
-  return sc.filter(x=>cat==="all"||x.l.c===cat).map(x=>({...x.l,fit:best.has(x.l.id)})).sort((a,b)=>b.fit-a.fit)}
+/* scrubber: click seeks, drag selects a range and starts a comment on it */
+function scrubDown(e,s){e.preventDefault();const c=card,D=CUES[c.id].dur,r=s.getBoundingClientRect(),T=ev=>cl((ev.clientX-r.left)/r.width)*D,a=T(e),x0=e.clientX;let b=null,lp=null;s.setPointerCapture(e.pointerId);
+  const mv=ev=>{if(b==null&&Math.abs(ev.clientX-x0)<4)return;b=T(ev);if(!lp){lp=document.createElement("i");lp.className="lp";s.appendChild(lp)}const lo=Math.min(a,b),hi=Math.max(a,b);lp.style.left=lo/D*100+"%";lp.style.width=(hi-lo)/D*100+"%";c.clip.seek(b)};
+  const up=()=>{s.removeEventListener("pointermove",mv);s.removeEventListener("pointerup",up);s.removeEventListener("pointercancel",up);
+    if(b==null||Math.abs(b-a)<.15)c.clip.seek(a);else openDraft(Math.min(a,b),Math.max(a,b),c.mode==="draft"?{box:c.draft.box,edge:c.draft.edge}:null)};
+  s.addEventListener("pointermove",mv);s.addEventListener("pointerup",up);s.addEventListener("pointercancel",up)}
 
-/* put a file on a cue: from upload, drag-and-drop or the library */
-function useFile(id,f,s,msg){const q=CUES[id];if(!q)return;q.s=s;q.f=f;
-  setG(NG[id],"set",`--${q.c}`);setTimeout(()=>NG[id]&&setG(NG[id],"check",`--${q.c}`),1200);setG(RG[id],"set",`--${q.c}`);
-  if(card&&card.id===id){card.mode="idle";clipPlay(card);render()}tally();toast(msg,f.name,q.c)}
-const isAudio=f=>/^audio\//.test(f.type)||/\.(wav|aiff?|mp3|m4a|flac|ogg|opus)$/i.test(f.name);
-async function readAudio(file){try{actx();const buf=await ac.decodeAudioData(await file.arrayBuffer());const d=buf.getChannelData(0),n=48,st=Math.max(1,Math.floor(d.length/n));
-    const peaks=Array.from({length:n},(_,i)=>{let m=0;for(let j=i*st;j<Math.min(d.length,(i+1)*st);j+=Math.ceil(st/200))m=Math.max(m,Math.abs(d[j]));return m});const mx=Math.max(...peaks)||1;
-    return{name:file.name,dur:buf.duration,buf,peaks:peaks.map(v=>v/mx)}}catch(e){return null}}
-const guessCat=n=>{const t=toks(n),hit=[[7,"props"],[8,"props"],[4,"footsteps"],[2,"ambience"],[3,"cloth"],[0,"hardfx"],[1,"hardfx"],[6,"hardfx"],[5,"score"]].find(([g])=>t.has("#"+g));return hit?hit[1]:"props"};
-function libAdd(f,cat){const l={id:"l"+lid++,c:cat,n:f.name.replace(/\.[^.]+$/,""),dur:f.dur,user:true,f};LIB.push(l);renderLib();return l}
-async function addFile(id,file){const q=CUES[id];if(!q)return;
-  if(!isAudio(file)){toast("Not an audio file",file.name,q.c,"seed");return}
-  const f=await readAudio(file);if(!f){toast("Couldn't read that file",file.name,q.c,"seed");return}
-  libAdd(f,q.c);useFile(id,f,"upload","File added")}
-async function addToLib(files){for(const file of files){
-  if(!isAudio(file)){toast("Not an audio file",file.name,"props","seed");continue}
-  const f=await readAudio(file);if(!f){toast("Couldn't read that file",file.name,"props","seed");continue}
-  const c=libCat!=="all"?libCat:guessCat(f.name.replace(/[_-]+/g," "));libAdd(f,c);toast("Added to library",f.name,c)}}
+/* ---------- frame tools, Google Drive style: press B (or the box button) and drag on the paused frame; press E and pick an edge.
+   The comment card opens beside the mark with the input focused ---------- */
+const curClipId=()=>VIEW==="clips"?stage.id:card&&!card.ext?card.id:null;
+const activeClip=()=>VIEW==="clips"?stage.clip:card?.clip;
+const toolTarget=()=>VIEW==="clips"?$("#stTool"):card&&card.open&&!card.ext?$(".toolslot",card.el):null;
+function startTool(k){if(!toolTarget()){toast("Open a cue first","Then press B to draw on its frame","props","seed");return}
+  activeClip().pause();TOOL=TOOL===k?null:k;renderTool()}
+function renderTool(){$$(".toolslot,#stTool").forEach(x=>x.innerHTML="");$$("[data-tool]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.tool===TOOL));
+  const tgt=toolTarget();if(!tgt||!TOOL)return;const id=curClipId(),cat=card?.id===id&&card.mode==="draft"?card.draft.cat:CUES[id].c;
+  tgt.innerHTML=TOOL==="box"?`<div class="draw" style="--c:var(--${cat})"><small>Drag to draw a box · Esc to cancel</small></div>`
+    :`<div class="draw edges" style="--c:var(--${cat})">${Object.keys(ARROW).map(e=>`<button class="ep ${e}" data-edge="${e}" aria-label="Off-screen ${e}">${ARROW[e]}</button>`).join("")}<small>Where does the sound come from?</small></div>`}
+function finishAnchor(a){const id=curClipId(),clip=activeClip();TOOL=null;renderTool();if(!id)return;
+  if(card&&card.id===id&&card.mode==="draft"){Object.assign(card.draft,{box:null,edge:null},a);card.focus=true;render();follow(card)}
+  else openCard(id,{draft:[clip.currentTime,null],anc:a})}
+function newComment(){const id=curClipId();if(!id){toast("Open a cue first","Then press C to comment at the playhead","props","seed");return}openCard(id,{draft:[activeClip().currentTime,null]})}
+/* box: drag on the frame; stored in 0–1 coordinates so it fits any player size */
+function drawDown(e,dr){e.preventDefault();const r=dr.getBoundingClientRect(),P=ev=>[cl((ev.clientX-r.left)/r.width),cl((ev.clientY-r.top)/r.height)],[x0,y0]=P(e);
+  const bx=document.createElement("div");bx.className="abox";dr.appendChild(bx);dr.setPointerCapture(e.pointerId);let box=null;
+  const mv=ev=>{const [x,y]=P(ev);box={x:Math.min(x,x0),y:Math.min(y,y0),w:Math.abs(x-x0),h:Math.abs(y-y0)};Object.assign(bx.style,{left:box.x*100+"%",top:box.y*100+"%",width:box.w*100+"%",height:box.h*100+"%"})};
+  const up=()=>{dr.removeEventListener("pointermove",mv);dr.removeEventListener("pointerup",up);dr.removeEventListener("pointercancel",up);
+    if(box&&box.w>.03&&box.h>.03)finishAnchor({box});else bx.remove()};
+  dr.addEventListener("pointermove",mv);dr.addEventListener("pointerup",up);dr.addEventListener("pointercancel",up)}
+document.addEventListener("pointerdown",e=>{const dr=e.target.closest?.(".draw:not(.edges)");if(dr){e.stopPropagation();drawDown(e,dr)}},true);
 
-/* library section: collapsible, filterable, takes uploads and drops; rows can be dragged onto cues */
-let libCat="all";const libsec=$("#libsec");
-function renderLib(){$("#libN").textContent=LIB.length+" files";
-  $("#libUp").innerHTML=ICON.up+"Upload to library";
-  $("#libChips").innerHTML=["all",...Object.keys(CATS)].map(k=>`<button class="chip" data-cat="${k}" aria-pressed="${libCat===k}"${k==="all"?"":` style="--c:var(--${k})"`}>${k==="all"?"All":`<i></i>${CATS[k]}`}</button>`).join("");
-  $("#libGrid").innerHTML=LIB.filter(l=>libCat==="all"||l.c===libCat).map(l=>`<div class="lr lone" draggable="true" data-lid="${l.id}" title="Drag onto a cue"><button class="btn btn-ghost btn-icon" data-lprev="${l.id}" aria-label="Preview ${l.n}">${ICON.play}</button><div class="lm"><div class="n">${l.n}</div><small>${CATS[l.c]} · ${fmtD(l.dur)}${l.user?" · yours":""}</small></div></div>`).join("")}
-renderLib();
-$("#libT").addEventListener("click",()=>{const c=libsec.classList.toggle("collapsed");$("#libT").setAttribute("aria-expanded",!c)});
-$("#libChips").addEventListener("click",e=>{const b=e.target.closest(".chip");if(b){libCat=b.dataset.cat;renderLib()}});
-$("#libGrid").addEventListener("click",e=>{const b=e.target.closest("[data-lprev]");if(b){const it=LIB.find(l=>l.id===b.dataset.lprev);playFile(it.f,it.c)}});
-$("#libGrid").addEventListener("dragstart",e=>{const r=e.target.closest(".lr");if(!r)return;e.dataTransfer.setData("text/x-lib",r.dataset.lid);e.dataTransfer.effectAllowed="copy"});
-$("#libUp").addEventListener("click",()=>{fin._id=null;fin.multiple=true;fin.click()});
-
-function clearFile(id){const q=CUES[id];if(!q)return;const n=fileOf(q);q.s="none";delete q.f;
-  setG(NG[id],"seed","--muted-foreground");setG(RG[id],"bud",`--${q.c}`);if(card&&card.id===id)render();tally();toast("File removed",n,q.c,"seed")}
-const fin=document.createElement("input");fin.type="file";fin.accept="audio/*,.wav,.aif,.aiff,.mp3,.m4a,.flac,.ogg";fin.hidden=true;document.body.appendChild(fin);
-fin.addEventListener("click",e=>e.stopPropagation());
-fin.addEventListener("change",()=>{const fs=[...fin.files],id=fin._id;fin.value="";fin.multiple=false;if(!fs.length)return;if(id)addFile(id,fs[0]);else addToLib(fs)});
-/* drag a file onto a cue in the script, its entry in the list, or its card */
-const dtHas=(e,t)=>e.dataTransfer&&[...e.dataTransfer.types].includes(t);
-let dropEl=null;const setDrop=el=>{if(dropEl!==el){dropEl?.classList.remove("drop");dropEl=el;el?.classList.add("drop")}};
-const dropT=e=>{const files=dtHas(e,"Files"),t=e.target.closest?.(".cue,.ci,.pop"+(files?",.libsec":""));return t};
-document.addEventListener("dragover",e=>{if(!dtHas(e,"Files")&&!dtHas(e,"text/x-lib"))return;e.preventDefault();const t=dropT(e);setDrop(t);e.dataTransfer.dropEffect=t?"copy":"none"});
-document.addEventListener("dragleave",e=>{if(!e.relatedTarget)setDrop(null)});
-document.addEventListener("drop",e=>{const files=dtHas(e,"Files"),lib=dtHas(e,"text/x-lib");if(!files&&!lib)return;e.preventDefault();const t=dropT(e);setDrop(null);if(!t)return;
-  if(t.id==="libsec"){addToLib([...e.dataTransfer.files]);return}
-  const onCard=t.classList.contains("pop"),id=onCard?card?.id:t.dataset.id;if(!id)return;
-  if(lib){const it=LIB.find(l=>l.id===e.dataTransfer.getData("text/x-lib"));if(it)useFile(id,it.f||{name:it.n.toLowerCase().replace(/[^a-z0-9]+/g,"_")+".wav",dur:it.dur},"library","Pulled from library")}
-  else addFile(id,e.dataTransfer.files[0]);
-  if(!onCard)openCard(id)});
-
+/* everything clickable inside the open card */
+function cardAct(a){const c=card,id=c.id,act=a.dataset.act,m=c.cid&&COMMENTS[c.cid];
+  switch(act){
+    case "close":return closeCard();
+    case "pp":return c.clip.paused?c.clip.play():c.clip.pause();
+    case "thread":return openThread(a.dataset.cid);
+    case "back":return toCue();
+    case "note":c.noteOpen=!c.noteOpen;a.setAttribute("aria-expanded",c.noteOpen);return place(c);
+    case "cuemenu":return showMenu(a,cueMenu(id));
+    case "stmenu":return showMenu(a,`<div class="mh">Status</div>${statusActs(m).map(([v,l])=>`<button data-m="st" data-v="${v}">${ICON.check}${l}</button>`).join("")}`);
+    case "noanc":c.draft.box=c.draft.edge=null;return render();
+    case "send":return send();
+    case "memo":return memo();
+    case "aplay":return playAud(a.dataset.aid);
+    case "unpend":c.pend=c.pend.filter(x=>x!==a.dataset.aid);return render();
+    case "rx":return react(+a.dataset.mi,a.dataset.e);
+  }}
 document.addEventListener("click",e=>{
-  if(card&&!card.open&&card.el.contains(e.target)){e.stopPropagation();if(!card.dragged)openCard(card.id);return}
+  const path=e.composedPath(),inCard=!!card&&path.includes(card.el);
+  const ep=e.target.closest(".ep");if(ep){e.stopPropagation();return finishAnchor({edge:ep.dataset.edge})}
+  const pt=e.target.closest("[data-tool]");if(pt){e.stopPropagation();return pt.dataset.tool==="comment"?newComment():startTool(pt.dataset.tool)}
+  if(card&&!card.open&&inCard){e.stopPropagation();if(!card.dragged)openCard(card.id);return}
   const a=e.target.closest("[data-act]");
-  if(a&&card&&card.open&&card.el.contains(a)){const id=card.id,q=CUES[id],act=a.dataset.act;
-    if(act==="close")return closeCard();
-    if(act==="play"){const d=q.f?Math.min(q.f.dur,12):1.7;card.playing=true;card.pdur=d;render();playFile(q.f,q.c);
-      setTimeout(()=>{if(card&&card.id===id){card.playing=false;if(card.mode==="idle")render()}},d*1000+50);return}
-    if(act==="upload"){fin._id=id;fin.click();return}
-    if(act==="clear")return clearFile(id);
-    if(act==="lib"){card.mode="lib";card.cat=q.c;render();return}
-    if(act==="lback"){card.mode="idle";render();return}
-    if(act==="lcat"){card.cat=a.dataset.cat;render();return}
-    const it=LIB.find(l=>l.id===a.dataset.lid);
-    if(act==="lprev"&&it){playFile(it.f,it.c);return}
-    if(act==="luse"&&it){useFile(id,it.f||{name:it.n.toLowerCase().replace(/[^a-z0-9]+/g,"_")+".wav",dur:it.dur},"library","Pulled from library");return}
-    return;
-  }
+  if(a&&inCard){cardAct(a);return}
+  if(inCard)return;
+  const ck=e.target.closest(".ck");
+  if(ck&&list.contains(ck)){e.stopPropagation();const id=ck.closest(".ci").dataset.id,q=CUES[id];
+    if(ROLE!=="foley"){toast("The foley artist checks off takes","Switch to Foley in the header",q.c,"seed");return}
+    setCue(id,done(q)?"approved":"recorded");return}
   const t=e.target.closest(".cue,.ci");
-  if(t&&(doc.contains(t)||list.contains(t))){e.stopPropagation();const id=t.dataset.id;if(t.classList.contains("ci")&&!t.classList.contains("in")&&!t.classList.contains("open"))jumpTo(id,()=>openCard(id));else openCard(id);return}
-  if(card&&card.open&&!e.composedPath().includes(card.el))closeCard();
+  if(t&&(doc.contains(t)||list.contains(t))){e.stopPropagation();const id=t.dataset.id;
+    if(VIEW==="clips"||!$(`.cue[data-id="${id}"]`))openCard(id,{anchor:"score"});
+    else if(t.classList.contains("ci")&&!t.classList.contains("in")&&!t.classList.contains("open"))jumpTo(id,()=>openCard(id));else openCard(id);return}
+  if(card&&card.open&&!path.some(n=>n===ftb||n===kbb||n===menu||n.tagName==="HEADER"||n.id==="ruler"||n.classList?.contains("score")||n.classList?.contains("toasts")))closeCard();
 });
 doc.addEventListener("keydown",e=>{if(e.key==="Enter"&&e.target.classList.contains("cue"))e.target.click()});
-document.addEventListener("keydown",e=>{if(e.key==="Escape")closeCard()});
+/* shortcuts: B box, E off-screen, C comment, space play/pause; in clip view ←/→ seek (shift: a tenth), [ ] previous/next clip */
+document.addEventListener("keydown",e=>{
+  if(e.key==="Escape"){if(!menu.hidden)return hideMenu();if(TOOL){TOOL=null;return renderTool()}return closeCard()}
+  if(e.metaKey||e.ctrlKey||e.altKey||e.target.closest?.("textarea,input,select,[contenteditable]"))return;
+  const k=e.key.toLowerCase(),clip=activeClip();
+  if(k==="b"||k==="e"){e.preventDefault();startTool(k==="b"?"box":"edge")}
+  else if(k==="c"){e.preventDefault();newComment()}
+  else if(k===" "&&clip){e.preventDefault();clip.paused?clip.play():clip.pause()}
+  else if(VIEW==="clips"&&(k==="arrowleft"||k==="arrowright")){e.preventDefault();clip.pause();clip.seek(clip.currentTime+(k==="arrowleft"?-1:1)*(e.shiftKey?.1:1))}
+  else if(VIEW==="clips"&&(k==="["||k==="]")){e.preventDefault();stageStep(k==="]"?1:-1)}
+});
 doc.addEventListener("scroll",()=>{if(card&&!card.open&&!card.hover)closeCard();else if(card)place(card)},{passive:true});
 addEventListener("resize",()=>card&&place(card));
 
-/* sync derived state after cues are added or removed */
-function sync(){const all=$$(".cue");order.splice(0,order.length,...all.map(c=>c.dataset.id));
-  $$(".act").forEach((sec,i)=>ACTIDS[i]=$$(".cue",sec).map(c=>c.dataset.id));
-  renderBar();renderScore();applyFilter();tally();settleList()}
+/* sync derived state after cues are added or removed. Cues made from a comment have no script phrase; they follow the cue they came from */
+function sync(){const base=$$(".cue").map(c=>c.dataset.id);
+  for(const id in CUES){const q=CUES[id];if(!q.virt)continue;let j=base.indexOf(q.after);if(j<0){base.push(id);continue}j++;while(j<base.length&&CUES[base[j]].virt)j++;base.splice(j,0,id)}
+  order.splice(0,order.length,...base);ACTIDS.forEach((_,i)=>ACTIDS[i]=order.filter(id=>CUES[id].act===i));
+  renderBar();renderScore();applyFilter();tally();refreshCounts();settleList()}
 /* resolve: the phrase goes back to plain script text and the cue disappears everywhere */
 function resolveCue(id){const q=CUES[id],span=$(`.cue[data-id="${id}"]`);if(!span)return;closeCard();io.unobserve(span);
   const par=span.parentNode;span.replaceWith(...span.childNodes);par.normalize();
-  $(`.ci[data-id="${id}"]`).remove();delete RG[id];delete NG[id];delete CUES[id];sync();toast("Cue resolved",q.n,q.c,"check")}
+  $(`.ci[data-id="${id}"]`).remove();delete RG[id];delete NG[id];delete CUES[id];for(const k in COMMENTS)if(COMMENTS[k].clip===id)delete COMMENTS[k];sync();toast("Cue resolved",q.n,q.c,"check")}
 const ctx=document.createElement("div");ctx.className="ctx";ctx.hidden=true;ctx.innerHTML=`<button type="button"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5l3.2 3L13 4.5"/></svg>Resolve cue</button>`;document.body.appendChild(ctx);
 let ctxId=null;const hideCtx=()=>{ctx.hidden=true;ctxId=null};
 doc.addEventListener("contextmenu",e=>{const c=e.target.closest(".cue");if(!c)return;e.preventDefault();ctxId=c.dataset.id;ctx.hidden=false;
@@ -864,7 +1199,7 @@ function addCue(range,cat){
   const text=range.toString().replace(/\s+/g," ").trim(),id="u"+(++uid),row=range.startContainer.parentElement.closest(".row"),all0=$$(".cue");
   let scene=1;for(let r=row;r;r=r.previousElementSibling){const n=r.querySelector(".scene-no");if(n){scene=+n.textContent;break}}
   const prev=all0.filter(c=>c.compareDocumentPosition(range.startContainer)&Node.DOCUMENT_POSITION_FOLLOWING).pop()||all0[0];
-  CUES[id]={c:cat,n:text.length>34?text.slice(0,33).trimEnd()+"…":text[0].toUpperCase()+text.slice(1),s:"none",loc:CUES[prev.dataset.id].loc,d:"Added from the script. No note yet.",scene,act:+row.closest(".act").dataset.act};
+  CUES[id]={c:cat,n:text.length>34?text.slice(0,33).trimEnd()+"…":text[0].toUpperCase()+text.slice(1),s:"none",loc:CUES[prev.dataset.id].loc,d:"Added from the script. No note yet.",dur:6+hash(id)%15,scene,act:+row.closest(".act").dataset.act};
   const span=document.createElement("span");span.className="cue";span.tabIndex=0;span.dataset.id=id;span.style.setProperty("--c",`var(--${cat})`);range.surroundContents(span);
   getSelection().removeAllRanges();hl.hidden=true;hlRange=null;
   const all=$$(".cue"),nextId=all[all.indexOf(span)+1]?.dataset.id;
@@ -877,20 +1212,211 @@ function addCue(range,cat){
 function toast(msg,file,cat,key="set"){const t=document.createElement("div");t.className="toast";t.innerHTML=`<canvas class="g" style="width:16px;height:16px" aria-hidden="true"></canvas><div>${msg}<small>${file}</small></div>`;
   $("#toasts").appendChild(t);glyph(t.querySelector("canvas"),key,{color:`--${cat}`,base:.08});setTimeout(()=>t.remove(),2800)}
 
-/* ---------- sound sketches ---------- */
-let ac=null,noiseBuf=null;
-function actx(){if(!ac){ac=new (window.AudioContext||window.webkitAudioContext)();noiseBuf=ac.createBuffer(1,ac.sampleRate*3,ac.sampleRate);const d=noiseBuf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1}return ac}
-function burst(out,t,dur,type,freq,q,peak,attack=.005){const s=ac.createBufferSource();s.buffer=noiseBuf;const fl=ac.createBiquadFilter();fl.type=type;fl.frequency.value=freq;fl.Q.value=q;
-  const g=ac.createGain();g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(peak,t+attack);g.gain.exponentialRampToValueAtTime(.0001,t+dur);s.connect(fl).connect(g).connect(out);s.start(t,Math.random()*1.5);s.stop(t+dur+.05)}
-function tone(out,t,dur,freq,peak,type="sine",end){const o=ac.createOscillator();o.type=type;o.frequency.setValueAtTime(freq,t);if(end)o.frequency.exponentialRampToValueAtTime(end,t+dur);
-  const g=ac.createGain();g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(peak,t+Math.min(.04,dur/3));g.gain.exponentialRampToValueAtTime(.0001,t+dur);o.connect(g).connect(out);o.start(t);o.stop(t+dur+.05)}
-function play(cat){actx();ac.resume();const out=ac.createGain();out.gain.value=.7;out.connect(ac.destination);const t=ac.currentTime+.03;
-  if(cat==="footsteps"){[0,.42,.86,1.3].forEach(o=>{burst(out,t+o,.09,"bandpass",900,1.2,.9);tone(out,t+o,.08,90,.4)})}
-  else if(cat==="props"){[0,.18,.31,.62,.7].forEach((o,i)=>burst(out,t+o,.05,"highpass",2400+i*300,.8,.7))}
-  else if(cat==="cloth"){burst(out,t,.5,"bandpass",2200,.7,.45,.2);burst(out,t+.55,.6,"bandpass",1800,.7,.35,.25)}
-  else if(cat==="hardfx"){tone(out,t,.9,110,.9,"sine",38);burst(out,t,.7,"lowpass",420,.7,.8)}
-  else if(cat==="ambience"){burst(out,t,1.6,"highpass",3000,.3,.18,.6);burst(out,t,1.6,"lowpass",500,.5,.25,.6)}
-  else{[220,277.2,329.6].forEach((fq,i)=>tone(out,t+i*.12,1.6,fq,.16))}}
+/* ---------- comment layer: actions ---------- */
+function setCue(id,s){const q=CUES[id],c=`--${q.c}`;q.s=s;
+  if(s==="recorded"){setG(NG[id],"set",c);setG(RG[id],"set",c);setTimeout(()=>{NG[id]&&setG(NG[id],restKey(q),c);RG[id]&&setG(RG[id],restKey(q),restColor)},1200)}
+  else{setG(NG[id],restKey(q),ok(q)?c:"--muted-foreground");setG(RG[id],restKey(q),restColor)}
+  tally();applyFilter();refreshCounts();if(card&&card.id===id)render();if(stage.id===id){renderStage();renderStrip()}
+  toast(s==="approved"?"Cue approved":s==="recorded"?"Marked recorded":"Back to unapproved",s==="approved"?"Added to the recording checklist":q.n,q.c,s==="recorded"?"check":"set")}
+function setStatus(m,s,verb){m.status=s;m.msgs.push({sys:true,by:ME(),at:Date.now(),text:`${first(ME())} ${verb}`});
+  renderScore();applyFilter();refreshCounts();card.scrollEnd=true;render();toast(`Comment ${STATUS[s].n.toLowerCase()}`,snip(m,48),m.cat,s==="approved"?"check":"set");
+  const q=CUES[m.clip];if(s==="approved"&&q.s==="none"&&commentsOf(m.clip).every(x=>x.status==="approved"))setTimeout(()=>toast("Every comment on this cue is approved","Approve the cue to add it to the checklist",q.c,"seed"),400)}
+function send(){const c=card,ta=$("textarea",c.el),text=(ta?.value||"").trim();
+  if(c.rec){toast("Finish the voice memo first","Tap the red button to stop",CUES[c.id].c,"seed");return}
+  if(!text&&!c.pend.length){ta?.focus();return}
+  const msg={by:ME(),at:Date.now(),text,audio:c.pend.slice(),react:{}},tagged=[...new Set((text.match(/@(\w+)/g)||[]).map(w=>FIRST[w.slice(1).toLowerCase()]).filter(Boolean))];
+  c.pend=[];c.text="";
+  if(c.mode==="cue"){c.mode="draft";c.draft={t0:c.clip.currentTime,t1:null,cat:CUES[c.id].c,pri:"med",box:null,edge:null}}
+  if(tagged.length)setTimeout(()=>toast("Notified",tagged.map(k=>PEOPLE[k].n).join(", "),CUES[c.id].c),300);
+  if(c.mode==="draft"){const d=c.draft,id="c"+(++cuid);COMMENTS[id]={id,clip:c.id,t0:d.t0,t1:d.t1,cat:d.cat,pri:d.pri,status:"open",box:d.box,edge:d.edge,msgs:[msg]};
+    renderScore();applyFilter();refreshCounts();toast("Comment added",rangeTxt(COMMENTS[id]),d.cat);c.acid=c.anchor==="score"?id:null;return openThread(id)}
+  COMMENTS[c.cid].msgs.push(msg);c.scrollEnd=true;c.focus=true;render()}
+function react(mi,e){const x=COMMENTS[card.cid]?.msgs[mi];if(!x||x.sys)return;const r=x.react||(x.react={}),a=r[e]||(r[e]=[]),i=a.indexOf(ME());if(i<0)a.push(ME());else a.splice(i,1);render()}
+/* AI stub: a thread becomes a cue of its own, spanning the comment's range on the same clip */
+function threadToCue(cid){const m=COMMENTS[cid],src=CUES[m.clip];if(!m||!src)return;if(m.cue&&CUES[m.cue])return openCard(m.cue,{anchor:"score"});
+  const id="u"+(++uid),root=m.msgs.find(x=>!x.sys&&x.text),text=(root?.text||"").replace(/@\w+\??/g,"").replace(/\s+/g," ").trim()||CATS[m.cat];
+  const end=m.t1??Math.min(src.dur,m.t0+2);
+  CUES[id]={c:m.cat,n:short(text.split(/[.!?]/)[0]||text),s:"none",loc:src.loc,d:text,scene:src.scene,act:src.act,dur:Math.max(.5,end-m.t0),virt:true,after:m.clip,from:{clip:m.clip,t0:m.t0,t1:m.t1}};
+  m.cue=id;m.msgs.push({sys:true,by:ME(),at:Date.now(),text:`Turned into cue “${CUES[id].n}”`});
+  clScroll.insertAdjacentHTML("beforeend",ciHTML(id));const ci=clScroll.lastElementChild;RG[id]=glyph(ci.querySelector("canvas"),"seed",{color:restColor});
+  sync();const nx=order[order.indexOf(id)+1];clScroll.insertBefore(ci,nx?$(`.ci[data-id="${nx}"]`):null);
+  toast("Cue created",CUES[id].n,m.cat);card.scrollEnd=true;render()}
+function refreshCounts(){$$(".ci").forEach(b=>{const id=b.dataset.id,q=CUES[id];if(!q)return;const n=commentsOf(id).filter(m=>m.status!=="approved").length,cc=$(".cc",b),ck=$(".ck",b);
+    cc.hidden=!n;cc.textContent=n;cc.title=`${n} unresolved comment${n>1?"s":""}`;ck.hidden=!ok(q);ck.setAttribute("aria-checked",done(q))});
+  $("#todoN").textContent=order.filter(id=>CUES[id].s==="approved").length}
+
+/* @mentions: a dropdown under the caret's word, styled like the right-click menu */
+let mn=null;
+function mentionCheck(ta){hideMn();const pos=ta.selectionStart,m=ta.value.slice(0,pos).match(/(^|\s)@(\w*)$/);if(!m)return;
+  const qs=m[2].toLowerCase(),items=Object.keys(PEOPLE).filter(k=>PEOPLE[k].n.toLowerCase().split(" ").some(w=>w.startsWith(qs)));if(!items.length)return;
+  const el=document.createElement("div");el.className="ctx mn";el.innerHTML=items.map((k,i)=>`<button type="button" data-pid="${k}" class="${i?"":"on"}">${avHTML(k)}${PEOPLE[k].n}<small>${PEOPLE[k].r}</small></button>`).join("");
+  ta.closest(".compose").appendChild(el);mn={el,items,i:0,ta,start:pos-m[2].length-1};
+  el.addEventListener("pointerdown",e=>e.preventDefault());el.addEventListener("click",e=>{e.stopPropagation();const b=e.target.closest("[data-pid]");if(b)pickMn(b.dataset.pid)})}
+function mnMove(d){mn.i=(mn.i+d+mn.items.length)%mn.items.length;$$("button",mn.el).forEach((b,i)=>b.classList.toggle("on",i===mn.i))}
+function pickMn(k){const {ta,start}=mn,pos=ta.selectionStart,w=first(k);ta.value=ta.value.slice(0,start)+"@"+w+" "+ta.value.slice(pos);const c=start+w.length+2;ta.setSelectionRange(c,c);card.text=ta.value;hideMn();ta.focus()}
+function hideMn(){if(mn){mn.el.remove();mn=null}}
+
+/* floating toolbar under the open card (react / tag / AI), a keyboard-shortcuts button, and the menus they open */
+const ftb=document.createElement("div");ftb.className="ftb";ftb.hidden=true;ftb.setAttribute("role","toolbar");ftb.setAttribute("aria-label","Comment tools");
+ftb.innerHTML=`<button class="btn btn-ghost" data-ft="react" title="React" aria-label="React">${ICON.smile}</button><button class="btn btn-ghost" data-ft="tag" title="Sound and priority" aria-label="Sound and priority">${ICON.tag}</button><button class="btn btn-ghost ai" data-ft="ai" title="AI" aria-label="AI">${ICON.spark}</button>`;document.body.appendChild(ftb);
+const kbb=document.createElement("button");kbb.className="kbb";kbb.hidden=true;kbb.title="Keyboard shortcuts";kbb.setAttribute("aria-label","Keyboard shortcuts");kbb.innerHTML=ICON.kbd;document.body.appendChild(kbb);
+const menu=document.createElement("div");menu.className="ctx menu";menu.hidden=true;document.body.appendChild(menu);
+function placeBar(c){const show=c.open&&c.mode!=="cue";ftb.hidden=!show;kbb.hidden=!c.open;if(!c.open)return;
+  const r=c.el.getBoundingClientRect(),h=ftb.offsetHeight||54,y=r.bottom+10+h<innerHeight-8?r.bottom+10:Math.max(8,r.top-10-h);
+  if(show){ftb.style.left=r.left+"px";ftb.style.top=y+"px";$('[data-ft="react"]',ftb).disabled=$('[data-ft="ai"]',ftb).disabled=c.mode!=="thread"}
+  kbb.style.left=r.right-40+"px";kbb.style.top=y+(h-36)/2+"px"}
+function showMenu(b,html){menu.innerHTML=html;menu.hidden=false;menu._b=b;const r=b.getBoundingClientRect(),w=menu.offsetWidth,h=menu.offsetHeight;
+  menu.style.left=cl(r.left,8,innerWidth-w-8)+"px";menu.style.top=(r.bottom+6+h<innerHeight?r.bottom+6:Math.max(8,r.top-6-h))+"px"}
+const hideMenu=()=>{menu.hidden=true};
+const tagTarget=()=>card?.mode==="draft"?card.draft:card?.mode==="thread"?COMMENTS[card.cid]:null;
+const tagMenu=()=>{const t=tagTarget();return `<div class="mh">Sound</div><div class="chips">${Object.keys(CATS).map(k=>`<button class="chip" data-m="cat" data-v="${k}" aria-pressed="${t.cat===k}" style="--c:var(--${k})"><i></i>${CATS[k]}</button>`).join("")}</div>
+  <div class="mh">Priority</div><div class="chips">${Object.keys(PRI).map(k=>`<button class="chip" data-m="pri" data-v="${k}" aria-pressed="${t.pri===k}" style="--c:var(${PRI[k].c})"><i></i>${PRI[k].n}</button>`).join("")}</div>`};
+const KEYS=[["B","Draw a box on the frame"],["E","Sound from off-screen"],["C","Comment at the playhead"],["Space","Play / pause"],["← →","Step a second (⇧ a tenth)"],["[ ]","Previous / next clip"],["@","Mention someone"],["Esc","Cancel / close"]];
+kbb.addEventListener("click",e=>{e.stopPropagation();showMenu(kbb,`<div class="mh">Keyboard</div>${KEYS.map(([k,l])=>`<div class="kr"><kbd>${k}</kbd>${l}</div>`).join("")}`)});
+ftb.addEventListener("click",e=>{e.stopPropagation();const b=e.target.closest("[data-ft]");if(!b||!card)return;const k=b.dataset.ft;
+  if(k==="react")showMenu(b,`<div class="emo">${EMO.map(x=>`<button data-m="rx" data-e="${x}" aria-label="React ${x}">${x}</button>`).join("")}</div>`);
+  if(k==="tag")showMenu(b,tagMenu());
+  if(k==="ai")showMenu(b,`<div class="mh">AI · stub</div><button data-m="tocue">${ICON.spark}Turn thread into cue<small>${rangeTxt(COMMENTS[card.cid])}</small></button>`)});
+menu.addEventListener("click",e=>{e.stopPropagation();const b=e.target.closest("[data-m]");if(!b)return;const k=b.dataset.m;
+  if(k==="cue"){hideMenu();return setCue(b.dataset.id,b.dataset.v)}
+  if(!card)return;
+  if(k==="cat"||k==="pri"){const t=tagTarget();t[k]=b.dataset.v;menu.innerHTML=tagMenu();if(card.mode==="thread"){renderScore();applyFilter()}render();return}
+  hideMenu();
+  if(k==="st"){const v=b.dataset.v;return setStatus(COMMENTS[card.cid],v,v==="addressed"?"marked this addressed":v==="approved"?"approved":"reopened this")}
+  if(k==="rx")return react(0,b.dataset.e);
+  if(k==="tocue")return threadToCue(card.cid)});
+document.addEventListener("pointerdown",e=>{if(!menu.hidden&&!menu.contains(e.target)&&!ftb.contains(e.target)&&e.target!==kbb&&!kbb.contains(e.target))hideMenu()});
+
+/* ---------- audio: voice memo playback and recording ---------- */
+let ac=null,curSrc=null,playEl=null;
+const actx=()=>ac??=new (window.AudioContext||window.webkitAudioContext)();
+function stopAudio(){try{curSrc?.stop()}catch(e){}curSrc=null;playEl?.classList.remove("playing");playEl=null}
+function playBuf(buf,loop=false,off=0){actx();ac.resume();stopAudio();const s=ac.createBufferSource();s.buffer=buf;s.loop=loop;s.connect(ac.destination);s.start(0,off);curSrc=s;
+  s.onended=()=>{if(curSrc===s){curSrc=null;playEl?.classList.remove("playing");playEl=null}};return s}
+function peaksOf(buf,n=48){const d=buf.getChannelData(0),st=Math.max(1,Math.floor(d.length/n));
+  const pk=Array.from({length:n},(_,i)=>{let m=0;for(let j=i*st;j<Math.min(d.length,(i+1)*st);j+=Math.ceil(st/200))m=Math.max(m,Math.abs(d[j]));return m});const mx=Math.max(...pk)||1;return pk.map(v=>v/mx)}
+/* items without a file (the seeded memo) are rendered offline from the sound sketches, so they have a real waveform */
+function ensureBuf(a){if(a.buf||a.url)return Promise.resolve(a);a.job??=renderSketch(a.cat,hash(a.name)).then(b=>{a.buf=b;a.peaks=peaksOf(b);a.dur=b.duration});return a.job.then(()=>a)}
+async function playAud(aid){const c=card,a=await ensureBuf(AUD[aid]);if(card!==c)return;
+  if(!a.buf){stopAudio();const au=new Audio(a.url);au.play().catch(()=>{});curSrc={stop(){au.pause()}};return}
+  playBuf(a.buf);const w=$(`.hero[data-aid="${aid}"] .wave`,c.el);if(w){w.style.setProperty("--d",a.buf.duration+"s");w.classList.add("playing");playEl=w}
+  const m=COMMENTS[c.cid];if(m){c.clip.seek(m.t0);c.clip.play()}}
+/* voice memo: MediaRecorder on the mic; the result is decoded for its waveform and attached to the reply being written */
+async function memo(){const c=card;if(c.rec)return c.rec.mr.stop();
+  if(!navigator.mediaDevices?.getUserMedia||!window.MediaRecorder){toast("Voice memos need microphone access","Open the page on localhost or https",CUES[c.id].c,"seed");return}
+  let st;try{st=await navigator.mediaDevices.getUserMedia({audio:true})}catch(e){toast("Microphone blocked","Allow mic access to record a memo",CUES[c.id].c,"seed");return}
+  if(card!==c){st.getTracks().forEach(t=>t.stop());return}
+  const mr=new MediaRecorder(st),ch=[],rec={mr,t0:Date.now(),discard:false};c.rec=rec;
+  mr.ondataavailable=e=>{if(e.data.size)ch.push(e.data)};
+  mr.onstop=async()=>{st.getTracks().forEach(t=>t.stop());clearInterval(rec.iv);if(c.rec===rec)c.rec=null;if(rec.discard||card!==c)return;
+    const blob=new Blob(ch,{type:mr.mimeType||"audio/webm"}),len=(Date.now()-rec.t0)/1000;let buf=null;try{buf=await actx().decodeAudioData(await blob.arrayBuffer())}catch(e){}
+    c.pend.push(newAud({kind:"memo",name:fmtD(buf?buf.duration:len),cat:c.draft?.cat||COMMENTS[c.cid]?.cat||CUES[c.id].c,buf,peaks:buf?peaksOf(buf):null,url:URL.createObjectURL(blob)}));if(card===c)render()};
+  mr.start();rec.iv=setInterval(()=>{const e=$(".rt",c.el);if(e)e.textContent=fmtD((Date.now()-rec.t0)/1000)},250);render()}
+function stopMemo(discard){if(card?.rec){card.rec.discard=discard;card.rec.mr.stop()}}
+
+/* ---------- uploaded clips: a video replaces a cue's stand-in, and its real length resizes the cue's slot on the score ---------- */
+const clipIn=document.createElement("input");clipIn.type="file";clipIn.accept="video/*,.mp4,.mov,.m4v,.webm";clipIn.hidden=true;document.body.appendChild(clipIn);
+clipIn.addEventListener("click",e=>e.stopPropagation());
+clipIn.addEventListener("change",()=>{const f=clipIn.files[0],id=clipIn._id;clipIn.value="";if(f&&id)setClip(id,f)});
+const isVideo=f=>/^video\//.test(f.type)||/\.(mp4|mov|m4v|webm)$/i.test(f.name);
+function setClip(id,f){const q=CUES[id];if(!q)return;if(!isVideo(f)){toast("Not a video file",f.name,q.c,"seed");return}
+  if(q.clipUrl)URL.revokeObjectURL(q.clipUrl);q.clip=q.clipUrl=URL.createObjectURL(f);q.clipName=f.name;
+  const v=document.createElement("video");v.preload="metadata";v.muted=true;v.onloadedmetadata=()=>{if(isFinite(v.duration))setDur(id,v.duration)};v.onerror=()=>toast("Couldn't play that video",f.name,q.c,"seed");v.src=q.clip;
+  if(stage.id===id)stageLoad(id,true);
+  if(card&&card.id===id&&!card.ext){card.unsub?.();card.clip.destroy();card.clip=makeClip(id);const c=card;c.unsub=c.clip.onTime(t=>tick(c,t));c.clip.play();render()}
+  toast(q.clipName===f.name?"Clip uploaded":"Clip replaced",f.name,q.c)}
+function setDur(id,d){const q=CUES[id];if(!q||Math.abs(q.dur-d)<.05)return;q.dur=d;renderScore();applyFilter();if(stage.id===id)renderStage();if(card&&card.id===id)render()}
+const dtFiles=e=>e.dataTransfer&&[...e.dataTransfer.types].includes("Files");
+let dropEl=null;const setDrop=el=>{if(dropEl!==el){dropEl?.classList.remove("drop");dropEl=el;el?.classList.add("drop")}};
+const dropT=e=>e.target.closest?.(".cue,.ci,.pop,.slot");
+document.addEventListener("dragover",e=>{if(!dtFiles(e))return;e.preventDefault();const t=dropT(e);setDrop(t);e.dataTransfer.dropEffect=t?"copy":"none"});
+document.addEventListener("dragleave",e=>{if(!e.relatedTarget)setDrop(null)});
+document.addEventListener("drop",e=>{if(!dtFiles(e))return;e.preventDefault();const t=dropT(e),f=e.dataTransfer.files[0];setDrop(null);if(!t||!f)return;
+  const onCard=t.classList.contains("pop"),id=onCard?card?.id:t.dataset.id;if(!id)return;
+  setClip(id,f)});
+
+const fmtD=t=>Math.floor(t/60)+":"+String(Math.round(t%60)).padStart(2,"0");
+
+/* ---------- sound sketches: tiny synthesized stand-ins, rendered offline into buffers ---------- */
+const NOISE=new WeakMap();
+function noiseFor(c){let b=NOISE.get(c);if(!b){b=c.createBuffer(1,c.sampleRate*3,c.sampleRate);const d=b.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;NOISE.set(c,b)}return b}
+function burst(out,t,dur,type,freq,q,peak,attack=.005){const c=out.context,s=c.createBufferSource();s.buffer=noiseFor(c);const fl=c.createBiquadFilter();fl.type=type;fl.frequency.value=freq;fl.Q.value=q;
+  const g=c.createGain();g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(peak,t+attack);g.gain.exponentialRampToValueAtTime(.0001,t+dur);s.connect(fl).connect(g).connect(out);s.start(t,Math.random()*1.5);s.stop(t+dur+.05)}
+function tone(out,t,dur,freq,peak,type="sine",end){const c=out.context,o=c.createOscillator();o.type=type;o.frequency.setValueAtTime(freq,t);if(end)o.frequency.exponentialRampToValueAtTime(end,t+dur);
+  const g=c.createGain();g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(peak,t+Math.min(.04,dur/3));g.gain.exponentialRampToValueAtTime(.0001,t+dur);o.connect(g).connect(out);o.start(t);o.stop(t+dur+.05)}
+function sketch(out,cat,t,k=1){
+  if(cat==="footsteps"){[0,.42,.86,1.3].forEach(o=>{burst(out,t+o,.09,"bandpass",900*k,1.2,.9);tone(out,t+o,.08,90*k,.4)})}
+  else if(cat==="props"){[0,.18,.31,.62,.7].forEach((o,i)=>burst(out,t+o*k,.05,"highpass",(2400+i*300)*k,.8,.7))}
+  else if(cat==="cloth"){burst(out,t,.5,"bandpass",2200*k,.7,.45,.2);burst(out,t+.55,.6,"bandpass",1800*k,.7,.35,.25)}
+  else if(cat==="hardfx"){tone(out,t,.9,110*k,.9,"sine",38);burst(out,t,.7,"lowpass",420*k,.7,.8)}
+  else if(cat==="ambience"){burst(out,t,1.6,"highpass",3000*k,.3,.18,.6);burst(out,t,1.6,"lowpass",500*k,.5,.25,.6)}
+  else{[220,277.2,329.6].forEach((fq,i)=>tone(out,t+i*.12,1.6,fq*k,.16))}}
+function renderSketch(cat,seed=0){const sr=22050,len=cat==="ambience"||cat==="score"?2.2:1.6,oc=new OfflineAudioContext(1,Math.round(sr*len),sr),out=oc.createGain();
+  out.gain.value=.7;out.connect(oc.destination);sketch(out,cat,.03,1+(seed%7-3)*.07);return oc.startRendering()}
+
+/* ---------- clip view: the cut as a player with a timecode ruler and a strip of clips. A stand-in for the carousel;
+   it plays through the same makeClip() interface, and the comment card drives it the same way ---------- */
+function setView(v){VIEW=v;try{localStorage.setItem("svsd-view",v)}catch(e){}closeCard();TOOL=null;renderTool();
+  document.body.classList.toggle("view-clips",v==="clips");doc.hidden=v==="clips";$("#stage").hidden=v!=="clips";$(".pane").classList.toggle("clips",v==="clips");
+  $$("#view button").forEach(b=>b.setAttribute("aria-selected",b.dataset.view===v));
+  if(v==="clips"){stageLoad(stage.id&&CUES[stage.id]?stage.id:order[0],true);fitPlayer()}else{stage.clip?.pause();phHide();$$(".ci.cur").forEach(x=>x.classList.remove("cur"))}}
+function stageLoad(id,force){if(!CUES[id]||stage.id===id&&!force&&stage.clip)return;if(card?.ext)closeCard();
+  stage.unsub?.();stage.clip?.destroy();stage.id=id;stage.clip=makeClip(id);$("#stMedia").replaceChildren(stage.clip.el);stage.unsub=stage.clip.onTime(stageTick);stage.anc=null;stage.pz=null;stage.lastT=0;
+  $$(".ci.cur").forEach(x=>x.classList.remove("cur"));$(`.ci[data-id="${id}"]`)?.classList.add("cur");revealSlot(id);
+  renderStage();renderStrip(true)}
+const stageStep=d=>{const i=order.indexOf(stage.id);stageLoad(order[(i+d+order.length)%order.length])};
+function renderStage(){const id=stage.id,q=CUES[id],i=order.indexOf(id);
+  $("#stHead").innerHTML=`<div class="tt"><b>${esc(q.n)}</b><small>Scene ${q.scene} · ${CATS[q.c]} · ${fmtD(q.dur)} · clip ${i+1} of ${order.length}${q.clipName?` · ${esc(q.clipName)}`:""}</small></div>${cueChip(q,"data-sact")}<button class="btn btn-outline" data-sact="clipup">${ICON.film}${q.clip?"Replace clip":"Upload clip"}</button>`;
+  $("#stNote").innerHTML=`<span>Director's note</span>${esc(q.d)}`;$("#stNote").title=q.d;
+  renderRuler()}
+function renderRuler(){if(VIEW!=="clips"||!stage.id)return;const q=CUES[stage.id],D=q.dur,P=v=>(cl(v/D,0,1)*100).toFixed(3)+"%",step=D>40?5:D>20?2:1;
+  let tk="";for(let s=0;s<=D+1e-6;s+=.5){const maj=Math.abs(s/step-Math.round(s/step))<1e-6;if(!maj&&(step>1||s%1===0))continue;tk+=`<i class="tk${maj?" l":""}" style="left:${P(s)}">${maj?`<span>${tc(s).replace(/\.0$/,"")}</span>`:""}</i>`}
+  const rows=[],bars=commentsOf(stage.id).map(m=>{let r=rows.findIndex(e=>e<m.t0-.1);if(r<0){r=rows.length;rows.push(0)}rows[r]=Math.max(m.t1??m.t0,m.t0+.4);
+    const hit=(curCat==="all"||m.cat===curCat)&&(curPri==="all"||m.pri===curPri);
+    return `<button class="rb ${m.status}${m.t1!=null?"":" pt"}${card?.cid===m.id?" on":""}${hit?"":" faded"}" data-sact="cm" data-cid="${m.id}" title="${esc(first(m.msgs[0].by))} · ${esc(rangeTxt(m))} · ${esc(snip(m,60))}" style="left:${P(m.t0)};${m.t1!=null?`width:${P(m.t1-m.t0)};`:""}top:${28+Math.min(r,2)*10}px;--c:var(--${m.cat})"></button>`});
+  const L=card?.ext?(card.mode==="thread"?COMMENTS[card.cid]:card.mode==="draft"?card.draft:null):null;
+  $("#ruler").innerHTML=tk+(L&&L.t1!=null?`<i class="rl" style="left:${P(L.t0)};width:${P(L.t1-L.t0)}"></i>`:"")+bars.join("")+`<i class="rsel" hidden></i><i class="rph"></i>`;
+  stage.ph=$(".rph",$("#ruler"));stage.pz=null;stageTick(stage.clip.currentTime)}
+function renderStrip(scroll){$("#strip").innerHTML=order.map((id,i)=>{const q=CUES[id],L=LOCS[q.loc]||LOCS.lobby,n=commentsOf(id).filter(m=>m.status!=="approved").length;
+    return `<button class="cc2" data-sact="clip" data-id="${id}" aria-current="${id===stage.id}" style="--a:${L.a};--b:${L.b};--c:var(--${q.c})"><span class="th"><i></i>${n?`<b>${n}</b>`:""}</span><span class="nm">${esc(q.n)}</span><small>${i+1} · ${fmtD(q.dur)}</small></button>`}).join("");
+  if(scroll){const c=$('#strip [aria-current="true"]'),s=$("#strip");if(c)s.scrollTo({left:c.offsetLeft-s.clientWidth/2+c.offsetWidth/2,behavior:reduce?"auto":"smooth"})}}
+function stageTick(t){if(!stage.clip)return;const q=CUES[stage.id],pz=stage.clip.paused;
+  $("#stTc").textContent=`${tc(t)} / ${tc(q.dur)}`;if(stage.ph)stage.ph.style.left=cl(t/q.dur*100,0,100)+"%";
+  if(pz!==stage.pz){stage.pz=pz;$("#stPP").innerHTML=pz?ICON.play:ICON.pause}
+  phShow(stage.id,t);
+  const html=anchorsHTML(stage.id,t);if(html!==stage.anc){stage.anc=html;$("#stAnc").innerHTML=html;if(card?.ext)place(card)}
+  if(autoPause&&!pz&&!(card?.ext&&card.mode!=="cue")&&t>stage.lastT&&t-stage.lastT<.5){const hit=commentsOf(stage.id).find(m=>m.t0>stage.lastT&&m.t0<=t);
+    if(hit){stage.clip.pause();stage.clip.seek(hit.t0);t=hit.t0;toast("Paused at a comment",snip(hit,48),hit.cat,"seed")}}
+  stage.lastT=t}
+$("#view").addEventListener("click",e=>{const b=e.target.closest("[data-view]");if(b&&b.dataset.view!==VIEW)setView(b.dataset.view)});
+$("#stage").addEventListener("click",e=>{const b=e.target.closest("[data-sact]");if(!b)return;e.stopPropagation();const k=b.dataset.sact,id=stage.id;
+  if(k==="pp")stage.clip.paused?stage.clip.play():stage.clip.pause();
+  else if(k==="prev"||k==="next")stageStep(k==="next"?1:-1);
+  else if(k==="clip")stageLoad(b.dataset.id);
+  else if(k==="cm")openCard(id,{cid:b.dataset.cid});
+  else if(k==="cuemenu")showMenu(b,cueMenu(id));
+  else if(k==="clipup"){clipIn._id=id;clipIn.click()}});
+/* ruler: click to seek, drag to select a range and comment on it */
+$("#ruler").addEventListener("pointerdown",e=>{if(e.button||e.target.closest(".rb"))return;e.preventDefault();const R=e.currentTarget,r=R.getBoundingClientRect(),D=CUES[stage.id].dur,
+  T=ev=>cl((ev.clientX-r.left)/r.width)*D,a=T(e),x0=e.clientX,sel=$(".rsel",R);let b=null;R.setPointerCapture(e.pointerId);stage.clip.seek(a);
+  const mv=ev=>{if(b==null&&Math.abs(ev.clientX-x0)<4)return;b=T(ev);const lo=Math.min(a,b),hi=Math.max(a,b);sel.hidden=false;sel.style.left=lo/D*100+"%";sel.style.width=(hi-lo)/D*100+"%";stage.clip.seek(b)};
+  const up=()=>{R.removeEventListener("pointermove",mv);R.removeEventListener("pointerup",up);R.removeEventListener("pointercancel",up);sel.hidden=true;
+    if(b!=null&&Math.abs(b-a)>=.15)openCard(stage.id,{draft:[Math.min(a,b),Math.max(a,b)]})};
+  R.addEventListener("pointermove",mv);R.addEventListener("pointerup",up);R.addEventListener("pointercancel",up)});
+/* the player keeps 16:9 inside whatever room the pane leaves it */
+function fitPlayer(){const w=$(".st-p"),p=$("#player"),r=w.getBoundingClientRect();if(!r.width)return;const pw=Math.min(r.width,r.height*16/9);p.style.width=pw+"px";p.style.height=pw*9/16+"px";if(card?.ext)place(card)}
+new ResizeObserver(fitPlayer).observe($(".st-p"));
+$("#player .ptools").innerHTML=toolsHTML();
+$('[data-sact="prev"]').innerHTML=ICON.back;$('[data-sact="next"]').innerHTML=ICON.next;
+
+/* role toggle: the director approves comments and cues, the foley artist addresses comments and checks off recorded cues */
+function renderRole(){$("#role").innerHTML=[["director","Director"],["foley","Foley"]].map(([k,n])=>`<button class="tg" data-role="${k}" aria-pressed="${ROLE===k}">${n}</button>`).join("")}
+$("#role").addEventListener("click",e=>{const b=e.target.closest("[data-role]");if(!b||b.dataset.role===ROLE)return;ROLE=b.dataset.role;try{localStorage.setItem("svsd-role",ROLE)}catch(e){}
+  renderRole();if(card){hideMenu();render()}toast(`Viewing as ${PEOPLE[ME()].r.toLowerCase()}`,PEOPLE[ME()].n,"score","seed")});
+
+renderPri();renderRole();applyFilter();refreshCounts();tally();setView(VIEW);
+Promise.all(Object.values(AUD).map(ensureBuf)).then(()=>{if(card)render()}).catch(()=>{});
+
 </script>
 
 </body></html>
