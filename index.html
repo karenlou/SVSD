@@ -1,0 +1,26 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Spotting</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&family=Courier+Prime:wght@400;700&display=swap">
+<link rel="stylesheet" href="assets/film-cut.css">
+</head><body>
+<!-- The board: it opens straight onto the interface. Upload the reel in the player; the script slot under it unlocks once the reel is in.
+     Everything stays in this browser (IndexedDB): the video under "video", the board (name, cues, notes, comments, script) under "board". -->
+<div id="app"></div>
+<script src="assets/engine.js"></script>
+<script>
+const store={db:null,
+  open(){return this.db||(this.db=new Promise((ok,no)=>{const r=indexedDB.open("svsd-board",1);r.onupgradeneeded=()=>r.result.createObjectStore("kv");r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)}))},
+  async tx(mode,fn){const db=await this.open();return new Promise((ok,no)=>{const t=db.transaction("kv",mode),s=t.objectStore("kv"),r=fn(s);t.oncomplete=()=>ok(r?.result);t.onerror=()=>no(t.error)})},
+  get(k){return this.tx("readonly",s=>s.get(k))},put(k,v){return this.tx("readwrite",s=>s.put(v,k))},clear(){return this.tx("readwrite",s=>s.clear())}};
+const save=b=>store.put("board",b).catch(()=>{});
+
+/* pick up this browser's board if there is one, otherwise start an empty one */
+(async()=>{let board=null,video=null;try{[board,video]=await Promise.all([store.get("board"),store.get("video")])}catch(e){}
+  if(!video)board=null;board??={name:"Untitled reel",script:[],cues:{},comments:{}};
+  window.board=boot({mode:"app",title:board.name,video:video?URL.createObjectURL(video):null,script:board.script,cues:board.cues,reel:Object.keys(board.cues||{}),comments:Object.values(board.comments||{}),
+    onVideo:f=>{board.videoName=f.name;store.put("video",f).then(()=>save(board))},
+    onChange:s=>{board.name=s.title;board.cues=s.cues;board.comments=s.comments;board.script=s.script;save(board)},
+    onReset:async()=>{await store.clear();location.reload()}})})();
+</script>
+</body></html>
