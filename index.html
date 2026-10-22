@@ -60,9 +60,6 @@ addEventListener("drop",e=>{if(!$("#gate")||$("#gate").hidden)return;e.preventDe
 /* a board already in this browser opens straight away; otherwise, the gate */
 (async()=>{let board=null,video=null;try{[board,video]=await Promise.all([store.get("board"),store.get("video")])}catch(e){}
   if(board&&video){$("#gate").remove();return open(board,video)}
-  $("#gate").hidden=false;$("#gateLogo").innerHTML=LOGO;glyph($("#gateMark"),"garden",{count:0,base:.14});gateRaf=requestAnimationFrame(gateTick);
-  softField($("#gate"),{cols:Math.round(innerWidth/90),alpha:[34,78],seed:11,top:[-.05,.4],stack:[6,12]});
-  /* the shapes lean a little toward the pointer, nearer ones more */
-  $("#gate").addEventListener("pointermove",e=>{const f=$("#gate .sf");if(!f)return;f.style.setProperty("--px",(e.clientX/innerWidth-.5).toFixed(3));f.style.setProperty("--py",(e.clientY/innerHeight-.5).toFixed(3))})})();
+  $("#gate").hidden=false;$("#gateLogo").innerHTML=LOGO;glyph($("#gateMark"),"garden",{count:0,base:.14});gateRaf=requestAnimationFrame(gateTick)})();
 </script>
 </body></html>
