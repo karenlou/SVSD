@@ -42,7 +42,7 @@ function say(t){const s=$("#gateS"),u=$("#gateUp");s.textContent=t;u.classList.a
 /* read the cut: its length and picture size, so the board opens already laid out; the flower blooms the whole time, then closes into a check */
 async function take(f){if(!f)return;if(!f.type.startsWith("video/"))return say("That isn't a video");
   $("#gateUp").hidden=true;$("#gateBusy").hidden=false;$("#gateName").textContent=f.name;
-  const g=glyph($("#gateG"),"pulse",{color:"--hardfx",base:.08});
+  const g=glyph($("#gateG"),"pulse",{color:"--charcoal",base:.08});
   const v=document.createElement("video");v.preload="metadata";v.muted=true;v.src=URL.createObjectURL(f);
   const ok=await Promise.race([new Promise(r=>{v.onloadedmetadata=()=>r(true);v.onerror=()=>r(false)}),pause(15000).then(()=>true)]);
   if(!ok){cancelAnimationFrame(gateRaf);$("#gateBusy").hidden=true;$("#gateUp").hidden=false;return say("Couldn't play that video")}

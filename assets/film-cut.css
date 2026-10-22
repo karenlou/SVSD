@@ -1268,3 +1268,10 @@ button,.btn,.mkb,.tg,.lg,.nct,.sidet,.ci,.cm-i{border-radius:2px!important}
 .legend .lg i{width:8px;height:8px}
 .legend .lg span{max-width:0;margin-left:0;overflow:hidden;opacity:0;white-space:nowrap;transition:max-width .3s var(--spring),margin-left .3s var(--spring),opacity .2s}
 .legend .lg[aria-pressed=true] span{max-width:96px;margin-left:6px;opacity:1}
+
+/* ---------- upload card: a faint pixel grid behind it, and charcoal in place of the blue accent ---------- */
+:root{--charcoal:#3a3a42}
+.gate-up,.gate-up:hover,.gate-up.over{background-image:linear-gradient(color-mix(in srgb,var(--foreground) 5%,transparent) 1px,transparent 1px),linear-gradient(90deg,color-mix(in srgb,var(--foreground) 5%,transparent) 1px,transparent 1px);background-size:16px 16px;background-position:center}
+.gate-up:hover,.gate-up.over{border-color:color-mix(in srgb,var(--charcoal) 45%,var(--border))}
+.gate-ic,.gate-up:hover .gate-ic{background-color:var(--charcoal)}
+.gate-up.bad{border-color:var(--charcoal)}.gate-up.bad .gate-s{color:var(--charcoal)}
