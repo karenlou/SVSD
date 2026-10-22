@@ -6,7 +6,7 @@
   --primary:#1c1917; --primary-foreground:#fafaf9; --secondary:#f5f3f0; --muted:#f5f3f0; --muted-foreground:#78716c;
   --accent:#f3f1ed; --border:#e5e2dd; --input:#e2ded8; --ring:#a1a1a1; --well:#0a0a0a; --well-fg:#fafafa;
   --radius:.625rem; --link:#2b8ff0;
-  --ambience:#7f9460; --footsteps:#c2643f; --props:#d69726; --cloth:#cf7f8b; --hardfx:#e0552b; --score:#8a5a7e;
+  --ambience:#7f9460; --footsteps:#c2643f; --props:#d69726; --cloth:#cf7f8b; --hardfx:#e0552b; --score:#8a5a7e; --offscreen:#1f93a8;
   --shadow-sm:0 1px 2px rgba(0,0,0,.05); --shadow-md:0 4px 6px -1px rgba(0,0,0,.1),0 2px 4px -2px rgba(0,0,0,.1);
   --f-sans:"Geist",ui-sans-serif,system-ui,-apple-system,sans-serif; --f-mono:"Geist Mono",ui-monospace,Menlo,monospace;
   --f-script:"Courier Prime","Courier New",Courier,monospace;
@@ -642,21 +642,11 @@ mark.cue{color:inherit;background-color:transparent}
 .dock .rng{padding:8px 0 0}
 .dock .stc{background:none;border-color:var(--border);font-weight:400;color:var(--muted-foreground)}.dock button.stc:hover{background:var(--accent);color:var(--foreground)}
 
-/* ---------- timeline, editor-style: every cue is a clip in its lane. Hovering near either end of any clip grabs that end;
-   the selected clip is solid, with a grip on each end ---------- */
-.fm{height:14px;margin-top:0}
-.fm::before{top:5px;height:4px}
-.fm:hover::before,.fm.hot::before,.fm.cur::before{top:2px;height:10px}
-.fm.sel::before{top:0;height:14px;border-radius:3px;background:var(--c);box-shadow:0 0 0 1.5px var(--card),0 0 0 3px var(--c)}
+/* ========== commenting: cue panel, comments, boxes on the frame, timeline handles. The layout and onboarding below take precedence ========== */
+/* ---------- timeline: hovering near either end of any cue grabs that end; the selected one sits between its brackets, which are its handles ---------- */
 .ftl.edge,.ftl.edge .fm{cursor:ew-resize}
-.fh,.fh:hover,.ftl.grabbing .fh{width:9px;height:14px;margin-top:0;border:0;border-radius:3px;opacity:1;background:var(--foreground);box-shadow:var(--shadow-sm)}
-.fh[data-h="in"]{margin-left:-11px;border-radius:3px 0 0 3px}
-.fh[data-h="out"]{margin-left:2px;border-radius:0 3px 3px 0}
+/* the selected cue keeps its brackets (above); a wider invisible grip makes them easy to catch */
 .fh::before{content:"";position:absolute;inset:-5px -6px}
-.fh::after{inset:auto;left:3.5px;top:4px;width:2px;height:6px;border-radius:1px;background:var(--background)}
-.fh:hover{transform:scaleY(1.15)}
-.mkb{padding:0 11px 0 8px}
-.mkb svg{width:13px;height:13px}
 
 /* ---------- the sidebar is the cue list. A cue's comment count sits on its row ---------- */
 .ci{grid-template-columns:18px minmax(0,1fr) auto auto}
@@ -737,41 +727,14 @@ mark.cue{color:inherit;background-color:transparent}
 .th-r .msg .av{width:20px;height:20px}
 .th-r .msg{grid-template-columns:20px minmax(0,1fr);gap:10px}
 .th-r .msg::before{display:none}
-/* the freeze-frame link on an open thread: jumps the film to that frame and shows the box */
-.ff{display:flex;align-items:center;gap:6px;width:calc(100% - 32px);margin:0 0 8px 32px;padding:6px 8px;border:1px dashed color-mix(in srgb,var(--foreground) 30%,transparent);border-radius:3px;background:var(--paper);font:400 11.5px var(--f-mono);color:var(--muted-foreground);cursor:pointer;text-align:left}
-.ff svg{flex:none;width:13px;height:13px;color:var(--foreground)}
-.ff span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.ff b{margin-left:auto;font:500 12px var(--f-sans);color:var(--foreground);white-space:nowrap}
-.ff:hover{border-style:solid;border-color:var(--foreground)}
-.rng .ffl{display:inline-flex;align-items:center;gap:6px;color:var(--foreground)}
-.rng .ffl svg{width:13px;height:13px}
 .acts .cmt svg{stroke-width:1.5}
 
-/* ---------- boxes on the picture (freeze-frame comments), and drawing one ---------- */
-.anc{position:absolute;inset:0;z-index:2;pointer-events:none}
-.abox{position:absolute;padding:0;border:1.5px solid var(--c);border-radius:2px;background:color-mix(in srgb,var(--c) 14%,transparent);box-shadow:0 0 0 1px rgba(0,0,0,.35)}
-.anc .abox{pointer-events:auto;cursor:pointer}
-.abox.on{border-width:2px;background:color-mix(in srgb,var(--c) 22%,transparent)}
-.abox .av{position:absolute;left:-9px;top:-9px;width:18px;height:18px;box-shadow:0 0 0 1.5px #fff}
-.abox.flash{animation:boxFlash .9s ease-out}
-@keyframes boxFlash{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--c) 70%,transparent),0 0 0 1px rgba(0,0,0,.35)}100%{box-shadow:0 0 0 14px transparent,0 0 0 1px rgba(0,0,0,.35)}}
-.draw{position:absolute;inset:0;z-index:3;cursor:crosshair;touch-action:none;background:rgba(0,0,0,.25)}
-.draw .abox{pointer-events:none}
-.draw>small{position:absolute;left:50%;top:12px;transform:translateX(-50%);font:400 11px var(--f-mono);color:#f5f5f5;background:rgba(0,0,0,.65);padding:3px 8px;border-radius:3px;white-space:nowrap;pointer-events:none}
-.frm{height:28px;padding:0 10px 0 8px;gap:6px;font-size:12.5px}
-.frm svg{width:14px;height:14px}
-/* a freeze-frame comment's dot on the selected cue's bar */
-.ffd{position:absolute;z-index:6;width:8px;height:8px;margin:-4px 0 0 -4px;border-radius:50%;background:var(--card);box-shadow:0 0 0 1.5px var(--foreground);cursor:pointer}
-.ffd:hover{transform:scale(1.3)}
 .acts{grid-template-columns:auto minmax(0,1fr)}
 .acts .cmt{min-width:0;overflow:hidden}
-.screen:has(.anc .abox) .big,.screen:has(.draw) .big{opacity:0!important}
 /* the panel reads as one block (name, note, sign-off) with a single rule under the sign-off row, before the comments */
 .dock.up .ch,.pop .ch{border-bottom:0}
 .dock.up .ch{padding-bottom:4px}
 .dock.up .acts,.pop .acts{padding-bottom:12px;border-bottom:1px solid var(--border)}
-/* freeze-frame dots sit on top of the selected bar (whose stacking order runs up to ~100) */
-.ffd{z-index:160;width:9px;height:9px;margin:-4.5px 0 0 -4.5px;background:var(--card);box-shadow:0 0 0 1.5px var(--foreground),0 1px 2px rgba(0,0,0,.3)}
 /* message header: name and the moment it points at on the left, when it was posted on the right */
 .msg .who,.dock .msg .who{flex-wrap:nowrap;align-items:baseline;gap:8px}
 .msg .who span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -789,3 +752,329 @@ mark.cue{color:inherit;background-color:transparent}
 /* the box at the bottom while replying: who it's going to, and × to go back to a new comment */
 .rng.rto span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:var(--f-sans);font-size:12px;color:var(--muted-foreground)}
 .rng.rto b{font-weight:500;color:var(--foreground)}
+
+/* ---------- the gate: the board's header, and one upload card in the middle (paper, a thin border, an upload mark); the flower blooms in it while the cut is read ---------- */
+.gate{position:fixed;inset:0;z-index:80;display:flex;flex-direction:column;padding:0 max(16px,env(safe-area-inset-right,0px)) 16px max(16px,env(safe-area-inset-left,0px));background:var(--background);transition:opacity .38s ease}
+.gate[hidden]{display:none}
+.gate.out{opacity:0}
+.gate .top{width:100%;max-width:1120px;margin:0 auto}
+.gate-c{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding-bottom:6vh}
+.gate-up,.gate-busy{position:relative;width:min(520px,100%);min-height:280px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:32px;
+  border:1px solid var(--border);border-radius:3px;background:var(--paper);text-align:center;transition:border-color .15s,background .15s}
+.gate-up{cursor:pointer;background-image:radial-gradient(color-mix(in srgb,var(--foreground) 7%,transparent) 1px,transparent 1.2px);background-size:14px 14px;background-position:center}
+.gate-up[hidden],.gate-busy[hidden]{display:none}
+.gate-up input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.gate-up:hover,.gate-up.over{border-color:color-mix(in srgb,var(--foreground) 40%,var(--border));background-color:var(--card)}
+.gate-up.bad{border-color:var(--hardfx)}.gate-up.bad .gate-s{color:var(--hardfx)}
+.gate-ic{display:grid;place-items:center;width:44px;height:44px;margin-bottom:10px;border:1px solid var(--border);border-radius:3px;background:var(--card);color:var(--foreground);transition:transform .2s cubic-bezier(.3,1.4,.5,1)}
+.gate-ic svg{width:20px;height:20px}
+.gate-up:hover .gate-ic,.gate-up.over .gate-ic{transform:translateY(-2px)}
+.gate-up b,.gate-busy b{font:600 16px/22px var(--f-sans);color:var(--foreground)}
+.gate-s{font-size:13px;color:var(--muted-foreground)}
+.gate-up em{margin-top:14px;font:400 10.5px var(--f-mono);font-style:normal;letter-spacing:.06em;text-transform:uppercase;color:var(--muted-foreground)}
+.gate-busy{gap:10px;animation:gatein .3s ease-out}
+.gate-busy canvas{margin-bottom:6px}
+.gate-busy span{font:400 11px var(--f-mono);letter-spacing:.04em;color:var(--muted-foreground)}
+.gate-n{margin:0;font-size:12.5px;color:var(--muted-foreground)}
+@keyframes gatein{from{opacity:0;transform:scale(.98)}}
+.arrive .wrap{animation:arrive .5s ease-out}
+@keyframes arrive{from{opacity:0;transform:translateY(6px)}}
+/* script sections without a name of their own have no header bar */
+.act.bare .act-body>.inner{padding-top:4px}
+/* before the first cue, the side panel is just its one line of guidance, centred, with no tabs or divider */
+.cuelist.empty .cuelist-h,.cuelist.empty .cl-scroll{display:none!important}
+.cuelist.empty .dock{flex:1;height:auto;margin:0;border-top:0;justify-content:center}
+.cuelist.empty .dock-e{max-width:250px;margin:0 auto;padding:0 0 8vh;text-align:center}
+
+/* ======================================================================================================
+   Look: white page, bright soft colour. Sounds take the reference's palette (cornflower, pink, butter, tangerine,
+   sage, lavender); surfaces are white with hairline borders; colour shows up as soft, translucent, slightly blurred
+   shapes. The thin brackets stay as the selection mark.
+   ====================================================================================================== */
+:root{
+  --background:#ffffff; --paper:#ffffff; --score-bg:#fafafa; --card:#ffffff; --popover:#ffffff;
+  --secondary:#f6f6f8; --muted:#f6f6f8; --accent:#f4f4f7; --muted-foreground:#7c7a85;
+  --border:#ececf0; --input:#e2e2e8; --foreground:#17151c; --primary:#17151c;
+  --hardfx:#4f7ff0; --cloth:#ef8ccb; --props:#e9b63f; --footsteps:#f08a3a; --ambience:#8bab5c; --score:#9d87f0; --offscreen:#1f93a8;
+  --teal:#1f93a8; --peach:#f6b7a3; --sky:#8fb3f7;
+  --shadow-sm:0 1px 2px rgba(23,21,28,.04); --shadow-md:0 8px 24px -10px rgba(23,21,28,.14),0 2px 6px rgba(23,21,28,.04);
+}
+body{background:var(--background)}
+header.top{border-bottom-color:var(--border)}
+
+/* soft field */
+.sf{position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+.sf i{position:absolute;display:block;animation:drift ease-in-out infinite alternate;will-change:transform}
+@keyframes drift{from{transform:translate3d(0,-3px,0) rotate(-1.5deg)}to{transform:translate3d(0,4px,0) rotate(1.5deg)}}
+@media (prefers-reduced-motion:reduce){.sf i{animation:none}}
+
+/* panels: white, hairline, no paper tint */
+.ex,.sp,.sheet .face,.drop,.sdrop{background:#fff}
+.pane{border-color:var(--border)}
+.sp .act-h,.ex .act-h,.sheet .act-h{background:rgba(255,255,255,.94)}
+.sp-h{border-bottom-color:var(--border)}
+.vdiv::before{background:var(--border)}
+
+/* timeline: lanes as the faintest rules; cues as soft translucent pills; the current one fills in, the selected one glows */
+.ftl .lnl{background:#f1f1f4}
+.ftl .ax{background:#dcdce3}
+.ftl::before{background:#dcdce3}
+.fm::before{height:5px;top:2px;border-radius:999px;background:color-mix(in srgb,var(--c) 45%,transparent);filter:blur(.3px)}
+.fm:hover::before,.fm.hot::before,.fm.cur::before{top:1px;height:7px;background:color-mix(in srgb,var(--c) 85%,transparent)}
+.fm.sel::before{top:1px;height:7px;background:var(--c);box-shadow:0 0 10px color-mix(in srgb,var(--c) 55%,transparent)}
+.rng-ax{border-radius:999px;background:color-mix(in srgb,var(--c) 22%,transparent);box-shadow:none}
+.fph{background:var(--foreground);width:1.5px}
+.fh{border-color:var(--c);border-width:1.5px;opacity:1}
+
+/* the script: phrases marked like a soft highlighter in their sound's colour */
+.cue{background-image:linear-gradient(90deg,color-mix(in srgb,var(--c) 14%,transparent),color-mix(in srgb,var(--c) 26%,transparent)),linear-gradient(90deg,color-mix(in srgb,var(--c) 55%,transparent),color-mix(in srgb,var(--c) 55%,transparent));border-radius:4px}
+.cue.now,.cue.hot{background-size:100% 100%,100% 1.5px}
+.cue.now{background-image:linear-gradient(90deg,color-mix(in srgb,var(--c) 26%,transparent),color-mix(in srgb,var(--c) 40%,transparent)),linear-gradient(90deg,var(--c),var(--c))}
+
+/* list: the current cue on a soft wash of its colour; the selected one in its brackets */
+.ci{border-radius:6px}
+.ci.in{background:color-mix(in srgb,var(--c) 10%,#fff)}
+.ci:hover{background:color-mix(in srgb,var(--c) 7%,#fff)}
+.ci::before,.ci::after{border-width:1.5px}
+.cm-i.in{background:color-mix(in srgb,var(--c) 10%,#fff)}
+.legend .lg i,.cdot,.cm-i .cq i{box-shadow:0 0 0 2px color-mix(in srgb,var(--c) 18%,transparent)}
+
+/* new-cue card: white, its sound's colour drifting behind it */
+.nc{background:#fff;border-color:color-mix(in srgb,var(--c) 28%,var(--border));box-shadow:0 18px 40px -18px color-mix(in srgb,var(--c) 45%,transparent),var(--shadow-md);border-radius:6px}
+.nc .nc-bg{opacity:.45;filter:blur(.4px)}
+.nct{border-radius:6px;background:rgba(255,255,255,.7)}
+.nct[aria-checked=true]{background:color-mix(in srgb,var(--c) 14%,rgba(255,255,255,.75))}
+.nc-n{background:transparent}
+
+/* side panel before the first cue: a little stack of shapes above its line */
+.dock{position:relative}
+.dock-sf{position:relative;height:110px;width:220px;margin:0 auto 8px}
+.cuelist:not(.empty) .dock-sf{display:none}
+.cuelist.empty .dock-e{padding-bottom:0}
+
+/* cards and menus: white with a soft lift */
+.pop .panel,.cmenu,.ctx,.toast,.tip{border-radius:6px}
+.pop .panel,.toast{box-shadow:var(--shadow-md)}
+.tip{background:var(--foreground)}
+.cin{background:#fff}
+.btn-default{background:var(--foreground)}
+
+/* the gate: soft shapes stacked across the page, parting around a white upload card */
+.gate{background:#fff}
+.gate .sf{inset:56px 0 0;-webkit-mask-image:radial-gradient(ellipse 34% 40% at 50% 47%,transparent 0 55%,#000 92%);mask-image:radial-gradient(ellipse 34% 40% at 50% 47%,transparent 0 55%,#000 92%)}
+.gate .top,.gate-c{position:relative;z-index:1}
+.gate-up,.gate-busy{border-radius:8px;background:rgba(255,255,255,.88);background-image:none;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border-color:var(--border);box-shadow:var(--shadow-md)}
+.gate-up:hover,.gate-up.over{background:#fff;border-color:color-mix(in srgb,var(--hardfx) 45%,var(--border))}
+.gate-ic{border:0;border-radius:10px;color:#fff;background:linear-gradient(140deg,var(--sky),var(--hardfx));box-shadow:0 6px 16px -6px color-mix(in srgb,var(--hardfx) 70%,transparent)}
+.gate-busy canvas{filter:blur(.3px)}
+.nc .nc-bg{opacity:.28;filter:blur(1.2px)}
+
+/* ======================================================================================================
+   Texture and touch: shapes are crisp translucent fills with a fine grain (no blur, no glow), and things answer
+   the pointer in small ways: shapes lean toward it, brackets slide in, new cues grow into place, controls give a little.
+   ====================================================================================================== */
+:root{--grain:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .5 0'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='.55'/></svg>");
+  --spring:cubic-bezier(.34,1.56,.64,1)}
+/* soft field: grain inside each shape; nearer shapes lean further toward the pointer */
+.sf i{background-image:var(--grain);background-size:140px 140px;filter:none!important;
+  translate:calc(var(--px,0)*var(--d,0)*22px) calc(var(--py,0)*var(--d,0)*14px);transition:translate .9s cubic-bezier(.2,.8,.2,1)}
+@keyframes drift{from{transform:translate3d(0,-2px,0) rotate(-1deg)}to{transform:translate3d(0,3px,0) rotate(1deg)}}
+
+/* timeline: flat translucent pills; hover lifts the pill a touch; a new cue grows from its in point */
+.fm::before{filter:none;box-shadow:none!important;transform-origin:left center;transition:transform .35s var(--spring),background .2s,top .15s,height .15s}
+.fm:hover::before{transform:scaleY(1.25)}
+.fm.sel::before{box-shadow:none}
+.fm[data-born]::before{animation:grow .6s var(--spring) both}
+@keyframes grow{from{transform:scaleX(0)}to{transform:none}}
+.rng-ax{background-image:var(--grain);background-size:140px}
+/* brackets arrive from a few pixels out */
+.fh{animation:bk-in .32s var(--spring) both}
+.fh[data-h="in"]{--bx:-4px}.fh[data-h="out"]{--bx:4px}
+@keyframes bk-in{from{opacity:0;transform:translateX(var(--bx))}to{opacity:1;transform:none}}
+
+/* list: the wash under the current cue is grained; the selected cue's brackets slide in; a new cue slides into its place */
+.ci.in,.cm-i.in{background-image:var(--grain);background-size:140px}
+.ci::before{transform:translateX(-5px)}.ci::after{transform:translateX(5px)}
+.ci::before,.ci::after{transition:opacity .2s,transform .35s var(--spring)}
+.ci.sel::before,.ci.sel::after{transform:none}
+.ci.born{animation:born-in .55s var(--spring) both}
+@keyframes born-in{from{opacity:0;transform:translateY(-6px) scale(.98);background:color-mix(in srgb,var(--c) 22%,#fff)}}
+.ci canvas.g{transition:transform .3s var(--spring)}
+.ci:hover canvas.g{transform:scale(1.18) rotate(8deg)}
+
+/* small give on controls */
+.btn,.tg,.lg,.nct,.sti,.gate-ic{transition:transform .25s var(--spring),background .15s,border-color .15s,color .15s,opacity .15s}
+.btn:active,.tg:active,.nct:active,.sti:active{transform:scale(.96)}
+.lg i{transition:transform .3s var(--spring)}
+.lg:hover i{transform:scale(1.45)}
+.cin .btn.send svg{transition:transform .25s var(--spring)}
+.cin .btn.send:hover svg{transform:translateY(-2px)}
+.sti svg{transition:transform .4s var(--spring)}
+button.sti:hover svg{transform:rotate(-12deg) scale(1.08)}
+.mkb.on svg{animation:rec 1s ease-in-out infinite}
+@keyframes rec{50%{transform:scale(.82);opacity:.55}}
+.legend .lg i,.cdot,.cm-i .cq i{box-shadow:none}
+
+/* side panel trim: the same thin brackets as the timeline, around a flat grained window */
+.trim .win{border-radius:2px;box-shadow:none;background-color:color-mix(in srgb,var(--c) 22%,transparent);background-image:var(--grain);background-size:140px}
+.trim .hd{top:4px;width:4px;height:14px;margin-left:-6px;border-radius:0;background:none;box-shadow:none;border:1.5px solid var(--c);border-right:0;cursor:ew-resize}
+.trim .hd[data-h="out"]{margin-left:2px;border-right:1.5px solid var(--c);border-left:0}
+.trim .hd::after{content:"";position:absolute;inset:-4px -5px;width:auto;height:auto;background:none;border-radius:0}
+.trim .hd:hover{transform:scaleY(1.15)}
+.trim .tph{width:1.5px}
+
+/* new-cue card: no shadow; its shapes and flower keep to the top-right corner */
+.nc{box-shadow:none;border-color:var(--border)}
+.nc-corner{position:absolute;z-index:0;top:0;right:0;width:150px;height:118px;overflow:hidden;pointer-events:none;
+  -webkit-mask-image:radial-gradient(circle at 100% 0,#000 35%,transparent 78%);mask-image:radial-gradient(circle at 100% 0,#000 35%,transparent 78%)}
+.nc-corner .sf{inset:0}
+.nc .nc-bg{position:absolute;right:10px;top:10px;bottom:auto;opacity:.32;filter:none}
+
+/* the gate's upload tile: a flat grained colour, nudged up on hover */
+.gate-ic{box-shadow:none;background:var(--hardfx);background-image:var(--grain);background-size:140px}
+.gate-up:hover .gate-ic,.gate-up.over .gate-ic{transform:translateY(-3px) rotate(-4deg)}
+.gate-up,.gate-busy{box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none;background:rgba(255,255,255,.94)}
+.pop .panel,.toast{box-shadow:0 1px 2px rgba(23,21,28,.05),0 10px 28px -14px rgba(23,21,28,.18)}
+/* interface fills get a much lighter grain than the shapes */
+:root{--grain-soft:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .14 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
+.ci.in,.cm-i.in,.trim .win,.rng-ax,.gate-ic{background-image:var(--grain-soft)}
+.ci.in{background-color:color-mix(in srgb,var(--c) 11%,#fff)}
+.cm-i.in{background-color:color-mix(in srgb,var(--c) 11%,#fff)}
+.trim .win{background-color:color-mix(in srgb,var(--c) 26%,transparent)}
+
+/* ---------- layout: the script as a bar at the top, the film centred, the timeline at the bottom; the side panel folded away until asked for ---------- */
+.main{justify-content:center;gap:32px}
+.main.side-off .cuelist{display:none}
+.main:not(.side-off) .cuelist{animation:side-in .32s var(--spring) both}
+@keyframes side-in{from{opacity:0;transform:translateX(14px)}}
+.vdiv{display:none}
+.player{flex:1;min-height:0;justify-content:space-between}
+.player .screen{margin-block:auto}
+.player .tp{flex:none}
+/* the script bar: just its header. Click it to open the script over the film */
+#ex{flex:none;height:auto}
+body:not(.sview) #ex .doc{display:none}
+body:not(.sview) #ex::after{display:none}
+body:not(.sview) #ex .sp-h{border-bottom:0}
+.sview #ex .sp-h{border-bottom:1px solid var(--border)}
+#ex.peek:hover .sp-h{color:var(--foreground)}
+#ex .sdrop{flex:none;flex-direction:row;justify-content:flex-start;align-items:baseline;gap:10px;margin:0;padding:8px 20px;border:0;min-height:0;line-height:16px}
+#ex .sdrop b{font-size:12.5px;white-space:nowrap}
+#ex .sdrop span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px}
+#ex:has(.sdrop:not([hidden])){border-style:dashed}
+#ex:has(.sdrop:not([hidden]):not(.locked):hover){border-color:var(--foreground)}
+#ex:has(.sdrop.bad:not([hidden])){border-color:var(--hardfx)}
+@media (max-width:860px){.player .screen{margin-block:0}}
+
+/* the side panel toggle: a small icon at the far right of the header; its right pane fills in when open */
+.sidet{display:inline-grid;place-items:center;width:26px;height:26px;margin:-5px -5px -5px 0;padding:0;border:0;border-radius:3px;background:none;color:var(--muted-foreground);cursor:pointer;transition:color .15s,background .15s,transform .15s var(--spring)}
+.sidet svg{width:16px;height:16px}
+.sidet .fill{fill:currentColor;stroke:none;opacity:0;transition:opacity .2s}
+.sidet:hover{color:var(--foreground);background:var(--accent)}
+.sidet[aria-expanded=true]{color:var(--foreground)}
+.sidet[aria-expanded=true] .fill{opacity:.35}
+.sidet:active{transform:scale(.9)}
+.meta{align-items:center}
+.exsp{flex:none}
+/* play / pause on the picture: a small flat white disc with a dark glyph; shows when paused, and on hover while playing */
+.screen .big{width:44px;height:44px;margin:-22px;background:rgba(255,255,255,.92);color:#111;transition:opacity .2s,transform .2s var(--spring);transform:scale(.92)}
+.screen .big svg{width:16px;height:16px}
+.screen .big svg path{transform:translateX(.6px)}
+.screen.paused .big{transform:none}
+.screen:not(.paused):hover .big{opacity:.85;transform:none}
+.screen:active .big{transform:scale(.9)}
+
+/* before the first cue: the instructions stand in for the timeline. One line of instruction over a pair of brackets with a square between them:
+   the square grows while you mark, takes the colour of the sound you pick, and finally shrinks onto its line as the timeline fades back in */
+.tpw{position:relative;flex:none;min-width:0}
+.tpw.clip{overflow:clip;overflow-clip-margin:12px}
+.tp{transition:opacity .4s ease}
+.prompt .tp{opacity:0;pointer-events:none}
+.prompt.land .tp{opacity:1}
+.onb{--c:var(--foreground);position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;opacity:0;pointer-events:none;transition:opacity .35s ease}
+.prompt .onb{opacity:1;pointer-events:auto}
+.prompt.land .onb{pointer-events:none}
+.onb-t{margin:0;font-size:14.5px;line-height:20px;color:var(--foreground);text-align:center}
+.onb-t kbd{display:inline-grid;place-items:center;min-width:22px;height:22px;margin:0 2px;padding:0 5px;border:1px solid var(--border);border-bottom-width:2px;border-radius:3px;background:#fff;font:500 12px var(--f-mono);vertical-align:1px}
+.onb-t.sw{animation:onb-sw .35s ease-out}
+@keyframes onb-sw{from{opacity:0;transform:translateY(4px)}}
+.onb-v{display:flex;align-items:center;gap:7px;height:40px;padding:0;border:0;background:none;cursor:pointer}
+.onb .bk{width:7px;height:34px;border:1.5px solid var(--c);transition:border-color .3s,opacity .3s}
+.onb .bk.l{border-right:0}.onb .bk.r{border-left:0}
+.onb-r{width:22px;height:22px;border-radius:2px;background:color-mix(in srgb,var(--c) 78%,transparent);background-image:var(--grain-soft);transform-origin:0 0;transition:width .12s linear,background-color .3s}
+.onb[data-step="0"] .onb-v{animation:onb-breathe 1.8s ease-in-out infinite}
+@keyframes onb-breathe{50%{transform:scale(1.06)}}
+.onb-c{min-height:16px;font:400 12px/16px var(--f-mono);color:var(--muted-foreground)}
+.land .onb-t,.land .onb .bk,.land .onb-c{opacity:0;transition:opacity .25s}
+@media (prefers-reduced-motion:reduce){.onb-v{animation:none!important}.onb-t.sw{animation:none}}
+
+/* cues on the timeline are plain rectangles */
+.fm::before,.fm:hover::before,.fm.hot::before,.fm.cur::before,.fm.sel::before{border-radius:1px}
+.onb-r{border-radius:1px}
+/* the transport: Mark cue on the left with the most weight, play and skip centred, the sound filter on the right */
+.ctl{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px}
+.ctl-l{display:flex;align-items:center;min-width:0}
+.ctl-m{display:flex;align-items:center;gap:2px;position:relative}
+.ctl-m .tc{position:absolute;left:100%;margin:0 0 0 10px;color:var(--muted-foreground)}
+.ctl-m .pp{width:34px;height:34px;border-radius:50%;background:var(--foreground);color:var(--background)}
+.ctl-m .pp:hover{background:color-mix(in srgb,var(--foreground) 85%,transparent);color:var(--background)}
+.ctl-m .pp svg{width:14px;height:14px}
+.ctl .legend{margin-left:0;justify-self:end}
+.mkb{height:34px;margin:0;padding:0 10px 0 12px;gap:8px;border:0;border-radius:3px;background:var(--hardfx);color:#fff;font:600 13.5px var(--f-sans)}
+.mkb:hover{background:color-mix(in srgb,var(--hardfx) 88%,#000)}
+.mkb kbd{margin-left:4px;color:#fff;background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.35)}
+.mkb.on{background:var(--foreground);color:var(--background);border-color:transparent}
+.mkb.on kbd{color:var(--background);border-color:color-mix(in srgb,var(--background) 40%,transparent)}
+.nc-c{grid-template-columns:repeat(4,1fr)}
+
+/* the transport: the timecode sits in the row beside the play controls (so the sound filter can't run into it), and the filter wraps if it must */
+.ctl-l{gap:6px}
+.ctl-m .tc{position:static;margin-left:10px}
+.ctl .legend{min-width:0;justify-self:stretch;flex-wrap:wrap;justify-content:flex-end;row-gap:0}
+
+/* ---------- off screen: a kind of sound of its own, coming from one side of the frame ---------- */
+/* in the cue list, the arrow before the name */
+.osa{margin-right:5px;font-style:normal;font-weight:500;color:var(--offscreen)}
+/* in the panel: one line saying where it comes from, and Change */
+.osc{display:flex;align-items:center;gap:4px;padding:12px 0 0;font-size:12.5px;color:var(--muted-foreground)}
+.osc b{font-weight:500;color:var(--foreground)}
+.osc .lk2{margin-left:auto;font-size:12.5px}
+.pop .osc{padding:12px 12px 0 18px}
+
+/* picking the side, on the film: the frame splits into four triangles meeting in the middle, each fading in from its own edge with an arrow;
+   wherever you click, the nearest edge wins. Hovering one brings it up */
+.osel{position:absolute;inset:0;z-index:4;background:rgba(0,0,0,.18);animation:oeIn .2s ease-out}
+.oz{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:6px;padding:16px;border:0;color:#fff;cursor:pointer;opacity:.55;transition:opacity .15s}
+.oz:hover,.oz:focus-visible,.oz.on{opacity:1;outline:none}
+.oz.left{clip-path:polygon(0 0,50% 50%,0 100%);justify-content:flex-start;flex-direction:column;align-items:flex-start;background:linear-gradient(90deg,color-mix(in srgb,var(--offscreen) 85%,transparent),transparent 34%)}
+.oz.right{clip-path:polygon(100% 0,50% 50%,100% 100%);justify-content:flex-end;flex-direction:column;align-items:flex-end;background:linear-gradient(270deg,color-mix(in srgb,var(--offscreen) 85%,transparent),transparent 34%)}
+.oz.left,.oz.right{justify-content:center}
+.oz.top{clip-path:polygon(0 0,100% 0,50% 50%);align-items:flex-start;background:linear-gradient(180deg,color-mix(in srgb,var(--offscreen) 85%,transparent),transparent 38%)}
+.oz.bottom{clip-path:polygon(0 100%,100% 100%,50% 50%);align-items:flex-end;background:linear-gradient(0deg,color-mix(in srgb,var(--offscreen) 85%,transparent),transparent 38%)}
+.oza{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:rgba(0,0,0,.5);font:500 17px/1 var(--f-sans)}
+.ozl{padding:2px 7px;border-radius:3px;background:rgba(0,0,0,.6);font:500 11.5px var(--f-sans)}
+.osq{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);margin:0;padding:8px 14px;border-radius:4px;background:rgba(0,0,0,.72);color:#fff;font:500 14px/20px var(--f-sans);text-align:center;pointer-events:none;white-space:nowrap}
+.osq small{display:block;font:400 11px var(--f-mono);color:rgba(255,255,255,.7)}
+.screen.picking .big,.screen.picking .oedge{display:none}
+
+/* on the picture: while an off-screen cue plays, its edge glows, and its name sits on a dark chip so it reads over any frame */
+.oedge{position:absolute;inset:0;z-index:2;pointer-events:none}
+.oe{position:absolute;display:flex;align-items:center;justify-content:center;animation:oeIn .3s ease-out}
+.oe b{display:inline-flex;align-items:center;gap:6px;max-width:100%;padding:4px 9px;border-radius:3px;background:rgba(0,0,0,.66);font:500 12px var(--f-sans);color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.oe b i{font-style:normal;color:color-mix(in srgb,var(--offscreen) 55%,#fff)}
+.oe.left,.oe.right{top:0;bottom:0;width:26%}
+.oe.left{left:0;justify-content:flex-start;padding-left:12px;background:linear-gradient(90deg,color-mix(in srgb,var(--offscreen) 75%,transparent),transparent)}
+.oe.right{right:0;justify-content:flex-end;padding-right:12px;background:linear-gradient(270deg,color-mix(in srgb,var(--offscreen) 75%,transparent),transparent)}
+.oe.top,.oe.bottom{left:0;right:0;height:24%}
+.oe.top{top:0;align-items:flex-start;padding-top:12px;background:linear-gradient(180deg,color-mix(in srgb,var(--offscreen) 75%,transparent),transparent)}
+.oe.bottom{bottom:0;align-items:flex-end;padding-bottom:12px;background:linear-gradient(0deg,color-mix(in srgb,var(--offscreen) 75%,transparent),transparent)}
+@keyframes oeIn{from{opacity:0}}
+@media (prefers-reduced-motion:reduce){.oe,.osel{animation:none}}
+
+/* the new-cue card: all five kinds of sound in one row */
+.nc-c{grid-template-columns:repeat(5,minmax(0,1fr))}
+.nc{width:452px}
+.nc-c .nct{padding:8px 7px 7px;font-size:12px}
+.nc-c .nct span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.nc-c .nct{position:relative}
+.nct[data-arrow]::after{content:attr(data-arrow);position:absolute;top:6px;right:7px;font:500 13px/1 var(--f-sans);color:var(--offscreen)}

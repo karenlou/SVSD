@@ -4,8 +4,17 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&family=Courier+Prime:wght@400;700&display=swap">
 <link rel="stylesheet" href="assets/film-cut.css">
 </head><body>
-<!-- The board: it opens straight onto the interface. Upload the reel in the player; the script slot under it unlocks once the reel is in.
-     Everything stays in this browser (IndexedDB): the video under "video", the board (name, cues, notes, comments, script) under "board". -->
+<!-- The board. With no cut yet, the page is just "Upload cut"; once one is chosen, the pixel flower blooms while it's read, and the board opens.
+     The script, if there is one, is added from the board. Everything stays in this browser (IndexedDB): the video under "video", the board under "board". -->
+<section class="gate" id="gate" hidden>
+  <header class="top"><div class="brand"><canvas class="g" id="gateMark" width="16" height="16" style="width:16px;height:16px" aria-hidden="true"></canvas><span>Spotting</span><span class="crumb">/ New board</span></div><span></span><div class="meta"><a class="lk" href="demo/demo.html">See the demo</a></div></header>
+  <div class="gate-c">
+    <label class="gate-up" id="gateUp"><input type="file" accept="video/*" id="gateFile">
+      <span class="gate-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V4.5M7.5 9L12 4.5 16.5 9"/><path d="M4.5 14.5v3a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-3"/></svg></span>
+      <b id="gateTx">Upload cut</b><span class="gate-s" id="gateS">Drop the picture edit here, or choose a file</span></label>
+    <div class="gate-busy" id="gateBusy" hidden><canvas class="g" id="gateG" style="width:56px;height:56px" aria-hidden="true"></canvas><b id="gateStep">Reading the cut</b><span id="gateName"></span></div>
+  </div>
+</section>
 <div id="app"></div>
 <script src="assets/engine.js"></script>
 <script>
@@ -15,17 +24,45 @@ const store={db:null,
   get(k){return this.tx("readonly",s=>s.get(k))},put(k,v){return this.tx("readwrite",s=>s.put(v,k))},clear(){return this.tx("readwrite",s=>s.clear())}};
 const save=b=>store.put("board",b).catch(()=>{});
 
-/* pick up this browser's board if there is one, otherwise start an empty one */
-(async()=>{let board=null,video=null;try{[board,video]=await Promise.all([store.get("board"),store.get("video")])}catch(e){}
-  if(!video)board=null;board??={name:"Untitled reel",script:[],cues:{},comments:{}};
-  window.board=boot({mode:"app",title:board.name,video:video?URL.createObjectURL(video):null,script:board.script,cues:board.cues,reel:Object.keys(board.cues||{}),comments:Object.values(board.comments||{}),
+function open(board,video){
+  window.board=boot({mode:"app",title:board.name,video:URL.createObjectURL(video),script:board.script,cues:board.cues,reel:Object.keys(board.cues||{}),comments:Object.values(board.comments||{}),
     onVideo:f=>{board.videoName=f.name;store.put("video",f).then(()=>save(board))},
     onChange:s=>{board.name=s.title;board.cues=s.cues;board.comments=s.comments;board.script=s.script;save(board)},
     onReset:async()=>{await store.clear();location.reload()}});
-  /* for now: clicking either drop zone loads the Challengers reel / script snippet from media/ instead of opening a file picker (dropping a file still works) */
-  const preload=(sel,url,name,type,load)=>document.querySelector(sel).addEventListener("click",async e=>{e.preventDefault();
-    const blob=await (await fetch(url)).blob();load(new File([blob],name,{type}))});
-  preload("#vdrop","media/challengers-reel-6.mp4","challengers-reel-6.mp4","video/mp4",f=>window.board.setVideo(f));
-  preload("#sdrop","media/challengers-final-scene.fountain","challengers-final-scene.fountain","text/plain",f=>window.board.setScriptFile(f))})();
+  preload("#sdrop","media/challengers-final-scene.fountain","challengers-final-scene.fountain","text/plain",f=>window.board.setScriptFile(f))}
+
+/* for now: clicking "Upload cut" loads the Challengers reel, and clicking the script slot loads the script snippet, from media/ instead of opening a file picker (dropping a file still works) */
+const preload=(sel,url,name,type,load)=>document.querySelector(sel)?.addEventListener("click",async e=>{e.preventDefault();
+  const blob=await (await fetch(url)).blob();load(new File([blob],name,{type}))});
+
+/* the gate: nothing but "Upload cut". The glyphs need a clock until the board starts its own */
+let gateRaf=0;const gateTick=t=>{NOW=t/1000;for(const it of insts)draw(it);gateRaf=requestAnimationFrame(gateTick)};
+const pause=ms=>new Promise(r=>setTimeout(r,ms));
+function say(t){const s=$("#gateS"),u=$("#gateUp");s.textContent=t;u.classList.add("bad");clearTimeout(say.t);say.t=setTimeout(()=>{s.textContent="Drop the picture edit here, or choose a file";u.classList.remove("bad")},2600)}
+/* read the cut: its length and picture size, so the board opens already laid out; the flower blooms the whole time, then closes into a check */
+async function take(f){if(!f)return;if(!f.type.startsWith("video/"))return say("That isn't a video");
+  $("#gateUp").hidden=true;$("#gateBusy").hidden=false;$("#gateName").textContent=f.name;
+  const g=glyph($("#gateG"),"pulse",{color:"--hardfx",base:.08});
+  const v=document.createElement("video");v.preload="metadata";v.muted=true;v.src=URL.createObjectURL(f);
+  const ok=await Promise.race([new Promise(r=>{v.onloadedmetadata=()=>r(true);v.onerror=()=>r(false)}),pause(15000).then(()=>true)]);
+  if(!ok){cancelAnimationFrame(gateRaf);$("#gateBusy").hidden=true;$("#gateUp").hidden=false;return say("Couldn't play that video")}
+  const board={name:f.name.replace(/\.[^.]+$/,"").replace(/[-_]+/g," "),videoName:f.name,script:[],cues:{},comments:{}};
+  await Promise.all([store.clear().then(()=>store.put("video",f)).then(()=>save(board)),pause(1100)]);
+  $("#gateStep").textContent="Ready";setG(g,"set","--ambience");await pause(900);
+  const gate=$("#gate");gate.classList.add("out");await pause(380);cancelAnimationFrame(gateRaf);gate.remove();
+  open(board,f);document.body.classList.add("arrive")}
+$("#gateFile").addEventListener("change",e=>take(e.target.files[0]));
+preload("#gateUp","media/challengers-reel-6.mp4","challengers-reel-6.mp4","video/mp4",take);
+addEventListener("dragover",e=>{const g=$("#gate");if(g&&!g.hidden&&[...e.dataTransfer.types].includes("Files")){e.preventDefault();$("#gateTx").textContent="Drop to upload";$("#gateUp").classList.add("over")}});
+addEventListener("dragleave",e=>{if(!e.relatedTarget&&$("#gate")){$("#gateTx").textContent="Upload cut";$("#gateUp").classList.remove("over")}});
+addEventListener("drop",e=>{if(!$("#gate")||$("#gate").hidden)return;e.preventDefault();$("#gateTx").textContent="Upload cut";$("#gateUp").classList.remove("over");take(e.dataTransfer.files[0])});
+
+/* a board already in this browser opens straight away; otherwise, the gate */
+(async()=>{let board=null,video=null;try{[board,video]=await Promise.all([store.get("board"),store.get("video")])}catch(e){}
+  if(board&&video){$("#gate").remove();return open(board,video)}
+  $("#gate").hidden=false;glyph($("#gateMark"),"garden",{count:0,base:.14});gateRaf=requestAnimationFrame(gateTick);
+  softField($("#gate"),{cols:Math.round(innerWidth/90),alpha:[34,78],seed:11,top:[-.05,.4],stack:[6,12]});
+  /* the shapes lean a little toward the pointer, nearer ones more */
+  $("#gate").addEventListener("pointermove",e=>{const f=$("#gate .sf");if(!f)return;f.style.setProperty("--px",(e.clientX/innerWidth-.5).toFixed(3));f.style.setProperty("--py",(e.clientY/innerHeight-.5).toFixed(3))})})();
 </script>
 </body></html>
