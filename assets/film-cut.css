@@ -786,7 +786,7 @@ mark.cue{color:inherit;background-color:transparent}
 .cuelist.empty .dock{flex:1;height:auto;margin:0;border-top:0;justify-content:center}
 .cuelist.empty .dock-e{max-width:250px;margin:0 auto;padding:0 0 8vh;text-align:center}
 
-/* ======================================================================================================
+/* ===============================================================================================
    Look: white page, bright soft colour. Sounds take the reference's palette (cornflower, pink, butter, tangerine,
    sage, lavender); surfaces are white with hairline borders; colour shows up as soft, translucent, slightly blurred
    shapes. The thin brackets stay as the selection mark.
@@ -1078,3 +1078,96 @@ body:not(.sview) #ex .sp-h{border-bottom:0}
 .nc-c .nct span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 .nc-c .nct{position:relative}
 .nct[data-arrow]::after{content:attr(data-arrow);position:absolute;top:6px;right:7px;font:500 13px/1 var(--f-sans);color:var(--offscreen)}
+/* ---------- timeline (Josh): lanes named in a gutter, stacked in build order (score on top, the ambience bed at the bottom),
+   cues as solid blocks that light up while they sound, a ghost playhead on hover, and scrubbing that catches on cue edges ---------- */
+.tlg{display:grid;grid-template-columns:76px minmax(0,1fr);gap:8px}
+.tll{position:relative;pointer-events:none}
+.tll span{position:absolute;left:0;right:0;display:flex;align-items:center;gap:6px;font:400 10.5px var(--f-mono);letter-spacing:.02em;color:var(--muted-foreground);white-space:nowrap;transition:color .2s}
+.tll i{width:6px;height:6px;border-radius:50%;background:color-mix(in srgb,var(--c) 45%,transparent);transition:background .2s,box-shadow .2s,transform .2s cubic-bezier(.34,1.56,.64,1)}
+.tll span.live{color:var(--foreground)}
+.tll span.live i{background:var(--c);box-shadow:0 0 0 3px color-mix(in srgb,var(--c) 18%,transparent);transform:scale(1.15)}
+.tll span.on{color:var(--foreground)}
+.ftl .lnl{height:24px;background:none;border-top:1px solid color-mix(in srgb,var(--foreground) 5%,transparent)}
+.ftl .lnl.on{background:color-mix(in srgb,var(--c) 7%,transparent)}
+.ftl::before{display:none}
+
+.ftl .fm{height:24px;margin-top:0}
+.ftl .fm::before{top:7px;height:10px;border-radius:3px;background:color-mix(in srgb,var(--c) 32%,transparent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--c) 45%,transparent);
+  transition:top .18s cubic-bezier(.22,1,.36,1),height .18s cubic-bezier(.22,1,.36,1),background .2s,box-shadow .2s}
+.ftl .fm.bed::before{top:4px;height:16px;border-radius:4px;background:repeating-linear-gradient(90deg,color-mix(in srgb,var(--c) 26%,transparent) 0 2px,color-mix(in srgb,var(--c) 16%,transparent) 2px 5px)}
+.ftl .fm:hover::before,.ftl .fm.hot::before{top:5px;height:14px;background:color-mix(in srgb,var(--c) 55%,transparent)}
+.ftl .fm.bed:hover::before,.ftl .fm.bed.hot::before{top:3px;height:18px}
+.ftl .fm.on::before{top:4px;height:16px;background:var(--c);box-shadow:0 0 0 1px var(--c),0 0 12px -2px var(--c)}
+.ftl .fm.bed.on::before{top:3px;height:18px;background:repeating-linear-gradient(90deg,var(--c) 0 2px,color-mix(in srgb,var(--c) 70%,transparent) 2px 5px)}
+.ftl .fm.cur::before{background:var(--c)}
+.ftl .fm.sel::before{top:3px;height:18px;border-radius:4px;background:var(--c);box-shadow:0 0 0 1.5px var(--card),0 0 0 3px var(--c)}
+.ftl .fh,.ftl .fh:hover,.ftl.grabbing .fh{height:18px;margin-top:0}
+.ftl .fh::after{top:6px}
+
+.ftl .fph{width:2px;box-shadow:0 0 0 2px color-mix(in srgb,var(--card) 70%,transparent)}
+.ftl .fph::before{content:"";position:absolute;left:-4px;top:-4px;width:10px;height:6px;border-radius:2px 2px 5px 5px;background:var(--foreground)}
+.ftl .fph.snap{animation:fph-snap .32s cubic-bezier(.34,1.56,.64,1)}
+@keyframes fph-snap{0%{transform:scaleX(1)}35%{transform:scaleX(2.2)}100%{transform:scaleX(1)}}
+
+.fgh{position:absolute;top:12px;bottom:18px;width:1px;margin-left:-.5px;background:color-mix(in srgb,var(--foreground) 35%,transparent);pointer-events:none;z-index:3}
+.fgh b{position:absolute;bottom:100%;left:50%;transform:translate(-50%,-2px);padding:1px 5px;border-radius:3px;background:var(--foreground);color:var(--background);font:500 10px/14px var(--f-mono);white-space:nowrap}
+.ftl.grabbing .fgh{display:none}
+@media (max-width:860px){.tlg{grid-template-columns:minmax(0,1fr)}.tll{display:none}}
+
+/* ---------- timeline zoom (Josh): the timeline clips to its view; under it, − + Fit and the navigator (the whole reel in miniature,
+   with a window on what's showing: drag it to move, drag its ends to expand or compress) ---------- */
+.ftl{overflow-x:clip}
+.ftl .tk.z b{transform:none}
+.tzr{margin-top:6px;align-items:center}
+.tzb{display:flex;align-items:center;gap:2px}
+.tzb .btn{height:22px;min-width:22px;padding:0 5px;font:500 12px/1 var(--f-mono);color:var(--muted-foreground)}
+.tzb .btn:hover:not(:disabled){color:var(--foreground)}
+.tzb .btn:disabled{opacity:.35;cursor:default}
+.tnv{position:relative;height:24px;border-radius:4px;background:color-mix(in srgb,var(--foreground) 4%,transparent);overflow:hidden;cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none}
+.tnv canvas{position:absolute;inset:0;width:100%;height:100%}
+.tnp{position:absolute;top:0;bottom:0;width:1.5px;margin-left:-.75px;background:var(--foreground);pointer-events:none;z-index:2}
+.tnw{position:absolute;top:0;bottom:0;min-width:12px;border-radius:4px;box-shadow:0 0 0 9999px color-mix(in srgb,var(--background) 62%,transparent),inset 0 0 0 1.5px var(--foreground);cursor:grab;z-index:1;
+  transition:box-shadow .2s}
+.tnv.full .tnw{box-shadow:0 0 0 9999px transparent,inset 0 0 0 1px color-mix(in srgb,var(--foreground) 28%,transparent)}
+.tnv.grabbing,.tnv.grabbing *{cursor:grabbing!important}
+.tnw i{position:absolute;top:0;bottom:0;width:10px;cursor:ew-resize}
+.tnw i[data-e="in"]{left:-5px}.tnw i[data-e="out"]{right:-5px}
+.tnw i::after{content:"";position:absolute;left:4px;top:7px;bottom:7px;width:2px;border-radius:1px;background:var(--foreground);opacity:0;transition:opacity .15s,transform .2s cubic-bezier(.34,1.56,.64,1)}
+.tnv:hover .tnw i::after,.tnw.live i::after{opacity:.8}
+.tnw i:hover::after{transform:scaleY(1.35)}
+.tnl{position:absolute;left:0;top:50%;z-index:20;transform:translateY(-50%) scale(.92);padding:1px 5px;border-radius:3px;background:var(--foreground);color:var(--background);font:500 10px/14px var(--f-mono);white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .15s,transform .2s cubic-bezier(.34,1.56,.64,1)}
+.tnvw{position:relative;min-width:0}
+.tnvw:has(.tnw.live) .tnl{opacity:1;transform:translateY(-50%) scale(1)}
+@media (max-width:860px){.tzr{grid-template-columns:auto minmax(0,1fr)}}
+
+/* ---------- long reels (Josh): folded lanes, cue clusters, clickable scenes, presets and follow mode, go-to timecode, a filmstrip navigator ---------- */
+.tll span{pointer-events:auto;cursor:pointer;border-radius:3px;transition:color .2s,height .25s cubic-bezier(.22,1,.36,1),top .25s cubic-bezier(.22,1,.36,1)}
+.tll span:hover{color:var(--foreground)}
+.tll span.fold{font-size:0;gap:0}
+.tll span.fold i{width:12px;height:2px;border-radius:1px}
+.tll span.fold:hover{font-size:10.5px;gap:6px}
+.tll span.fold:hover i{width:6px;height:6px;border-radius:50%}
+.ftl .fm.mini{height:10px}
+.ftl .fm.mini::before,.ftl .fm.mini:hover::before,.ftl .fm.mini.on::before{top:3px;height:4px;border-radius:2px}
+.fcl{position:absolute;z-index:2;padding:0;border:0;background:none;cursor:zoom-in;display:flex;align-items:center;justify-content:center;transition:opacity .2s}
+.fcl::before{content:"";position:absolute;left:0;right:0;top:50%;height:12px;margin-top:-6px;border-radius:6px;background:repeating-linear-gradient(90deg,color-mix(in srgb,var(--c) 70%,transparent) 0 2px,color-mix(in srgb,var(--c) 30%,transparent) 2px 4px);box-shadow:inset 0 0 0 1px var(--c);transition:transform .2s cubic-bezier(.34,1.56,.64,1)}
+.fcl span{position:relative;padding:0 4px;border-radius:6px;background:var(--card);color:var(--foreground);font:500 9.5px/12px var(--f-mono);box-shadow:0 0 0 1px var(--c)}
+.fcl:hover::before{transform:scaleY(1.25)}
+.fcl.faded{opacity:.12}
+.ftl .scb span{pointer-events:auto;cursor:zoom-in;padding:0 3px;margin-left:-3px;border-radius:3px;transition:background .15s,color .15s}
+.ftl .scb span:hover{background:var(--foreground);color:var(--background)}
+.tzr{grid-template-columns:76px minmax(0,1fr) auto}
+.tzp{display:flex;align-items:center;gap:1px}
+.tzp .btn{height:22px;padding:0 6px;font:500 11px/1 var(--f-mono);color:var(--muted-foreground)}
+.tzp .btn:hover{color:var(--foreground)}
+.tzp .btn:disabled{opacity:.35;cursor:default}
+.tzp #zFol[aria-pressed=true]{color:var(--foreground);background:var(--accent)}
+.tzs{width:1px;height:14px;margin:0 4px;background:var(--border)}
+.tnv{height:34px}
+.ctl .tc{cursor:text;border-radius:4px;padding:2px 4px;margin-left:-4px;transition:background .15s}
+.ctl .tc:hover{background:var(--accent)}
+.ctl .tc.edit{background:none;padding:0;margin-left:-4px}
+.ctl .tc input{width:92px;height:22px;padding:0 4px;border:1px solid var(--foreground);border-radius:4px;background:var(--card);color:var(--foreground);font:500 12px var(--f-mono);outline:none}
+.ctl .tc.bad input{border-color:var(--hardfx);animation:tc-no .3s}
+@keyframes tc-no{20%{transform:translateX(-3px)}40%{transform:translateX(3px)}60%{transform:translateX(-2px)}80%{transform:translateX(1px)}}
+@media (max-width:860px){.tzr{grid-template-columns:auto minmax(0,1fr)}.tzp{grid-column:1/-1;justify-content:flex-end}}

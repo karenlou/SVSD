@@ -23,7 +23,7 @@ const KIND={memo:"Voice memo"}, EMO=["👍","🔥","👀","🎧","✅","❓"], A
 const AUD={};let aidN=0;const newAud=o=>{const id="a"+(++aidN);AUD[id]={id,...o};return id};
 const CUES={},COMMENTS={};let cuid=0;
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-const tc=t=>{t=Math.max(0,t);const s=(t%60).toFixed(1);return Math.floor(t/60)+":"+s.padStart(4,"0")};
+const tc=t=>{t=Math.max(0,t);const s=(t%60).toFixed(1),h=Math.floor(t/3600);return h?`${h}:${String(Math.floor(t/60)%60).padStart(2,"0")}:${s.padStart(4,"0")}`:Math.floor(t/60)+":"+s.padStart(4,"0")};
 const rel=at=>{const s=(Date.now()-at)/1000;return s<45?"just now":s<3600?Math.round(s/60)+"m ago":s<86400?Math.round(s/3600)+"h ago":Math.round(s/86400)+"d ago"};
 const rangeTxt=m=>m.t1!=null?`${tc(m.t0)} – ${tc(m.t1)}`:`at ${tc(m.t0)}`;
 const snip=(m,n=60)=>{const x=m.msgs.find(x=>!x.sys&&(x.text||x.audio?.length));const t=x?.text||(x?.audio?.length?KIND[AUD[x.audio[0]].kind]:"");return t.length>n?t.slice(0,n-2).trimEnd()+"…":t};
@@ -96,7 +96,7 @@ function hash(s){let h=2166136261;for(const ch of s)h=Math.imul(h^ch.charCodeAt(
 /* comment times are kept relative to their cue and shown on the reel's clock */
 const rtc=(m,q=CUES[m.clip])=>m.t1!=null?`${tc(q.ft+m.t0)} – ${tc(q.ft+m.t1)}`:`at ${tc(q.ft+m.t0)}`;
 const commentsOf=id=>Object.values(COMMENTS).filter(m=>m.clip===id).sort((a,b)=>a.t0-b.t0);
-const mmss=t=>{t=Math.max(0,Math.round(t));return Math.floor(t/60)+":"+String(t%60).padStart(2,"0")};
+const mmss=t=>{t=Math.max(0,Math.round(t));const h=Math.floor(t/3600),ss=String(t%60).padStart(2,"0");return h?`${h}:${String(Math.floor(t/60)%60).padStart(2,"0")}:${ss}`:Math.floor(t/60)+":"+ss};
 const span=q=>`${mmss(q.ft)}–${mmss(q.ft+q.dur)}`, secs=d=>(Math.round(d*10)/10)+"s";
 const ICON={play:'<svg viewBox="0 0 16 16" fill="currentColor"><path d="M5 3.5v9l7-4.5z"/></svg>',pause:'<svg viewBox="0 0 16 16" fill="currentColor"><rect x="4" y="3.5" width="2.6" height="9" rx=".6"/><rect x="9.4" y="3.5" width="2.6" height="9" rx=".6"/></svg>',
   mark:'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 2.5H3.5v11H5M11 2.5h1.5v11H11"/><path d="M8 5.5v5M5.5 8h5"/></svg>',
@@ -180,7 +180,7 @@ $("#app").innerHTML=`<div class="wrap">
           <div class="ctl-m"><button class="btn btn-ghost btn-icon" id="prev" aria-label="Previous cue ([)"></button><button class="btn btn-ghost btn-icon pp" id="pp" aria-label="Play or pause (space)"></button><button class="btn btn-ghost btn-icon" id="next" aria-label="Next cue (])"></button><span class="tc" id="tc"></span></div>
           <div class="legend" id="bar" role="group" aria-label="Filter by sound"></div></div>
         <div class="tlh"><span id="tlL"></span><span id="tlR"></span></div>
-        <div class="ftl" id="ftl"></div>
+        <div class="tlg"><div class="tll" id="tll" aria-hidden="true"></div><div class="ftl" id="ftl"></div></div><div class="tlg tzr"><div class="tzb" role="group" aria-label="Zoom the timeline"><button class="btn btn-ghost" id="zOut" title="Zoom out (−)" aria-label="Zoom out">−</button><button class="btn btn-ghost" id="zIn" title="Zoom in (=)" aria-label="Zoom in">+</button></div><div class="tnvw"><div class="tnv" id="tnv" title="Drag the window to move through the reel, drag its ends to zoom. Double-click to fit."><canvas id="tnc" aria-hidden="true"></canvas><i class="tnp" id="tnp"></i><div class="tnw" id="tnw"><i data-e="in"></i><i data-e="out"></i></div></div><b class="tnl" id="tnl"></b></div><div class="tzp" role="group" aria-label="Show"><button class="btn btn-ghost" data-z="10" title="Show 10 seconds around the playhead">10s</button><button class="btn btn-ghost" data-z="60" title="Show a minute around the playhead">1m</button><button class="btn btn-ghost" data-z="scene" title="Fit the scene at the playhead ({ } step scenes)">Scene</button><button class="btn btn-ghost" data-z="fit" id="zFit" title="Fit the whole reel (\\)">Reel</button><span class="tzs"></span><button class="btn btn-ghost" id="zFol" title="While playing, the view pages along with the playhead. Click to keep the playhead centred instead.">Page</button></div></div>
       </div>
       <div class="onb" id="onb" aria-hidden="true" data-step="0"><p class="onb-t" id="onbT"></p>
         <button class="onb-v" id="onbV" tabindex="-1" title="Press M"><span class="bk l"></span><span class="onb-r" id="onbR"></span><span class="bk r"></span></button><span class="onb-c" id="onbC"></span></div></div>
@@ -245,7 +245,7 @@ function renderSlot(){const sd=$("#sdrop"),has=hasScript();$("#ex").hidden=!has&
 const FILM=Object.keys(REEL).sort((a,b)=>CUES[a].ft-CUES[b].ft);
 const timedScenes=()=>(SCRIPT.find(a=>a.reel)?.scenes||[]).filter(s=>s.e!=null);
 const vid=$("#vid"),screen=$("#screen");let LEN=D.duration||1;if(VID)vid.src=D.video;
-vid.addEventListener("loadedmetadata",()=>{if(isFinite(vid.duration)){LEN=vid.duration;counts();renderTL();layoutFilm();renderCard()}});
+vid.addEventListener("loadedmetadata",()=>{if(isFinite(vid.duration)){LEN=vid.duration;V0=0;VW=0;counts();renderTL();layoutFilm();renderCard()}});
 const now=()=>vid.currentTime||0;
 function ownerAt(t){let o=FILM[0];for(const id of FILM)if(CUES[id].ft<=t+.01)o=id;return o}
 const ppIcon=()=>{const p=!vid.paused&&!vid.ended;$("#pp").innerHTML=p?ICON.pause:ICON.play;$("#big").innerHTML=p?ICON.pause:ICON.play;screen.classList.toggle("paused",!p);const z=$("[data-act=pp]",host());if(z)z.innerHTML=p?ICON.pause:ICON.play};
@@ -278,29 +278,41 @@ if(APP){$("#fVid").addEventListener("change",e=>setVideo(e.target.files[0]));$("
 
 /* ---------- timeline: a lane for every kind of sound. Above it, the cue at the playhead: [its interval] and name on the left, how long it runs on the right.
    The selected cue (the one in the panel) gets handles: drag its ends to trim, drag its body to move it; Delete removes it ---------- */
-const ftl=$("#ftl"),XP=t=>(t/LEN*100).toFixed(3)+"%",LANES=Object.keys(CATS),LTOP=16,LH=9;let AX=0;
-function renderTL(){const W=ftl.clientWidth||800,px=t=>t/LEN*W;AX=LTOP+LANES.length*LH+6;
-  let h=timedScenes().map(s=>`<div class="scb" style="left:${XP(s.s)};width:${XP(s.e-s.s)};top:${LTOP-4}px;height:${AX-LTOP+4}px"><span>SC ${s.n}</span></div>`).join("");
-  h+=LANES.map((c,i)=>`<div class="lnl" style="top:${LTOP+i*LH+4}px;--c:var(--${c})"></div>`).join("");
+let V0=0,VW=0;const vw=()=>Math.min(VW||LEN,LEN);
+const ftl=$("#ftl"),XP=t=>((t-V0)/vw()*100).toFixed(3)+"%",XD=d=>(d/vw()*100).toFixed(3)+"%",LANES=Object.keys(CATS),TLL=(o=>o.filter(k=>k in CATS).concat(Object.keys(CATS).filter(k=>!o.includes(k))))(["score","offscreen","hardfx","props","cloth","footsteps","ambience"]),LTOP=18,LH=24,LHC=10,LYM={},LHM={},LANEPIN={},LY=c=>LYM[c]??LTOP,LHo=c=>LHM[c]??LH;let AX=0;
+/* a lane is open if it has cues (or holds the selected cue), unless its name was clicked to fold or unfold it */
+const laneOpen=c=>CUES[SC.id]?.c===c||(LANEPIN[c]??FILM.some(id=>CUES[id].c===c));
+function renderTL(){const W=ftl.clientWidth||800,w=vw(),px=t=>(t-V0)/w*W;let ly=LTOP;TLL.forEach(c=>{LYM[c]=ly;LHM[c]=laneOpen(c)?LH:LHC;ly+=LHM[c]});AX=ly+4;
+  let h=timedScenes().map(s=>`<div class="scb" style="left:${XP(s.s)};width:${XD(s.e-s.s)};top:${LTOP-4}px;height:${AX-LTOP+4}px"><span>SC ${s.n}</span></div>`).join("");
+  h+=TLL.map(c=>`<div class="lnl" data-lane="${c}" style="top:${LY(c)}px;height:${LHo(c)}px;--c:var(--${c})"></div>`).join("");
+  $("#tll").innerHTML=TLL.map(c=>`<span data-lane="${c}" class="${laneOpen(c)?"":"fold"}" style="top:${LY(c)}px;height:${LHo(c)}px;--c:var(--${c})" title="${laneOpen(c)?"Fold":"Unfold"} ${CATS[c]}"><i></i>${CATS[c]}</span>`).join("");
   h+=`<div class="ax" style="top:${AX}px"></div>`;
-  if(VID){const stp=LEN>600?30:LEN>240?10:5,big=stp*6;for(let t=0;t<=LEN;t+=stp)h+=`<i class="tk${t%big?"":" l"}" style="left:${XP(t)};top:${AX}px">${t%big?"":`<b>${mmss(t)}</b>`}</i>`}
-  h+=FILM.map(id=>{const q=CUES[id];return `<button class="fm${id===cur?" cur":""}" data-id="${id}" ${id===born?' data-born':''} style="--c:var(--${q.c});--zz:${100-Math.min(98,Math.round(q.dur))};left:${px(q.ft)}px;width:${Math.max(3,px(q.dur))}px;top:${LTOP+LANES.indexOf(q.c)*LH+4}px" aria-label="${span(q)} ${esc(q.n)}"></button>`}).join("");
+  if(VID){const [stp,big]=tickSteps(W/w),k0=Math.max(0,Math.floor(V0/stp)),k1=Math.min(Math.floor(LEN/stp),Math.ceil((V0+w)/stp)),per=Math.round(big/stp);
+    for(let k=k0;k<=k1;k++){const t=k*stp,l=k%per===0;h+=`<i class="tk${l?" l":""}${k===0?" z":""}" style="left:${XP(t)};top:${AX}px">${l?`<b>${big<1?tc(t):mmss(t)}</b>`:""}</i>`}}
+  const cueB=id=>{const q=CUES[id];return `<button class="fm${id===cur?" cur":""}${q.c==="ambience"?" bed":""}${laneOpen(q.c)?"":" mini"}" data-id="${id}"${id===born?" data-born":""} style="--c:var(--${q.c});--zz:${100-Math.min(98,Math.round(q.dur))};left:${px(q.ft)}px;width:${Math.max(3,q.dur/w*W)}px;top:${LY(q.c)}px" aria-label="${span(q)} ${esc(q.n)}"></button>`};
+  const vis=FILM.filter(id=>{const q=CUES[id];return q.ft+q.dur>=V0-w&&q.ft<=V0+2*w}),tiny=id=>id!==SC.id&&CUES[id].dur/w*W<4,GAP=4;
+  TLL.forEach(c=>{const ids=vis.filter(id=>CUES[id].c===c).sort((a,b)=>CUES[a].ft-CUES[b].ft);let run=[],end=-1e9;
+    const flush=()=>{if(run.length>=2){const a=CUES[run[0]].ft,b=Math.max(...run.map(id=>CUES[id].ft+CUES[id].dur));
+        h+=`<button class="fcl" data-c="${c}" data-a="${a}" data-b="${b}" style="--c:var(--${c});left:${px(a)}px;width:${Math.max(12,(b-a)/w*W)}px;top:${LY(c)}px;height:${LHo(c)}px" title="${run.length} ${CATS[c]} cues · click to zoom in" aria-label="${run.length} ${CATS[c]} cues, ${mmss(a)} to ${mmss(b)}"><span>${run.length}</span></button>`}
+      else run.forEach(id=>h+=cueB(id));run=[]};
+    ids.forEach(id=>{const q=CUES[id];if(tiny(id)&&run.length&&(q.ft-end)/w*W<GAP){run.push(id);end=Math.max(end,q.ft+q.dur);return}flush();if(tiny(id)){run=[id];end=q.ft+q.dur}else h+=cueB(id)});flush()});
   ftl.style.height=AX+22+"px";
-  ftl.innerHTML=h+`<i class="fh" data-h="in" hidden></i><i class="fh" data-h="out" hidden></i><div class="rng-ax" id="crng" style="top:${AX}px"></div><div class="rng-ax hov" id="hrng" style="top:${AX}px" hidden></div><div class="rng-ax mrk" id="mrng" style="top:${AX}px" hidden></div><div class="fph" id="fph" style="top:${LTOP-6}px;height:${AX-LTOP+8}px"></div>`;
-  placeLabel();applyFilter();markSel();lastT=-1;update(now())}
+  ftl.innerHTML=h+`<i class="fh" data-h="in" hidden></i><i class="fh" data-h="out" hidden></i><div class="rng-ax" id="crng" style="top:${AX}px"></div><div class="rng-ax hov" id="hrng" style="top:${AX}px" hidden></div><div class="rng-ax mrk" id="mrng" style="top:${AX}px" hidden></div><div class="fph" id="fph" style="top:${LTOP-6}px;height:${AX-LTOP+8}px"></div><div class="fgh" id="fgh" hidden><b></b></div>`;
+  placeLabel();applyFilter();markSel();renderNav();lastT=-1;update(now())}
 let tlW=0;new ResizeObserver(()=>{if(ftl.clientWidth!==tlW){tlW=ftl.clientWidth;renderTL()}}).observe(ftl);
-function rngAt(el,q){el.style.setProperty("--c",`var(--${q.c})`);el.style.left=XP(q.ft);el.style.width=XP(q.dur)}
+function rngAt(el,q){el.style.setProperty("--c",`var(--${q.c})`);el.style.left=XP(q.ft);el.style.width=XD(q.dur)}
 /* the selected cue's bar, and its handles */
-function markSel(){$$(".fm.sel",ftl).forEach(x=>x.classList.remove("sel"));$$(".ci.sel").forEach(x=>x.classList.remove("sel"));if(CUES[SC.id])$(`.ci[data-id="${SC.id}"]`)?.classList.add("sel");const q=CUES[SC.id],fm=q&&$(`.fm[data-id="${SC.id}"]`,ftl),hs=$$(".fh",ftl);
-  if(!fm){hs.forEach(h=>h.hidden=true);return}fm.classList.add("sel");const top=LTOP+LANES.indexOf(q.c)*LH+4;
-  hs.forEach(h=>{h.hidden=false;h.style.setProperty("--c",`var(--${q.c})`);h.style.top=top-5+"px";h.style.left=XP(h.dataset.h==="in"?q.ft:q.ft+q.dur)})}
+function markSel(){if(CUES[SC.id]&&$(`.fm.mini[data-id="${SC.id}"]`,ftl))return renderTL();$$(".fm.sel",ftl).forEach(x=>x.classList.remove("sel"));$$(".ci.sel").forEach(x=>x.classList.remove("sel"));if(CUES[SC.id])$(`.ci[data-id="${SC.id}"]`)?.classList.add("sel");const q=CUES[SC.id],fm=q&&$(`.fm[data-id="${SC.id}"]`,ftl),hs=$$(".fh",ftl);
+  $$(".ffd",ftl).forEach(x=>x.remove());
+  if(!fm){hs.forEach(h=>h.hidden=true);return}fm.classList.add("sel");const top=LY(q.c)+LH/2-7;
+  hs.forEach(h=>{h.hidden=false;h.style.setProperty("--c",`var(--${q.c})`);h.style.top=top+"px";h.style.left=XP(h.dataset.h==="in"?q.ft:q.ft+q.dur)})}
 function placeLabel(){if(MARK)return;const q=CUES[cur],c=$("#crng");
   if(!q){$("#tlL").innerHTML=`<span class="hint">${!VID?"Upload the reel to start.":FILM.length?"":"No cues yet. Play the reel and press M at the start of a sound, then again at its end."}</span>`;$("#tlR").textContent="";if(c)c.hidden=true;return}
   $("#tlL").innerHTML=`<b>[${span(q)}]</b> ${esc(q.n)}`;$("#tlR").textContent=secs(q.dur);if(c){c.hidden=false;rngAt(c,q)}}
 /* while a cue's timing changes (here or in the panel), everything showing it follows along live */
-function liveTiming(id){const q=CUES[id],fm=$(`.fm[data-id="${id}"]`,ftl);if(fm){const W=ftl.clientWidth;fm.style.left=q.ft/LEN*W+"px";fm.style.width=Math.max(3,q.dur/LEN*W)+"px"}
+function liveTiming(id){const q=CUES[id],fm=$(`.fm[data-id="${id}"]`,ftl);if(fm){const W=ftl.clientWidth,w=vw();fm.style.left=(q.ft-V0)/w*W+"px";fm.style.width=Math.max(3,q.dur/w*W)+"px"}renderNav()
   if(id===SC.id){markSel();trimShow()}if(id===cur)placeLabel()}
-const tAt=e=>{const r=ftl.getBoundingClientRect();return cl((e.clientX-r.left)/r.width)*LEN};
+const tAt=e=>{const r=ftl.getBoundingClientRect();return cl(V0+(e.clientX-r.left)/r.width*vw(),0,LEN)};
 let drag=null;
 /* within a few pixels of either end of any cue, the pointer grabs that end (like a clip in an editor) */
 const edgeOf=(fm,e)=>{const r=fm.getBoundingClientRect(),g=Math.min(7,r.width/3);return e.clientX-r.left<=g?"in":r.right-e.clientX<=g?"out":null};
@@ -313,7 +325,7 @@ ftl.addEventListener("pointerdown",e=>{if(e.button||!VID)return;e.preventDefault
   else drag={kind:"scrub",x:e.clientX,id:fm?.dataset.id,moved:false,was:!vid.paused};
   ftl.classList.toggle("grabbing",drag.kind!=="scrub")});
 ftl.addEventListener("pointermove",e=>{if(!drag){const fm=e.target.closest(".fm");ftl.classList.toggle("edge",!!(fm&&edgeOf(fm,e))&&!fm.classList.contains("faded"));return}if(!drag.moved&&Math.abs(e.clientX-drag.x)<4)return;
-  if(drag.kind==="scrub"){if(!drag.moved){drag.moved=true;if(drag.was)pause()}return seek(tAt(e))}
+  if(drag.kind==="scrub"){if(!drag.moved){drag.moved=true;if(drag.was)pause()}return seek(snapT(e))}
   if(!drag.moved){drag.moved=true;checkpoint(drag.kind==="move"?"move cue":"trim cue");pause()}
   const q=CUES[drag.id],t=tAt(e);
   if(drag.kind==="in"){q.ft=cl(t,0,drag.e0-.3);q.dur=drag.e0-q.ft;seek(q.ft)}
@@ -358,10 +370,121 @@ function onbLand(id){const r=$("#onbR"),fm=$(`.fm[data-id="${id}"]`,ftl);player.
 function mark(){if(!VID)return;if(MARK){const t1=now();let a=Math.min(MARK.t0,t1),b=Math.max(MARK.t0,t1);if(b-a<.3)b=Math.min(LEN,a+3);MARK=null;mkb.classList.remove("on");$("span",mkb).textContent="Mark cue";$("#mrng").hidden=true;if(!FILM.length)onbSet(2,`[${mmss(a)}–${mmss(b)}] · ${secs(b-a)}`);newCueForm(a,b);return}
   closeNC();MARK={t0:now()};if(vid.paused||vid.ended)play();if(!FILM.length)onbSet(1,`From ${tc(MARK.t0)}`);mkb.classList.add("on");$("span",mkb).textContent="Set end";const m=$("#mrng");m.hidden=false;markTick()}
 function cancelMark(){if(!MARK)return;MARK=null;if(!FILM.length)onbSet(0);mkb.classList.remove("on");$("span",mkb).textContent="Mark cue";$("#mrng").hidden=true;placeLabel()}
-function markTick(){const a=Math.min(MARK.t0,now()),b=Math.max(MARK.t0,now()),m=$("#mrng");if(m){m.style.left=XP(a);m.style.width=XP(Math.max(b-a,LEN/400))}
+function markTick(){const a=Math.min(MARK.t0,now()),b=Math.max(MARK.t0,now()),m=$("#mrng");if(m){m.style.left=XP(a);m.style.width=XD(Math.max(b-a,vw()/400))}
   $("#tlL").innerHTML=`<b>[${mmss(a)}–${mmss(b)}]</b> <span class="hint">Marking. Press M again where the sound ends</span>`;$("#tlR").textContent=secs(b-a);
   if(ONB===1){const o=$("#onb");$("#onbR").style.width=Math.min(o.clientWidth*.7,22+(b-a)*46)+"px";$("#onbC").textContent=`From ${tc(a)} · ${secs(b-a)}`}}
 mkb.addEventListener("click",mark);
+/* cues under the playhead light up on their lanes, and their lane names with them */
+function sounding(t){const on=new Set();FILM.forEach(id=>{const q=CUES[id];if(q.ft<=t&&t<q.ft+q.dur)on.add(q.c)});
+  $$(".fm",ftl).forEach(el=>{const q=CUES[el.dataset.id];el.classList.toggle("on",!!q&&q.ft<=t&&t<q.ft+q.dur)});
+  $$(".tll span").forEach(l=>l.classList.toggle("live",on.has(l.dataset.lane)))}
+/* scrubbing catches on cue edges within a few pixels, so you can land exactly where a sound starts */
+const SNAP=6;let snapped=null;
+function snapT(e){const t=tAt(e),pxs=SNAP/ftl.clientWidth*vw();let best=null,bd=pxs;
+  FILM.forEach(id=>{const q=CUES[id];if($(`.fm[data-id="${id}"]`,ftl)?.classList.contains("faded"))return;for(const x of[q.ft,q.ft+q.dur]){const d=Math.abs(x-t);if(d<bd){bd=d;best=x}}});
+  const k=best==null?null:best.toFixed(2);if(k!==snapped){snapped=k;if(k!=null){const ph=$("#fph");ph?.classList.remove("snap");void ph?.offsetWidth;ph?.classList.add("snap")}}
+  return best??t}
+/* hovering the empty timeline shows a ghost playhead with the time under the pointer */
+ftl.addEventListener("pointermove",e=>{const g=$("#fgh");if(!g)return;if(drag||!VID||e.target.closest(".fm,.fh,.ffd")){g.hidden=true;return}
+  const t=tAt(e);g.hidden=false;g.style.left=XP(t);$("b",g).textContent=tc(t)});
+ftl.addEventListener("pointerleave",()=>{const g=$("#fgh");if(g)g.hidden=true});
+
+/* ---------- zoom: the timeline shows V0..V0+VW of the reel. Pinch or ⌘-scroll zooms around the pointer, a sideways scroll pans,
+   − / = / \ zoom out, in and fit, a double-click on a cue zooms to it. Under the timeline, the navigator is the whole reel in
+   miniature with a window on what's showing: drag the window to move, drag its ends to expand or compress ---------- */
+const MINW=()=>Math.min(LEN,1);
+/* tick spacing that stays readable at any zoom: minor ticks at least 7px apart, labels at least 64px apart */
+const STEPS=[.1,.2,.5,1,2,5,10,15,30,60,120,300,600,900,1800,3600];
+function tickSteps(pps){const stp=STEPS.find(s=>s*pps>=7)||3600,big=STEPS.find(s=>s>=stp&&s*pps>=64&&Math.abs(s/stp-Math.round(s/stp))<1e-9)||stp*6;return [stp,big]}
+let zRaf=0,zTo=0;
+function setView(v0,w,live){w=cl(w,MINW(),LEN);v0=cl(v0,0,LEN-w);const full=w>=LEN-1e-6;if(Math.abs(v0-V0)<1e-6&&Math.abs(w-vw())<1e-6)return;
+  V0=full?0:v0;VW=full?0:w;ftl.classList.toggle("zoomed",!full);renderTL();$("#tnw").classList.toggle("live",!!live)}
+/* eased zoom for the buttons, keys and double-clicks */
+function animView(v0,w){cancelAnimationFrame(zRaf);w=cl(w,MINW(),LEN);v0=cl(v0,0,LEN-w);if(reduce)return setView(v0,w);
+  const a0=V0,aw=vw(),t0=performance.now(),D=260,ease=k=>1-Math.pow(1-k,3);
+  clearTimeout(zTo);zTo=setTimeout(()=>{cancelAnimationFrame(zRaf);setView(v0,w)},D+80);  /* lands even if frames are throttled */
+  (function fr(n){const k=Math.min(1,(n-t0)/D),e=ease(k),lw=Math.exp(Math.log(aw)+(Math.log(w)-Math.log(aw))*e);setView(a0+(v0-a0)*e,lw,k<1);if(k<1)zRaf=requestAnimationFrame(fr)})(t0)}
+/* zoom by a factor, keeping the time under `at` where it is */
+function zoomBy(f,at){const w=vw(),nw=cl(w*f,MINW(),LEN);at??=(now()>=V0&&now()<=V0+w?now():V0+w/2);return [at-(at-V0)*nw/w,nw]}
+const fit=()=>animView(0,LEN);
+/* while playing (or after a seek), the view pages along so the playhead stays in sight */
+let followT=0,FOLLOW="page";
+function keepInView(t){if(t===followT)return;followT=t;if(!VW||navDrag||drag)return;if(FOLLOW==="centre"&&!vid.paused)return setView(t-vw()/2,vw());const w=vw();if(t<V0||t>V0+w)setView(t-w*.08,w)}
+ftl.addEventListener("wheel",e=>{if(!VID)return;
+  if(e.ctrlKey||e.metaKey){e.preventDefault();cancelAnimationFrame(zRaf);const [v0,w]=zoomBy(Math.exp(e.deltaY*.01),tAt(e));return setView(v0,w,true)}
+  const dx=e.shiftKey?e.deltaY:e.deltaX;if(!VW||Math.abs(dx)<Math.abs(e.deltaY)*(e.shiftKey?0:1)||!dx)return;
+  e.preventDefault();setView(V0+dx/ftl.clientWidth*vw(),vw(),true)},{passive:false});
+ftl.addEventListener("dblclick",e=>{if(!VID)return;const fm=e.target.closest(".fm");
+  if(fm){const q=CUES[fm.dataset.id],pad=Math.max(q.dur*.6,1);return animView(q.ft-pad,q.dur+2*pad)}if(VW)fit()});
+$("#zIn").addEventListener("click",()=>animView(...zoomBy(1/1.8)));
+$("#zOut").addEventListener("click",()=>animView(...zoomBy(1.8)));
+$("#zFit").addEventListener("click",fit);
+addEventListener("keydown",e=>{if(e.metaKey||e.ctrlKey||e.altKey||e.target.closest?.("textarea,input")||!VID)return;
+  if(e.key==="="||e.key==="+"){e.preventDefault();animView(...zoomBy(1/1.8))}else if(e.key==="-"||e.key==="_"){e.preventDefault();animView(...zoomBy(1.8))}else if(e.key==="\\"){e.preventDefault();fit()}});
+/* the navigator */
+const tnv=$("#tnv"),tnc=$("#tnc"),tnw=$("#tnw");let navDrag=null;
+function renderNav(){if(!tnv)return;const W=tnv.clientWidth,H=tnv.clientHeight,d=Math.min(devicePixelRatio||1,2);
+  if(tnc.width!==Math.round(W*d)||tnc.height!==Math.round(H*d)){tnc.width=Math.round(W*d);tnc.height=Math.round(H*d)}
+  const c=tnc.getContext("2d"),cs=getComputedStyle(document.documentElement);c.setTransform(d,0,0,d,0,0);c.clearRect(0,0,W,H);
+  if(VID&&LEN&&STRIP.src!==(vid.currentSrc||vid.src))buildStrip();
+  const TH=STRIP.frames.length?Math.round(H*.56):0;
+  if(TH){const N=STRIP.N,cw=W/N;c.globalAlpha=.9;STRIP.frames.forEach((f,i)=>{if(!f)return;const sw=Math.min(f.width,f.height*cw/TH);c.drawImage(f,(f.width-sw)/2,0,sw,f.height,i*cw,0,cw+.5,TH)});c.globalAlpha=1}
+  const lh=(H-TH-6)/TLL.length;
+  if(VID&&LEN)FILM.forEach(id=>{const q=CUES[id],i=TLL.indexOf(q.c);if(i<0)return;c.fillStyle=cs.getPropertyValue(`--${q.c}`).trim();c.globalAlpha=$(`.fm[data-id="${id}"]`,ftl)?.classList.contains("faded")?.18:.85;
+    c.fillRect(q.ft/LEN*W,TH+3+i*lh+lh*.2,Math.max(1.5,q.dur/LEN*W),Math.max(1.5,lh*.6))});
+  const full=!VW;tnv.classList.toggle("full",full);tnw.style.left=(LEN?V0/LEN*100:0)+"%";tnw.style.width=(LEN?vw()/LEN*100:100)+"%";
+  const tl=$("#tnl");tl.textContent=`${mmss(V0)} – ${mmss(V0+vw())}`;if(LEN){const lw=tl.offsetWidth,c=(V0+vw()/2)/LEN*W;tl.style.left=cl(c-lw/2,0,Math.max(0,W-lw))+"px"}$("#zIn").disabled=vw()<=MINW()+1e-6;const zs=$('[data-z="scene"]');if(zs)zs.disabled=!timedScenes().length;$("#zOut").disabled=$("#zFit").disabled=full}
+function navHead(t){const p=$("#tnp");if(p&&LEN)p.style.left=t/LEN*100+"%"}
+new ResizeObserver(()=>renderNav()).observe(tnv);
+const navT=e=>{const r=tnv.getBoundingClientRect();return cl((e.clientX-r.left)/r.width)*LEN};
+tnv.addEventListener("pointerdown",e=>{if(e.button||!VID)return;e.preventDefault();cancelAnimationFrame(zRaf);try{tnv.setPointerCapture(e.pointerId)}catch(_){}
+  const ed=e.target.closest(".tnw i")?.dataset.e,t=navT(e),w=vw();
+  if(!ed&&!e.target.closest(".tnw")){setView(t-w/2,w,true)}  /* click outside the window: centre it there, then keep dragging */
+  navDrag={kind:ed||"pan",t0:t,v0:V0,v1:V0+vw()};tnv.classList.add("grabbing");tnw.classList.add("live")});
+tnv.addEventListener("pointermove",e=>{if(!navDrag)return;const d=navDrag,t=navT(e),dt=t-d.t0,m=MINW();
+  if(d.kind==="pan")setView(d.v0+dt,d.v1-d.v0,true);
+  else if(d.kind==="in"){const a=cl(d.v0+dt,0,d.v1-m);setView(a,d.v1-a,true)}
+  else{const b=cl(d.v1+dt,d.v0+m,LEN);setView(d.v0,b-d.v0,true)}});
+const navUp=()=>{if(!navDrag)return;navDrag=null;tnv.classList.remove("grabbing");tnw.classList.remove("live")};
+tnv.addEventListener("pointerup",navUp);tnv.addEventListener("pointercancel",navUp);
+tnv.addEventListener("dblclick",fit);
+tnv.addEventListener("wheel",e=>{if(!VID)return;e.preventDefault();
+  if(e.ctrlKey||e.metaKey){const [v0,w]=zoomBy(Math.exp(e.deltaY*.01),navT(e));return setView(v0,w,true)}
+  setView(V0+(e.deltaX||e.deltaY)/tnv.clientWidth*LEN,vw(),true)},{passive:false});
+
+/* presets: 10s and 1m around the playhead, the scene at the playhead, the whole reel */
+const sceneAt=t=>{const ss=timedScenes();return ss.find(s=>t>=s.s&&t<s.e)||ss.filter(s=>s.s<=t).pop()||ss[0]};
+function zoomPreset(z){if(!VID)return;const t=now();if(z==="fit")return fit();
+  if(z==="scene"){const s=sceneAt(t);if(s)return animView(s.s,s.e-s.s);return}
+  const w=+z;animView(t-w/2,w)}
+$(".tzp").addEventListener("click",e=>{const b=e.target.closest("[data-z]");if(b)zoomPreset(b.dataset.z)});
+$("#zFol").addEventListener("click",e=>{FOLLOW=FOLLOW==="page"?"centre":"page";const b=e.currentTarget;b.textContent=FOLLOW==="page"?"Page":"Centre";b.setAttribute("aria-pressed",FOLLOW==="centre");
+  b.title=FOLLOW==="page"?"While playing, the view pages along with the playhead. Click to keep the playhead centred instead.":"While playing, the playhead stays centred and the reel scrolls under it. Click to page along instead."});
+/* scenes: click a scene's label to fit it; { and } step to the previous and next scene */
+ftl.addEventListener("pointerdown",e=>{const sl=e.target.closest(".scb span"),cl_=e.target.closest(".fcl");if(!sl&&!cl_)return;e.stopPropagation();e.preventDefault();
+  if(cl_){const a=+cl_.dataset.a,b=+cl_.dataset.b,pad=Math.max((b-a)*.25,1);return animView(a-pad,b-a+2*pad)}
+  const s=timedScenes().find(x=>`SC ${x.n}`===sl.textContent);if(s){animView(s.s,s.e-s.s);seek(s.s)}},true);
+function stepScene(d){const ss=timedScenes();if(!ss.length)return;const t=now(),i=ss.indexOf(sceneAt(t)),j=d<0&&t-ss[i].s>1.5?i:cl(i+d,0,ss.length-1),s=ss[j];seek(s.s);if(VW)animView(s.s,s.e-s.s)}
+/* lane names fold and unfold their lanes */
+$("#tll").addEventListener("click",e=>{const l=e.target.closest("[data-lane]");if(!l)return;LANEPIN[l.dataset.lane]=!laneOpen(l.dataset.lane);renderTL()});
+/* go to a time: click the timecode (or press G) and type 1:23, 1:02:03.5, 95, +10 or -5 */
+let TCE=false;
+function parseTime(v){v=v.trim().replace(/[^\d:.+-]/g,"");if(!v)return null;const rel=/^[+-]/.test(v)?v[0]:null;if(rel)v=v.slice(1);
+  const p=v.split(":");if(p.length>3||p.some(x=>x===""||isNaN(+x)))return null;const sec=p.reduce((a,x)=>a*60+ +x,0);return rel?now()+(rel==="-"?-sec:sec):sec}
+function editTime(){if(!VID||TCE)return;TCE=true;pause();const el=$("#tc");el.classList.add("edit");el.innerHTML=`<input aria-label="Go to time" spellcheck="false" value="${tc(now())}">`;const i=$("input",el);i.focus();i.select();
+  const done=go=>{if(!TCE)return;if(go){const t=parseTime(i.value);if(t==null){el.classList.remove("bad");void el.offsetWidth;el.classList.add("bad");i.select();return}seek(t)}TCE=false;el.classList.remove("edit","bad");el.textContent=`${tc(now())} / ${mmss(LEN)}`};
+  i.addEventListener("keydown",e=>{e.stopPropagation();if(e.key==="Enter")done(true);else if(e.key==="Escape")done(false)});i.addEventListener("blur",()=>done(false))}
+$("#tc").addEventListener("click",editTime);$("#tc").title="Go to a time (G)";
+addEventListener("keydown",e=>{if(e.metaKey||e.ctrlKey||e.altKey||e.target.closest?.("textarea,input")||!VID)return;
+  if(e.key==="g"||e.key==="G"){e.preventDefault();editTime()}else if(e.key==="{"||e.key==="}"){e.preventDefault();stepScene(e.key==="}"?1:-1)}});
+/* thumbnails for the navigator, pulled from a second, silent copy of the reel */
+const STRIP={src:null,frames:[],N:32};
+async function buildStrip(){const src=vid.currentSrc||vid.src;if(!src||!LEN)return;STRIP.src=src;STRIP.frames=[];const v=document.createElement("video");v.muted=true;v.preload="auto";v.playsInline=true;v.src=src;
+  await new Promise(r=>{v.addEventListener("loadeddata",r,{once:true});v.addEventListener("error",r,{once:true})});if(v.error||STRIP.src!==src)return;
+  const fh=54,fw=Math.round(fh*((v.videoWidth/v.videoHeight)||16/9));
+  for(let i=0;i<STRIP.N;i++){if(STRIP.src!==src)return;await new Promise(r=>{const ok=()=>r();v.addEventListener("seeked",ok,{once:true});setTimeout(ok,2000);v.currentTime=Math.min((i+.5)/STRIP.N*LEN,LEN-.05)});
+    const c=document.createElement("canvas");c.width=fw;c.height=fh;try{c.getContext("2d").drawImage(v,0,0,fw,fh)}catch(_){return}STRIP.frames[i]=c;if(i%4===3||i===STRIP.N-1)renderNav()}
+  v.removeAttribute("src");v.load()}
 /* the new-cue card: a name, a tile per kind of sound, and the sound's flower blooming in the background in its colour */
 const nc=document.createElement("div");nc.className="nc";nc.hidden=true;document.body.appendChild(nc);let NC=null,NCG=null,lastCat="props";
 const ncField=()=>{const c=`--${NC.c}`;softField($(".nc-corner",nc),{cols:3,colors:[c,c,"--peach","--sky"],alpha:[16,34],size:.5,seed:hash(NC.c),top:[-.2,.1],stack:[2,4]})};
@@ -373,7 +496,7 @@ function newCueForm(a,b){pause();seek(a);NC={a,b,c:curCat!=="all"&&curCat!=="off
     <div class="nc-c" role="radiogroup" aria-label="Kind of sound">${LANES.map(k=>`<button class="nct" data-cat="${k}" role="radio" aria-checked="false" style="--c:var(--${k})"><canvas class="g" style="width:14px;height:14px" aria-hidden="true"></canvas><span>${CATS[k]}</span></button>`).join("")}</div>
     <div class="nc-f"><button class="btn btn-ghost" data-nc="x">Cancel</button><button class="btn btn-default" data-nc="ok">Add cue</button></div>`;
   NCG=glyph($(".nc-bg",nc),"flower",{color:`--${NC.c}`,base:.08});ncField();$$(".nct",nc).forEach(x=>x._g=glyph($("canvas",x),"flower",{color:`--${x.dataset.cat}`,base:.1}));ncCat(NC.c);
-  nc.hidden=false;const ob=player.classList.contains("prompt"),r=(ob?$("#tpw"):ftl).getBoundingClientRect(),w=nc.offsetWidth,h=nc.offsetHeight,x=ob?r.left+r.width/2:r.left+(a+b)/2/LEN*r.width;nc.style.left=cl(x-w/2,8,innerWidth-w-8)+"px";nc.style.top=Math.max(8,r.top-h-10)+"px";$(".nc-n",nc).focus()}
+  nc.hidden=false;const ob=player.classList.contains("prompt"),r=(ob?$("#tpw"):ftl).getBoundingClientRect(),w=nc.offsetWidth,h=nc.offsetHeight,x=ob?r.left+r.width/2:r.left+((a+b)/2-V0)/vw()*r.width;nc.style.left=cl(x-w/2,8,innerWidth-w-8)+"px";nc.style.top=Math.max(8,r.top-h-10)+"px";$(".nc-n",nc).focus()}
 function ncOff(){const was=NC.c;nc.hidden=true;pickSide(NC.picked?NC.side:null,side=>{if(!NC)return;nc.hidden=false;
   if(side){NC.side=side;NC.picked=true;ncCat("offscreen")}else if(!NC.picked)ncCat(was);$(".nc-n",nc).focus()})}
 function closeNC(){nc.hidden=true;NC=null;placeLabel();if(ONB===2&&!onbAdding&&!FILM.length)onbSet(0)}
@@ -392,7 +515,7 @@ let born=null;
 
 /* ---------- the current cue: list, lanes, label, script and the cue panel follow the playhead ---------- */
 let cur=null,lastT=-1;
-function update(t){if(t===lastT)return;lastT=t;const ph=$("#fph");if(!ph)return;ph.style.left=XP(t);$("#tc").textContent=VID?`${tc(t)} / ${mmss(LEN)}`:"–:–";setCur(ownerAt(t));renderEdge(t);draftTick()}
+function update(t){if(t===lastT)return;lastT=t;const ph=$("#fph");if(!ph)return;keepInView(t);ph.style.left=XP(t);sounding(t);navHead(t);if(!TCE)$("#tc").textContent=VID?`${tc(t)} / ${mmss(LEN)}`:"–:–";setCur(ownerAt(t));renderEdge(t);draftTick()}
 function setCur(id,force){if(!id){if(cur&&!CUES[cur]){cur=null;placeLabel();cardFollow(true)}return}if(id===cur&&!force)return;const prev=cur;cur=id;const q=CUES[id];
   $$(".ci.in").forEach(x=>x.classList.remove("in"));$(`.ci[data-id="${id}"]`)?.classList.add("in");settleList();
   $$(".fm.cur").forEach(x=>x.classList.remove("cur"));$(`.fm[data-id="${id}"]`)?.classList.add("cur");placeLabel();
@@ -720,7 +843,7 @@ function renderBar(){const n={};FILM.forEach(id=>n[CUES[id].c]=(n[CUES[id].c]||0
 function applyFilter(){const on=curCat!=="all",hit=id=>!on||CUES[id]?.c===curCat;
   doc.classList.toggle("filtering",on);list.classList.toggle("filtering",on);
   $$(".cue:not(.off)",doc).forEach(el=>el.classList.toggle("match",hit(el.dataset.id)&&on));$$(".ci").forEach(el=>el.classList.toggle("match",hit(el.dataset.id)));
-  $$(".fm",ftl).forEach(el=>el.classList.toggle("faded",!hit(el.dataset.id)));$$(".lnl",ftl).forEach((l,i)=>l.classList.toggle("on",on&&LANES[i]===curCat))}
+  $$(".fm",ftl).forEach(el=>el.classList.toggle("faded",!hit(el.dataset.id)));$$(".fcl",ftl).forEach(el=>el.classList.toggle("faded",on&&el.dataset.c!==curCat));$$(".lnl,.tll span").forEach(l=>l.classList.toggle("on",on&&l.dataset.lane===curCat))}
 $("#bar").addEventListener("click",e=>{const b=e.target.closest("[data-cat]");if(!b)return;curCat=curCat===b.dataset.cat?"all":b.dataset.cat;renderBar();applyFilter()});
 
 /* ---------- hover: a cue lights up wherever it appears; on the lanes its interval shows on the axis ---------- */
