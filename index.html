@@ -28,7 +28,12 @@ function open(board,video){
   window.board=boot({mode:"app",title:board.name,video:URL.createObjectURL(video),script:board.script,cues:board.cues,reel:Object.keys(board.cues||{}),comments:Object.values(board.comments||{}),
     onVideo:f=>{board.videoName=f.name;store.put("video",f).then(()=>save(board))},
     onChange:s=>{board.name=s.title;board.cues=s.cues;board.comments=s.comments;board.script=s.script;save(board)},
-    onReset:async()=>{await store.clear();location.reload()}})}
+    onReset:async()=>{await store.clear();location.reload()}});
+  preload("#sdrop","media/challengers-final-scene.fountain","challengers-final-scene.fountain","text/plain",f=>window.board.setScriptFile(f))}
+
+/* for now: clicking "Upload cut" loads the Challengers reel, and clicking the script slot loads the script snippet, from media/ instead of opening a file picker (dropping a file still works) */
+const preload=(sel,url,name,type,load)=>document.querySelector(sel)?.addEventListener("click",async e=>{e.preventDefault();
+  const blob=await (await fetch(url)).blob();load(new File([blob],name,{type}))});
 
 /* the gate: nothing but "Upload cut". The glyphs need a clock until the board starts its own */
 let gateRaf=0;const gateTick=t=>{NOW=t/1000;for(const it of insts)draw(it);gateRaf=requestAnimationFrame(gateTick)};
@@ -47,6 +52,7 @@ async function take(f){if(!f)return;if(!f.type.startsWith("video/"))return say("
   const gate=$("#gate");gate.classList.add("out");await pause(380);cancelAnimationFrame(gateRaf);gate.remove();
   open(board,f);document.body.classList.add("arrive")}
 $("#gateFile").addEventListener("change",e=>take(e.target.files[0]));
+preload("#gateUp","media/challengers-reel-6.mp4","challengers-reel-6.mp4","video/mp4",take);
 addEventListener("dragover",e=>{const g=$("#gate");if(g&&!g.hidden&&[...e.dataTransfer.types].includes("Files")){e.preventDefault();$("#gateTx").textContent="Drop to upload";$("#gateUp").classList.add("over")}});
 addEventListener("dragleave",e=>{if(!e.relatedTarget&&$("#gate")){$("#gateTx").textContent="Upload cut";$("#gateUp").classList.remove("over")}});
 addEventListener("drop",e=>{if(!$("#gate")||$("#gate").hidden)return;e.preventDefault();$("#gateTx").textContent="Upload cut";$("#gateUp").classList.remove("over");take(e.dataTransfer.files[0])});
