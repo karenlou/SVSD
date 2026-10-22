@@ -21,6 +21,11 @@ const save=b=>store.put("board",b).catch(()=>{});
   window.board=boot({mode:"app",title:board.name,video:video?URL.createObjectURL(video):null,script:board.script,cues:board.cues,reel:Object.keys(board.cues||{}),comments:Object.values(board.comments||{}),
     onVideo:f=>{board.videoName=f.name;store.put("video",f).then(()=>save(board))},
     onChange:s=>{board.name=s.title;board.cues=s.cues;board.comments=s.comments;board.script=s.script;save(board)},
-    onReset:async()=>{await store.clear();location.reload()}})})();
+    onReset:async()=>{await store.clear();location.reload()}});
+  /* for now: clicking either drop zone loads the Challengers reel / script snippet from media/ instead of opening a file picker (dropping a file still works) */
+  const preload=(sel,url,name,type,load)=>document.querySelector(sel).addEventListener("click",async e=>{e.preventDefault();
+    const blob=await (await fetch(url)).blob();load(new File([blob],name,{type}))});
+  preload("#vdrop","media/challengers-reel-6.mp4","challengers-reel-6.mp4","video/mp4",f=>window.board.setVideo(f));
+  preload("#sdrop","media/challengers-final-scene.fountain","challengers-final-scene.fountain","text/plain",f=>window.board.setScriptFile(f))})();
 </script>
 </body></html>

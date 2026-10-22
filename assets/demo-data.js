@@ -25,7 +25,7 @@ const DEMO_COMMENTS=[];
  [{clip:"f_crowd",t0:2,t1:9.5,cat:"ambience",pri:"med",status:"open",msgs:[
     say("maya",190,"Crowd reads too big here. Think 200 people on folding chairs, not a stadium. @Theo can we thin the walla?",{"👍":["priya"]}),
     say("theo",150,"Agreed. A thin murmur bed with a few close coughs and chair creaks on top, so it feels intimate.")]},
-  {clip:"f_tell",t0:1,cat:"props",pri:"high",status:"open",msgs:[
+  {clip:"f_tell",t0:1,cat:"props",pri:"high",status:"open",box:{x:.33,y:.57,w:.17,h:.3},msgs:[
     say("priya",95,"The ball settling in the throat should be almost inaudible. It's the whole tell; don't oversell it.")]},
   {clip:"f_serve",t0:.3,t1:1.1,cat:"hardfx",pri:"high",status:"addressed",msgs:[
     say("maya",1560,"This thwack is the sound the whole film rhymes with. A little too loud, and dry.",{"🔥":["priya","theo"]}),

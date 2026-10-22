@@ -188,7 +188,7 @@ button.stc{cursor:pointer}button.stc:hover{background:var(--accent)}
 @media (min-width:861px){body{height:100dvh}}
 body{overflow-x:hidden}
 .main{flex:1;min-height:0;display:flex;gap:0}
-.vdiv{flex:1 1 auto;min-width:48px;display:flex;justify-content:center}
+.vdiv{flex:none;width:48px;display:flex;justify-content:center}
 .vdiv::before{content:"";width:1px;background:var(--border)}
 .col{position:relative;flex:1;min-width:0;min-height:0;display:flex;flex-direction:column;gap:14px}
 .player{flex:none;padding:14px 18px 10px;display:flex;flex-direction:column;gap:10px;transform-origin:50% 45%;
@@ -580,12 +580,8 @@ mark.cue{color:inherit;background-color:transparent}
 .fh[data-h="in"]{margin-left:-6px;border-right:0;border-radius:0}
 .fh[data-h="out"]{margin-left:2px;border-left:0;border-radius:0}
 .fh:hover,.ftl.grabbing .fh{border-color:var(--foreground)}
-/* ---------- side panel: the sound as a colour, the approval as a small mark ---------- */
+/* ---------- side panel: the sound as a colour ---------- */
 .cdot{display:inline-block;width:7px;height:7px;margin-right:6px;border-radius:50%;background:var(--c);vertical-align:0}
-.sti{flex:none;display:grid;place-items:center;width:26px;height:26px;padding:0;border:0;border-radius:3px;background:none;color:var(--c)}
-button.sti{cursor:pointer}button.sti:hover{background:var(--accent)}
-.sti svg{width:16px;height:16px}
-.sti[data-s=none]{color:var(--muted-foreground)}
 .ci{grid-template-columns:18px 1fr auto;padding-top:9px;padding-bottom:9px}
 .ci .lbl{font-weight:500}
 /* ---------- side panel comments: one left edge, the reply box reads as a field ---------- */
@@ -645,3 +641,151 @@ button.sti{cursor:pointer}button.sti:hover{background:var(--accent)}
 .rng{background:none;border-top:1px solid var(--border);font:400 11.5px/24px var(--f-mono)}
 .dock .rng{padding:8px 0 0}
 .dock .stc{background:none;border-color:var(--border);font-weight:400;color:var(--muted-foreground)}.dock button.stc:hover{background:var(--accent);color:var(--foreground)}
+
+/* ---------- timeline, editor-style: every cue is a clip in its lane. Hovering near either end of any clip grabs that end;
+   the selected clip is solid, with a grip on each end ---------- */
+.fm{height:14px;margin-top:0}
+.fm::before{top:5px;height:4px}
+.fm:hover::before,.fm.hot::before,.fm.cur::before{top:2px;height:10px}
+.fm.sel::before{top:0;height:14px;border-radius:3px;background:var(--c);box-shadow:0 0 0 1.5px var(--card),0 0 0 3px var(--c)}
+.ftl.edge,.ftl.edge .fm{cursor:ew-resize}
+.fh,.fh:hover,.ftl.grabbing .fh{width:9px;height:14px;margin-top:0;border:0;border-radius:3px;opacity:1;background:var(--foreground);box-shadow:var(--shadow-sm)}
+.fh[data-h="in"]{margin-left:-11px;border-radius:3px 0 0 3px}
+.fh[data-h="out"]{margin-left:2px;border-radius:0 3px 3px 0}
+.fh::before{content:"";position:absolute;inset:-5px -6px}
+.fh::after{inset:auto;left:3.5px;top:4px;width:2px;height:6px;border-radius:1px;background:var(--background)}
+.fh:hover{transform:scaleY(1.15)}
+.mkb{padding:0 11px 0 8px}
+.mkb svg{width:13px;height:13px}
+
+/* ---------- the sidebar is the cue list. A cue's comment count sits on its row ---------- */
+.ci{grid-template-columns:18px minmax(0,1fr) auto auto}
+.cmc{display:inline-flex;align-items:center;gap:3px;font:500 11px var(--f-mono);color:var(--muted-foreground);padding:1px 5px;border-radius:999px;cursor:pointer}
+.cmc svg{width:12px;height:12px}
+.cmc.open{color:var(--link);background:color-mix(in srgb,var(--link) 12%,transparent)}
+.cmc:hover{background:var(--accent);color:var(--foreground)}
+
+/* ---------- the selected cue: a compact card under the list (name, note, approve, comments) ---------- */
+.cuelist{position:relative}
+.dock{height:auto;max-height:46%;margin-top:6px}
+.dock .cnote{padding:2px 0 0}
+.dock .cnote.ed textarea{min-height:0}
+.acts .cmt b{font:500 11px var(--f-mono);color:var(--link)}
+
+/* ---------- the cue's actions: two sign-off boxes, then its comments ---------- */
+.acts{flex:none;display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:10px 0 4px}
+.pop .acts{padding:10px 12px 4px 18px}
+.sg{display:flex;align-items:center;gap:8px;height:32px;padding:0 10px;border:1px solid var(--border);border-radius:3px;background:var(--card);font:500 12.5px var(--f-sans);color:var(--foreground);text-align:left;white-space:nowrap;cursor:pointer}
+.sg:hover{border-color:color-mix(in srgb,var(--foreground) 45%,var(--border))}
+.sg i{flex:none;display:grid;place-items:center;width:14px;height:14px;border:1.25px solid color-mix(in srgb,var(--foreground) 55%,transparent);border-radius:2px;color:var(--background)}
+.sg i svg{width:11px;height:11px;stroke-width:2}
+.sg.on{color:var(--muted-foreground)}
+.sg.on i{background:var(--foreground);border-color:var(--foreground)}
+.acts .cmt{height:32px;font-size:12.5px;justify-content:flex-start;padding:0 10px}
+.acts .cmt svg{width:14px;height:14px}
+.acts .cmt kbd{margin-left:auto}
+.acts .cmt b{font:500 11px var(--f-mono);color:var(--muted-foreground)}
+
+/* ---------- comments rise as a sheet over the list, in the same paper, borders and type as the rest of the board ---------- */
+.dock.up{position:absolute;left:-8px;right:-8px;bottom:0;z-index:30;height:auto;max-height:min(80%,620px);margin:0;padding:0 14px 14px;
+  border:1px solid var(--border);border-radius:3px;background:var(--popover);box-shadow:0 1px 8px rgba(0,0,0,.12);display:flex;flex-direction:column}
+.dock.rise{animation:sheetUp .3s cubic-bezier(.22,1,.36,1)}
+@keyframes sheetUp{from{transform:translateY(40px);opacity:0}}
+@media (prefers-reduced-motion:reduce){.dock.rise{animation:none}}
+.dock.up .ch{padding:12px 0 10px;margin:0}
+.dock.up .ch .bk{margin-left:-8px}
+.dock.up .ch .cls{margin-right:-6px}
+.dock.up .clist .empty{padding:12px 0}
+.dock .compose{position:relative}
+
+/* the @mention picker, above the input */
+.mpop{position:absolute;left:0;right:0;bottom:calc(100% + 4px);z-index:5;padding:4px;border:1px solid var(--border);border-radius:3px;background:var(--popover);box-shadow:var(--shadow-md);animation:mpopIn .12s ease-out}
+@keyframes mpopIn{from{opacity:0;transform:translateY(4px)}}
+.mpop button{display:flex;align-items:center;gap:8px;width:100%;padding:6px 8px;border:0;border-radius:2px;background:none;text-align:left;font:500 13px var(--f-sans);color:var(--foreground);cursor:pointer}
+.mpop button[aria-selected=true],.mpop button:hover{background:var(--accent)}
+.mpop .av{width:20px;height:20px}
+.mpop small{margin-left:auto;font:400 11px var(--f-mono);color:var(--muted-foreground)}
+.pop .compose{position:relative}
+.pop .mpop{left:12px;right:12px}
+
+/* ---------- the cue panel, the same card in the film view and script view: name and timing, note, your confirm box, then the threads ---------- */
+.pop .panel{box-shadow:0 1px 8px rgba(0,0,0,.12)}
+.dock.up .cbody{padding:0 0 6px}
+.dock.up .acts{padding:10px 0 2px}
+.clh{padding:14px 0 4px;font:500 11px/16px var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted-foreground)}
+.clh b{font-weight:500;color:var(--foreground)}
+.pop .clist{padding:0 12px 6px 18px}
+.dock .clist{padding:0}
+/* a thread: its opening message (click to open or close), then a line with your box, when it points and the replies toggle */
+.th{border-top:1px solid var(--border)}
+.clh+.th{border-top:0}
+.th-h{cursor:pointer;border-radius:3px;margin:0 -6px;padding:0 6px;outline:none}
+.th-h:hover{background:var(--accent)}
+.th-h:focus-visible{box-shadow:inset 0 0 0 1px var(--foreground)}
+.th .msg{padding:10px 0 4px}
+.th:not(.open) .th-h .msg p{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.cft{display:flex;align-items:center;gap:8px;padding:2px 0 10px 32px;font:400 11px var(--f-mono);color:var(--muted-foreground)}
+.cft .when{display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
+.cft .when svg{width:12px;height:12px}
+.tgl{margin-left:auto;display:inline-flex;align-items:center;gap:3px;border:0;background:none;padding:2px 0;font:500 12px var(--f-sans);color:var(--foreground);cursor:pointer;white-space:nowrap}
+.tgl svg{width:12px;height:12px;color:var(--muted-foreground)}
+.tgl:hover{text-decoration:underline;text-underline-offset:2px}
+/* open: the replies hang off the opening message on the same thread line, with a reply box at the end */
+.th-r{position:relative;padding:0 0 10px 32px}
+.th-r::before{content:"";position:absolute;left:10.25px;top:-6px;bottom:22px;width:1.5px;border-radius:1px;background:var(--border)}
+.th-r .msg{padding:8px 0}
+.th-r .msg .av{width:20px;height:20px}
+.th-r .msg{grid-template-columns:20px minmax(0,1fr);gap:10px}
+.th-r .msg::before{display:none}
+/* the freeze-frame link on an open thread: jumps the film to that frame and shows the box */
+.ff{display:flex;align-items:center;gap:6px;width:calc(100% - 32px);margin:0 0 8px 32px;padding:6px 8px;border:1px dashed color-mix(in srgb,var(--foreground) 30%,transparent);border-radius:3px;background:var(--paper);font:400 11.5px var(--f-mono);color:var(--muted-foreground);cursor:pointer;text-align:left}
+.ff svg{flex:none;width:13px;height:13px;color:var(--foreground)}
+.ff span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ff b{margin-left:auto;font:500 12px var(--f-sans);color:var(--foreground);white-space:nowrap}
+.ff:hover{border-style:solid;border-color:var(--foreground)}
+.rng .ffl{display:inline-flex;align-items:center;gap:6px;color:var(--foreground)}
+.rng .ffl svg{width:13px;height:13px}
+.acts .cmt svg{stroke-width:1.5}
+
+/* ---------- boxes on the picture (freeze-frame comments), and drawing one ---------- */
+.anc{position:absolute;inset:0;z-index:2;pointer-events:none}
+.abox{position:absolute;padding:0;border:1.5px solid var(--c);border-radius:2px;background:color-mix(in srgb,var(--c) 14%,transparent);box-shadow:0 0 0 1px rgba(0,0,0,.35)}
+.anc .abox{pointer-events:auto;cursor:pointer}
+.abox.on{border-width:2px;background:color-mix(in srgb,var(--c) 22%,transparent)}
+.abox .av{position:absolute;left:-9px;top:-9px;width:18px;height:18px;box-shadow:0 0 0 1.5px #fff}
+.abox.flash{animation:boxFlash .9s ease-out}
+@keyframes boxFlash{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--c) 70%,transparent),0 0 0 1px rgba(0,0,0,.35)}100%{box-shadow:0 0 0 14px transparent,0 0 0 1px rgba(0,0,0,.35)}}
+.draw{position:absolute;inset:0;z-index:3;cursor:crosshair;touch-action:none;background:rgba(0,0,0,.25)}
+.draw .abox{pointer-events:none}
+.draw>small{position:absolute;left:50%;top:12px;transform:translateX(-50%);font:400 11px var(--f-mono);color:#f5f5f5;background:rgba(0,0,0,.65);padding:3px 8px;border-radius:3px;white-space:nowrap;pointer-events:none}
+.frm{height:28px;padding:0 10px 0 8px;gap:6px;font-size:12.5px}
+.frm svg{width:14px;height:14px}
+/* a freeze-frame comment's dot on the selected cue's bar */
+.ffd{position:absolute;z-index:6;width:8px;height:8px;margin:-4px 0 0 -4px;border-radius:50%;background:var(--card);box-shadow:0 0 0 1.5px var(--foreground);cursor:pointer}
+.ffd:hover{transform:scale(1.3)}
+.acts{grid-template-columns:auto minmax(0,1fr)}
+.acts .cmt{min-width:0;overflow:hidden}
+.screen:has(.anc .abox) .big,.screen:has(.draw) .big{opacity:0!important}
+/* the panel reads as one block (name, note, sign-off) with a single rule under the sign-off row, before the comments */
+.dock.up .ch,.pop .ch{border-bottom:0}
+.dock.up .ch{padding-bottom:4px}
+.dock.up .acts,.pop .acts{padding-bottom:12px;border-bottom:1px solid var(--border)}
+/* freeze-frame dots sit on top of the selected bar (whose stacking order runs up to ~100) */
+.ffd{z-index:160;width:9px;height:9px;margin:-4.5px 0 0 -4.5px;background:var(--card);box-shadow:0 0 0 1.5px var(--foreground),0 1px 2px rgba(0,0,0,.3)}
+/* message header: name and the moment it points at on the left, when it was posted on the right */
+.msg .who,.dock .msg .who{flex-wrap:nowrap;align-items:baseline;gap:8px}
+.msg .who span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.msg .who i{margin-left:6px;font:400 11px var(--f-mono);font-style:normal;color:var(--muted-foreground)}
+.msg .who i svg{width:11px;height:11px;vertical-align:-1px;margin-right:3px}
+.msg .who small{margin-left:auto;flex:none}
+/* under each thread: show or hide its replies, and Reply */
+.cft{padding:0 0 10px 32px}
+.tgl{margin-left:0}
+.tgl.rp{margin-left:auto;color:var(--muted-foreground)}
+.tgl.rp:hover{color:var(--foreground)}
+.th-r{padding:0 0 4px 32px}
+.th-r::before{bottom:10px}
+.th.rto-on .th-h{box-shadow:inset 2px 0 0 var(--foreground)}
+/* the box at the bottom while replying: who it's going to, and × to go back to a new comment */
+.rng.rto span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:var(--f-sans);font-size:12px;color:var(--muted-foreground)}
+.rng.rto b{font-weight:500;color:var(--foreground)}
