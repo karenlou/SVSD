@@ -1,7 +1,9 @@
 /* Spotting board engine: the reel, cue lanes, the script that unfolds over the reel, the cue panel (notes, comments, trim) and the cue list.
    Shared by the board (index.html, starts empty: you upload a reel and optionally a script) and the demo (demo.html, Challengers reel 6).
    Pages call boot(data); see the comment above boot() for what data holds. */
-const CATS={ambience:"Ambience",footsteps:"Footsteps",props:"Props",cloth:"Cloth",hardfx:"Hard FX",score:"Score"};
+const CATS={ambience:"Ambience",footsteps:"Footsteps",props:"Props",cloth:"Cloth"};
+/* kinds of sound that have since been folded into others (boards saved before then still carry them) */
+const OLDCATS={hardfx:"props",score:"ambience"};
 const ok=q=>q.s!=="none", done=q=>q.s==="recorded";
 const PEOPLE={
  maya:{n:"Maya Ortiz",r:"Director",i:"MO",c:"--score"},
@@ -66,12 +68,25 @@ function draw(it){
   if(reduce){t=0;p=1}
   const b=g.f(t,p,it),c=it.ctx,S=it.w*it.d,cell=S/5,dot=cell*(it.w<=14?.78:.74),off=(cell-dot)/2;
   c.setTransform(1,0,0,1,0,0);c.clearRect(0,0,S,S);c.fillStyle=col(it.color);
-  for(let i=0;i<25;i++){const v=Math.round(cl(b[i])*4)/4;c.globalAlpha=it.base+(1-it.base)*v;rr(c,(i%5)*cell+off,((i/5)|0)*cell+off,dot,dot,dot*.3);c.fill()}
+  for(let i=0;i<25;i++){const v=Math.round(cl(b[i])*4)/4;c.globalAlpha=it.base+(1-it.base)*v;rr(c,(i%5)*cell+off,((i/5)|0)*cell+off,dot,dot,dot*.42);c.fill()}
   c.globalAlpha=1;
 }
 const restKey=q=>done(q)?"check":ok(q)?"bud":"seed";
 const restColor="--muted-foreground";
 
+/* ---------- soft field: stacks of translucent, lightly grained shapes in the palette (rounded blocks, pills, circles, little stars) that drift a little.
+   Each stack is a column of shapes sitting on one another, the way the reference piles them. It sits behind whatever it's put in ---------- */
+const SOFT=["--hardfx","--cloth","--props","--footsteps","--ambience","--score","--teal","--peach","--sky"];
+const STAR="polygon(50% 0%,61% 30%,93% 25%,72% 50%,93% 75%,61% 70%,50% 100%,39% 70%,7% 75%,28% 50%,7% 25%,39% 30%)";
+function softField(host,o={}){const {cols=12,colors=SOFT,alpha=[35,85],size=1,seed=7,top=[.05,.45],stack=[3,7]}=o;host.querySelector(":scope>.sf")?.remove();
+  let k=seed>>>0||1;const r=()=>{k=Math.imul(k^k>>>15,1|k)+0x6D2B79F5|0;let t=Math.imul(k^k>>>7,61|k)^k;return((t^t>>>14)>>>0)/4294967296},pick=a=>a[Math.floor(r()*a.length)],rnd=([a,b])=>a+r()*(b-a);
+  const f=document.createElement("div");f.className="sf";f.setAttribute("aria-hidden","true");const H=host.clientHeight||400;let h="";
+  for(let c=0;c<cols;c++){const cx=(c+.15+r()*.7)/cols*100;let y=rnd(top)*H;const n=Math.round(rnd(stack));
+    for(let i=0;i<n&&y<H*1.05;i++){const t=r(),w=(t<.55?36+r()*70:t<.75?18+r()*22:t<.9?22+r()*30:46+r()*60)*size,hh=(t<.55?22+r()*58:t<.75?w:t<.9?w:12+r()*10)*size;
+      const shape=t<.55?"border-radius:6px":t<.75?"border-radius:50%":t<.9?`clip-path:${STAR}`:"border-radius:999px";
+      h+=`<i style="left:calc(${cx}% - ${w/2}px);top:${y}px;width:${w}px;height:${hh}px;${shape};background-color:color-mix(in srgb,var(${pick(colors)}) ${Math.round(rnd(alpha))}%,transparent);--d:${(.2+r()*.8).toFixed(2)};animation-duration:${(7+r()*8).toFixed(1)}s;animation-delay:-${(r()*10).toFixed(1)}s"></i>`;
+      y+=hh*(.72+r()*.3)}}
+  f.innerHTML=h;host.prepend(f);return f}
 function hash(s){let h=2166136261;for(const ch of s)h=Math.imul(h^ch.charCodeAt(0),16777619);return h>>>0}
 /* comment times are kept relative to their cue and shown on the reel's clock */
 const rtc=(m,q=CUES[m.clip])=>m.t1!=null?`${tc(q.ft+m.t0)} – ${tc(q.ft+m.t1)}`:`at ${tc(q.ft+m.t0)}`;
@@ -95,18 +110,24 @@ const ICON={play:'<svg viewBox="0 0 16 16" fill="currentColor"><path d="M5 3.5v9
 
 
 /* ---------- screenplay text → acts/scenes/blocks. Scene headings start INT./EXT.; an all-caps line followed by more text is a character and their dialogue ---------- */
-function parseScreenplay(text,name){const paras=text.replace(/\r/g,"").split(/\n\s*\n/).map(p=>p.split("\n").map(l=>l.trim()).filter(Boolean)).filter(p=>p.length);
+/* the script's own divisions, named the way it names them: "ACT ONE", "SET TWO", "ROUND 3", "Game 1", "PROLOGUE", a Fountain "# Act One"... */
+const DIVISION=/^#*\s*((?:ACT|SET|PART|ROUND|GAME|MATCH|CHAPTER|EPISODE|BOOK|MOVEMENT|SEQUENCE|REEL|DAY|NIGHT)\s+(?:[0-9]+|[IVXLC]+|ONE|TWO|THREE|FOUR|FIVE|SIX|SEVEN|EIGHT|NINE|TEN|ELEVEN|TWELVE)\b[^.!?]{0,24}|TEASER|COLD OPEN|PROLOGUE|EPILOGUE|INTERMISSION|TAG)[:.]?$/i;
+const titled=t=>t.replace(/^#+\s*/,"").replace(/[:.]$/,"").toLowerCase().replace(/\b([a-z])/g,c=>c.toUpperCase()).replace(/\b([ivxlc]+)\b/gi,w=>/^[ivxlc]+$/i.test(w)&&w.length<5?w.toUpperCase():w);
+function parseScreenplay(text){const paras=text.replace(/\r/g,"").split(/\n\s*\n/).map(p=>p.split("\n").map(l=>l.trim()).filter(Boolean)).filter(p=>p.length);
   if(paras[0]?.every(l=>/^[A-Za-z][\w ]*:/.test(l)))paras.shift(); /* a Fountain title page */
-  const scenes=[];let sc=null;const slug=l=>/^(INT|EXT|INT\.?\s*\/\s*EXT|I\/E|EST)[.\s]/i.test(l)&&l===l.toUpperCase();
-  const add=b=>{if(!sc){sc={n:1,slug:"",b:[]};scenes.push(sc)}sc.b.push(b)};
+  const acts=[{name:"",board:"",reel:true,scenes:[]}];let sc=null,n=0;const slug=l=>/^(INT|EXT|INT\.?\s*\/\s*EXT|I\/E|EST)[.\s]/i.test(l)&&l===l.toUpperCase();
+  const act=()=>acts[acts.length-1],add=b=>{if(!sc){sc={n:++n,slug:"",b:[]};act().scenes.push(sc)}sc.b.push(b)};
   for(const p of paras){let i=0;
-    if(slug(p[0])){sc={n:scenes.length+1,slug:p[0],b:[]};scenes.push(sc);i=1;if(p.length===1)continue}
+    /* a division line opens a new section; "END OF ACT ONE" and the like just close one */
+    if(p.length===1&&p[0].length<=40&&(p[0]===p[0].toUpperCase()||p[0].startsWith("#"))){
+      if(/^#*\s*END OF\b/i.test(p[0]))continue;
+      if(DIVISION.test(p[0])){acts.push({name:titled(p[0]),board:"",reel:true,scenes:[]});sc=null;continue}}
+    if(slug(p[0])){sc={n:++n,slug:p[0],b:[]};act().scenes.push(sc);i=1;if(p.length===1)continue}
     const head=p[i],rest=p.slice(i+1);
     if(rest.length&&head===head.toUpperCase()&&/[A-Z]/.test(head)&&head.length<=40&&!/[.!?]$/.test(head.replace(/\(.*\)/,"").trim())){add(["c",head]);add(["l",rest.join(" ")])}
     else if(head===head.toUpperCase()&&/TO:$/.test(head)&&!rest.length)add(["t",head]);
     else add(["a",p.slice(i).join(" ")])}
-  scenes.forEach((s,i)=>s.n=i+1);
-  return scenes.length?[{name:name||"Script",board:"",reel:true,scenes}]:[]}
+  return acts.filter(a=>a.scenes.length)}
 
 /* ---------- reading a script file: plain text / Fountain, or a PDF (its text, laid out by indent: scene headings and action at the left margin,
    character names far in, dialogue in between). A PDF whose fonts carry no text (common with some exports) can't be read and says so ---------- */
@@ -126,7 +147,7 @@ async function pdfToText(file){const lib=await pdfLib(),pdf=await lib.getDocumen
   const text=out.join("\n"),body=text.replace(/\s/g,""),junk=(body.match(/[\u0000-\u001f\ufffd]/g)||[]).length,words=(text.match(/\b(the|and|to|of|in|he|she|is|at|his|her)\b/gi)||[]).length;
   if(body.length<80||junk>body.length*.02||words<body.length/200)throw new Error("This PDF has no readable text (its fonts don't carry any). Export it from your screenwriting app as text, Fountain or a fresh PDF.");
   return text}
-async function readScript(file,name="Script"){const pdf=/pdf$/i.test(file.type)||/\.pdf$/i.test(file.name),text=pdf?await pdfToText(file):await file.text(),acts=parseScreenplay(text,name);
+async function readScript(file,name="Script"){const pdf=/pdf$/i.test(file.type)||/\.pdf$/i.test(file.name),text=pdf?await pdfToText(file):await file.text(),acts=parseScreenplay(text);
   if(!acts.length)throw new Error("Couldn't find any script in that file.");return acts}
 
 /* ---------- the board. D = {mode:"demo"|"app", title, video (url, or none yet in the app), script:[acts]|null, cues:{id:cue}, reel:[ids on this reel], comments:[...],
@@ -138,32 +159,34 @@ $("#app").innerHTML=`<div class="wrap">
 <header class="top">
   <div class="brand"><canvas class="g" id="garden" width="16" height="16" style="width:16px;height:16px" aria-hidden="true"></canvas><span class="scr" data-scr>Spotting</span><span class="crumb">/ ${APP?`<button class="ttl" id="ttl" title="Rename this board">${esc(TITLE)}</button>`:`<span class="scr" data-scr>${esc(TITLE)}</span>`}</span></div>
   <nav class="nav" role="tablist" aria-label="Stage"><button role="tab" aria-selected="true"><span class="scr" data-scr>Spot</span></button></nav>
-  <div class="meta">${APP?`<button class="lk" id="newReel">New reel</button>`:`<a class="lk" href="${esc(D.home||"index.html")}">Start your own</a>`}<div class="toggles" id="role" role="group" aria-label="Working as"></div><span><span class="scr" data-scr>Takes</span> <b id="navTally">0/0</b></span></div>
+  <div class="meta">${APP?`<button class="lk" id="newReel">New reel</button>`:`<a class="lk" href="${esc(D.home||"index.html")}">Start your own</a>`}<div class="toggles" id="role" role="group" aria-label="Working as"></div><span><span class="scr" data-scr>Takes</span> <b id="navTally">0/0</b></span><button class="sidet" id="sideT" aria-expanded="false" aria-controls="cuelist" aria-label="Show cues and comments" title="Show cues and comments"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><rect x="2" y="3" width="12" height="10" rx="1.5"/><path d="M10 3v10"/><path class="fill" d="M10 3h2.5a1.5 1.5 0 0 1 1.5 1.5v7a1.5 1.5 0 0 1-1.5 1.5H10z"/></svg></button></div>
 </header>
-<div class="main">
+<div class="main side-off">
   <div class="col">
-    <section class="card player" id="player" aria-label="Film">
-      <div class="screen paused" id="screen" title="Play or pause (space)"><video id="vid" playsinline preload="auto"></video><span class="big" id="big"></span>
-        <label class="vdrop" id="vdrop" hidden><input type="file" accept="video/*" id="fVid"><canvas class="g vdg" style="width:44px;height:44px" aria-hidden="true"></canvas><b>Upload the reel</b><span>Drop a video here, or choose a file. It stays in this browser.</span><em id="vErr"></em></label></div>
-      <div class="tp">
-        <div class="ctl"><button class="btn btn-ghost btn-icon" id="pp" aria-label="Play or pause (space)"></button><button class="btn btn-ghost btn-icon" id="prev" aria-label="Previous cue ([)"></button><button class="btn btn-ghost btn-icon" id="next" aria-label="Next cue (])"></button><span class="tc" id="tc"></span>
-          <button class="btn btn-outline mkb" id="mark" title="Mark a cue: press at the start of the sound, then again at its end"><i></i><span>Mark cue</span><kbd>M</kbd></button><div class="legend" id="bar" role="group" aria-label="Filter by sound"></div></div>
-        <div class="tlh"><span id="tlL"></span><span id="tlR"></span></div>
-        <div class="ftl" id="ftl"></div>
-      </div>
-    </section>
     <section class="pane ex" id="ex" aria-label="Script"><div class="sp-h" id="sph"><span>Script</span><button class="btn btn-ghost sv" id="sv" hidden>${ICON.down}Back to film<kbd>Esc</kbd></button></div>
       <label class="sdrop" id="sdrop" hidden><input type="file" accept=".pdf,.txt,.fountain,.md,text/plain,application/pdf" id="fScript"><b id="sdT"></b><span id="sdS"></span></label>
       <main class="doc scroller" id="doc" tabindex="-1"></main></section>
+    <section class="card player" id="player" aria-label="Film">
+      <div class="screen paused" id="screen" title="Play or pause (space)"><video id="vid" playsinline preload="auto"></video><span class="big" id="big"></span>
+        <label class="vdrop" id="vdrop" hidden><input type="file" accept="video/*" id="fVid"><canvas class="g vdg" style="width:44px;height:44px" aria-hidden="true"></canvas><b>Upload the reel</b><span>Drop a video here, or choose a file. It stays in this browser.</span><em id="vErr"></em></label></div>
+      <div class="tpw" id="tpw"><div class="tp">
+        <div class="ctl"><div class="ctl-l"><button class="btn mkb" id="mark" title="Mark a cue: press at the start of the sound, then again at its end"><i></i><span>Mark cue</span><kbd>M</kbd></button></div>
+          <div class="ctl-m"><button class="btn btn-ghost btn-icon" id="prev" aria-label="Previous cue ([)"></button><button class="btn btn-ghost btn-icon pp" id="pp" aria-label="Play or pause (space)"></button><button class="btn btn-ghost btn-icon" id="next" aria-label="Next cue (])"></button><span class="tc" id="tc"></span></div>
+          <div class="legend" id="bar" role="group" aria-label="Filter by sound"></div></div>
+        <div class="tlh"><span id="tlL"></span><span id="tlR"></span></div>
+        <div class="ftl" id="ftl"></div>
+      </div>
+      <div class="onb" id="onb" aria-hidden="true" data-step="0"><p class="onb-t" id="onbT"></p>
+        <button class="onb-v" id="onbV" tabindex="-1" title="Press M"><span class="bk l"></span><span class="onb-r" id="onbR"></span><span class="bk r"></span></button><span class="onb-c" id="onbC"></span></div></div>
+    </section>
   </div>
-  <div class="vdiv" aria-hidden="true"></div>
   <aside class="cuelist" id="cuelist" aria-label="Cues and comments"><div class="cuelist-h"><span>Board</span><span class="toggles" id="clTabs" role="group" aria-label="Show"><button class="tg" data-tab="cues" aria-pressed="true">Cues <b id="allN"></b></button><button class="tg" data-tab="cms" aria-pressed="false">Comments <b id="cmN"></b></button></span></div><div class="cl-scroll" id="clScroll"></div><div class="cl-scroll" id="cmScroll" hidden></div><section class="dock" id="dock" aria-label="Selected cue"></section></aside>
 </div>
 </div>
 <div class="pop" id="scard" hidden></div>
 <div class="toasts" id="toasts" aria-live="polite"></div>`;
 document.title=`${TITLE} · Spotting`;
-Object.assign(CUES,D.cues||{});const REEL={};(D.reel||Object.keys(D.cues||{})).forEach(id=>{if(CUES[id])REEL[id]=CUES[id]});
+Object.assign(CUES,D.cues||{});for(const q of Object.values(CUES))if(!CATS[q.c])q.c=OLDCATS[q.c]||"props";const REEL={};(D.reel||Object.keys(D.cues||{})).forEach(id=>{if(CUES[id])REEL[id]=CUES[id]});
 for(const m of D.comments||[])COMMENTS[m.id]=m;
 const maxN=(ks,p)=>Math.max(0,...ks.map(k=>+(k.match(new RegExp("^"+p+"(\\d+)$"))||[0,0])[1]));
 cuid=maxN(Object.keys(COMMENTS),"c");let uid=maxN(Object.keys(CUES),"u");
@@ -198,13 +221,14 @@ function renderDoc(){doc.innerHTML=SCRIPT.map((act,ai)=>{const rows=[];
       const cls=t==="a"?"":t==="t"?"sub":t==="c"?"char":"line",prev=rows[rows.length-1],p=`<p class="${cls}" data-b="${ai}.${si}.${bi}">${body}</p>`;
       if(t==="l"&&prev?.dlg){prev.page+=p;return}
       rows.push({gut:"",page:p,dlg:t==="c"})})});
-  return `<section class="act${act.reel?"":" collapsed"}" data-act="${ai}"${act.reel?" data-reel":""}><button class="act-h${SCRIPT.length>1?"":" solo"}" aria-expanded="${!!act.reel}"><svg class="chev" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6l4 4 4-4"/></svg><span class="nm"><i></i>${esc(act.name)}</span><span class="bd">${esc(act.board||"")}</span>${SCRIPT.length>1?`<span class="at">${act.reel?"This reel":"Other reels"}</span>`:""}</button><div class="act-body"><div class="inner">`+
+  const others=SCRIPT.some(a=>!a.reel),head=act.name?`<button class="act-h${SCRIPT.length>1?"":" solo"}" aria-expanded="${!!act.reel}">`:"";
+  return `<section class="act${act.reel?"":" collapsed"}${act.name?"":" bare"}" data-act="${ai}"${act.reel?" data-reel":""}>${head}${act.name?`<svg class="chev" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6l4 4 4-4"/></svg><span class="nm"><i></i>${esc(act.name)}</span><span class="bd">${esc(act.board||"")}</span>${others?`<span class="at">${act.reel?"This reel":"Other reels"}</span>`:""}</button>`:""}<div class="act-body"><div class="inner">`+
     rows.map(r=>`<div class="row"><div class="gut">${r.gut}</div><div class="page">${r.page}</div></div>`).join("")+`</div></div></section>`}).join("");
   renderSlot()}
 /* write a paragraph's text (with its cue markers) back into the script */
 function serial(p){if(!p?.dataset.b)return;let s="";p.childNodes.forEach(n=>{const id=n.nodeType===1&&(n.dataset.id||n.dataset.off);s+=id?`[[${id}|${n.textContent}]]`:n.textContent});
   const [a,sc,b]=p.dataset.b.split(".").map(Number);SCRIPT[a].scenes[sc].b[b][1]=s}
-function toggleAct(sec,force){const c=force??!sec.classList.contains("collapsed");sec.classList.toggle("collapsed",c);sec.querySelector(".act-h").setAttribute("aria-expanded",String(!c))}
+function toggleAct(sec,force){if(!sec.querySelector(".act-h"))return;const c=force??!sec.classList.contains("collapsed");sec.classList.toggle("collapsed",c);sec.querySelector(".act-h").setAttribute("aria-expanded",String(!c))}
 /* the script panel without a script: locked until there's a reel, then a place to drop one (optional) */
 function renderSlot(){const sd=$("#sdrop"),has=hasScript();$("#ex").hidden=!has&&!APP;sd.hidden=has;doc.hidden=!has;$("#sph").hidden=!has;if(has)return;
   sd.classList.toggle("locked",!VID);$("#fScript").disabled=!VID;sd.classList.remove("bad");
@@ -218,8 +242,8 @@ const vid=$("#vid"),screen=$("#screen");let LEN=D.duration||1;if(VID)vid.src=D.v
 vid.addEventListener("loadedmetadata",()=>{if(isFinite(vid.duration)){LEN=vid.duration;counts();renderTL();layoutFilm();renderCard()}});
 const now=()=>vid.currentTime||0;
 function ownerAt(t){let o=FILM[0];for(const id of FILM)if(CUES[id].ft<=t+.01)o=id;return o}
-const ppIcon=()=>{const p=!vid.paused&&!vid.ended;$("#pp").innerHTML=p?ICON.pause:ICON.play;$("#big").innerHTML=ICON.play;screen.classList.toggle("paused",!p);const z=$("[data-act=pp]",host());if(z)z.innerHTML=p?ICON.pause:ICON.play};
-["play","pause","ended"].forEach(e=>vid.addEventListener(e,ppIcon));vid.addEventListener("play",()=>{SC.pin=false});
+const ppIcon=()=>{const p=!vid.paused&&!vid.ended;$("#pp").innerHTML=p?ICON.pause:ICON.play;$("#big").innerHTML=p?ICON.pause:ICON.play;screen.classList.toggle("paused",!p);const z=$("[data-act=pp]",host());if(z)z.innerHTML=p?ICON.pause:ICON.play};
+["play","pause","ended"].forEach(e=>vid.addEventListener(e,()=>{ppIcon();prompt()}));vid.addEventListener("play",()=>{SC.pin=false});
 const play=()=>{if(!VID)return;if(vid.ended)vid.currentTime=0;vid.play().catch(()=>{})},pause=()=>vid.pause();
 function seek(t){if(!VID)return;vid.currentTime=cl(t,0,LEN);update(cl(t,0,LEN))}
 const toggle=()=>vid.paused||vid.ended?play():pause();
@@ -232,13 +256,13 @@ function loop(t){NOW=t/1000;for(const it of insts){if(!it.cv.isConnected){insts.
 function setVideo(f){if(!f)return;if(!f.type.startsWith("video/")){$("#vErr").textContent="That isn't a video file.";return}
   D.onVideo?.(f);vid.src=URL.createObjectURL(f);VID=true;document.body.classList.remove("novid");$("#vdrop").hidden=true;
   if(TITLE==="Untitled reel")setTitle(f.name.replace(/\.[^.]+$/,"").replace(/[-_]+/g," "));
-  renderSlot();layoutFilm();toast("Reel loaded","Press M where a sound starts, and again where it ends","ambience");if(!hasScript())$("#sdrop").classList.add("ping")}
+  renderSlot();layoutFilm();prompt();toast("Reel loaded","Press M where a sound starts, and again where it ends","ambience");if(!hasScript())$("#sdrop").classList.add("ping")}
 function setTitle(t){TITLE=t.trim()||"Untitled reel";const b=$("#ttl");if(b)b.textContent=TITLE;document.title=`${TITLE} · Spotting`;changed()}
 /* a script arriving: read it, then let it make its entrance */
 async function setScriptFile(f){if(!f||!VID)return;const sd=$("#sdrop");$("#sdT").textContent="Reading "+f.name+"…";$("#sdS").textContent="";sd.classList.remove("bad","ping");
   let acts;try{acts=await readScript(f,"Script")}catch(e){renderSlot();sd.classList.add("bad");$("#sdS").textContent=e.message;return}
   checkpoint("add script");SCRIPT=acts;renderDoc();layoutFilm();setCur(cur,true);changed();renderCard();
-  await introScript(f.name);toast("Script added",`${acts[0].scenes.length} scene${acts[0].scenes.length===1?"":"s"} · select a line to make or attach a cue`,"props")}
+  const ns=acts.reduce((x,a)=>x+a.scenes.length,0);await introScript(f.name);toast("Script added",`${ns} scene${ns===1?"":"s"}${acts.some(a=>a.name)?` · ${acts.filter(a=>a.name).map(a=>a.name).join(", ")}`:""}`,"props")}
 if(APP){$("#fVid").addEventListener("change",e=>setVideo(e.target.files[0]));$("#fScript").addEventListener("change",e=>{setScriptFile(e.target.files[0]);e.target.value=""});
   addEventListener("dragover",e=>{if([...e.dataTransfer.types].includes("Files")){e.preventDefault();document.body.classList.add("dragging-file")}});
   addEventListener("dragleave",e=>{if(!e.relatedTarget)document.body.classList.remove("dragging-file")});
@@ -254,7 +278,7 @@ function renderTL(){const W=ftl.clientWidth||800,px=t=>t/LEN*W;AX=LTOP+LANES.len
   h+=LANES.map((c,i)=>`<div class="lnl" style="top:${LTOP+i*LH+4}px;--c:var(--${c})"></div>`).join("");
   h+=`<div class="ax" style="top:${AX}px"></div>`;
   if(VID){const stp=LEN>600?30:LEN>240?10:5,big=stp*6;for(let t=0;t<=LEN;t+=stp)h+=`<i class="tk${t%big?"":" l"}" style="left:${XP(t)};top:${AX}px">${t%big?"":`<b>${mmss(t)}</b>`}</i>`}
-  h+=FILM.map(id=>{const q=CUES[id];return `<button class="fm${id===cur?" cur":""}" data-id="${id}" style="--c:var(--${q.c});--zz:${100-Math.min(98,Math.round(q.dur))};left:${px(q.ft)}px;width:${Math.max(3,px(q.dur))}px;top:${LTOP+LANES.indexOf(q.c)*LH+4}px" aria-label="${span(q)} ${esc(q.n)}"></button>`}).join("");
+  h+=FILM.map(id=>{const q=CUES[id];return `<button class="fm${id===cur?" cur":""}" data-id="${id}" ${id===born?' data-born':''} style="--c:var(--${q.c});--zz:${100-Math.min(98,Math.round(q.dur))};left:${px(q.ft)}px;width:${Math.max(3,px(q.dur))}px;top:${LTOP+LANES.indexOf(q.c)*LH+4}px" aria-label="${span(q)} ${esc(q.n)}"></button>`}).join("");
   ftl.style.height=AX+22+"px";
   ftl.innerHTML=h+`<i class="fh" data-h="in" hidden></i><i class="fh" data-h="out" hidden></i><div class="rng-ax" id="crng" style="top:${AX}px"></div><div class="rng-ax hov" id="hrng" style="top:${AX}px" hidden></div><div class="rng-ax mrk" id="mrng" style="top:${AX}px" hidden></div><div class="fph" id="fph" style="top:${LTOP-6}px;height:${AX-LTOP+8}px"></div>`;
   placeLabel();applyFilter();markSel();lastT=-1;update(now())}
@@ -293,34 +317,54 @@ ftl.addEventListener("pointercancel",()=>{drag=null;ftl.classList.remove("grabbi
 
 /* ---------- marking a cue from the reel: M (or the button) at the start of the sound, again at its end, then name it and pick what kind of sound it is ---------- */
 let MARK=null;const mkb=$("#mark");
-function mark(){if(!VID)return;if(MARK){const t1=now();let a=Math.min(MARK.t0,t1),b=Math.max(MARK.t0,t1);if(b-a<.3)b=Math.min(LEN,a+3);MARK=null;mkb.classList.remove("on");$("span",mkb).textContent="Mark cue";$("#mrng").hidden=true;newCueForm(a,b);return}
-  closeNC();MARK={t0:now()};mkb.classList.add("on");$("span",mkb).textContent="Set end";const m=$("#mrng");m.hidden=false;markTick()}
-function cancelMark(){if(!MARK)return;MARK=null;mkb.classList.remove("on");$("span",mkb).textContent="Mark cue";$("#mrng").hidden=true;placeLabel()}
+/* with no cues yet, the instructions stand in for the timeline: three steps (start, end, name), each checked off as it's done.
+   Once the first cue is in, its last check shows for a moment, then the timeline slides back up in their place */
+var ONB=0,onbHold=false,onbAdding=false,promptT=0;
+function prompt(){const w=$("#tpw");if(!w)return;const on=VID&&(!FILM.length||onbHold);if(on===player.classList.contains("prompt"))return;
+  clearTimeout(promptT);w.classList.add("clip");player.classList.toggle("prompt",on);$("#onb").setAttribute("aria-hidden",String(!on));promptT=setTimeout(()=>w.classList.remove("clip"),560);if(on)onbSet(0)}
+const ONBT=["Press <kbd>M</kbd> where the sound starts. The reel plays.","Press <kbd>M</kbd> again where the sound ends.","Name it, and pick the kind of sound."];
+function onbSet(step,note){const o=$("#onb");if(!o)return;const was=ONB;ONB=step;o.dataset.step=step;const t=$("#onbT");
+  if(step<3&&(was!==step||!t.innerHTML)){t.innerHTML=ONBT[step];t.classList.remove("sw");void t.offsetWidth;t.classList.add("sw")}
+  $("#onbC").textContent=note||"";if(step===0){const r=$("#onbR");r.style.width="";o.style.removeProperty("--c")}}
+$("#onbV").addEventListener("click",()=>mark());
+/* the first cue lands: the timeline fades back in, and the square between the brackets shrinks onto the cue's own line in it */
+function onbLand(id){const r=$("#onbR"),fm=$(`.fm[data-id="${id}"]`,ftl);player.classList.add("land");
+  const done=()=>{if(fm)fm.style.opacity="";r.style.opacity=0;onbHold=false;player.classList.remove("land");prompt();setTimeout(()=>{Object.assign(r.style,{transform:"",transition:"",opacity:"",borderRadius:""});onbSet(0)},400)};
+  if(!fm||reduce)return setTimeout(done,500);fm.removeAttribute("data-born");fm.style.opacity=0;
+  setTimeout(()=>{const a=r.getBoundingClientRect(),b=fm.getBoundingClientRect();r.style.transition="transform .75s cubic-bezier(.65,0,.25,1)";
+    r.style.transform=`translate(${b.left-a.left}px,${b.top-a.top}px) scale(${b.width/a.width},${b.height/a.height})`;setTimeout(done,780)},300)}
+function mark(){if(!VID)return;if(MARK){const t1=now();let a=Math.min(MARK.t0,t1),b=Math.max(MARK.t0,t1);if(b-a<.3)b=Math.min(LEN,a+3);MARK=null;mkb.classList.remove("on");$("span",mkb).textContent="Mark cue";$("#mrng").hidden=true;if(!FILM.length)onbSet(2,`[${mmss(a)}–${mmss(b)}] · ${secs(b-a)}`);newCueForm(a,b);return}
+  closeNC();MARK={t0:now()};if(vid.paused||vid.ended)play();if(!FILM.length)onbSet(1,`From ${tc(MARK.t0)}`);mkb.classList.add("on");$("span",mkb).textContent="Set end";const m=$("#mrng");m.hidden=false;markTick()}
+function cancelMark(){if(!MARK)return;MARK=null;if(!FILM.length)onbSet(0);mkb.classList.remove("on");$("span",mkb).textContent="Mark cue";$("#mrng").hidden=true;placeLabel()}
 function markTick(){const a=Math.min(MARK.t0,now()),b=Math.max(MARK.t0,now()),m=$("#mrng");if(m){m.style.left=XP(a);m.style.width=XP(Math.max(b-a,LEN/400))}
-  $("#tlL").innerHTML=`<b>[${mmss(a)}–${mmss(b)}]</b> <span class="hint">Marking. Press M again where the sound ends</span>`;$("#tlR").textContent=secs(b-a)}
+  $("#tlL").innerHTML=`<b>[${mmss(a)}–${mmss(b)}]</b> <span class="hint">Marking. Press M again where the sound ends</span>`;$("#tlR").textContent=secs(b-a);
+  if(ONB===1){const o=$("#onb");$("#onbR").style.width=Math.min(o.clientWidth*.7,22+(b-a)*46)+"px";$("#onbC").textContent=`From ${tc(a)} · ${secs(b-a)}`}}
 mkb.addEventListener("click",mark);
 /* the new-cue card: a name, a tile per kind of sound, and the sound's flower blooming in the background in its colour */
-const nc=document.createElement("div");nc.className="nc";nc.hidden=true;document.body.appendChild(nc);let NC=null,NCG=null,lastCat="hardfx";
-function ncCat(c){NC.c=c;nc.style.setProperty("--c",`var(--${c})`);$$(".nct",nc).forEach(x=>{const on=x.dataset.cat===c;x.setAttribute("aria-checked",on);x._g.base=on?.16:.1;x._g.color=`--${x.dataset.cat}`});NCG.color=`--${c}`}
+const nc=document.createElement("div");nc.className="nc";nc.hidden=true;document.body.appendChild(nc);let NC=null,NCG=null,lastCat="props";
+const ncField=()=>{const c=`--${NC.c}`;softField($(".nc-corner",nc),{cols:3,colors:[c,c,"--peach","--sky"],alpha:[16,34],size:.5,seed:hash(NC.c),top:[-.2,.1],stack:[2,4]})};
+function ncCat(c){const was=NC.c;NC.c=c;if(was!==c&&nc.querySelector(".nc-corner .sf"))ncField();nc.style.setProperty("--c",`var(--${c})`);if(ONB===2)$("#onb").style.setProperty("--c",`var(--${c})`);$$(".nct",nc).forEach(x=>{const on=x.dataset.cat===c;x.setAttribute("aria-checked",on);x._g.base=on?.16:.1;x._g.color=`--${x.dataset.cat}`});NCG.color=`--${c}`}
 function newCueForm(a,b){pause();seek(a);NC={a,b,c:curCat!=="all"?curCat:lastCat};
-  nc.innerHTML=`<canvas class="nc-bg" style="width:196px;height:196px" aria-hidden="true"></canvas>
+  nc.innerHTML=`<div class="nc-corner" aria-hidden="true"><canvas class="nc-bg" style="width:64px;height:64px"></canvas></div>
     <div class="nc-h"><span>New cue</span><b>[${mmss(a)}–${mmss(b)}]</b><small>${secs(b-a)}</small></div>
     <input class="nc-n" placeholder="What do we hear?" aria-label="Cue name">
     <div class="nc-c" role="radiogroup" aria-label="Kind of sound">${LANES.map(k=>`<button class="nct" data-cat="${k}" role="radio" aria-checked="false" style="--c:var(--${k})"><canvas class="g" style="width:14px;height:14px" aria-hidden="true"></canvas><span>${CATS[k]}</span></button>`).join("")}</div>
     <div class="nc-f"><button class="btn btn-ghost" data-nc="x">Cancel</button><button class="btn btn-default" data-nc="ok">Add cue</button></div>`;
-  NCG=glyph($(".nc-bg",nc),"flower",{color:`--${NC.c}`,base:.08});$$(".nct",nc).forEach(x=>x._g=glyph($("canvas",x),"flower",{color:`--${x.dataset.cat}`,base:.1}));ncCat(NC.c);
-  nc.hidden=false;const r=ftl.getBoundingClientRect(),w=nc.offsetWidth,h=nc.offsetHeight,x=r.left+(a+b)/2/LEN*r.width;nc.style.left=cl(x-w/2,8,innerWidth-w-8)+"px";nc.style.top=Math.max(8,r.top-h-10)+"px";$(".nc-n",nc).focus()}
-function closeNC(){nc.hidden=true;NC=null;placeLabel()}
+  NCG=glyph($(".nc-bg",nc),"flower",{color:`--${NC.c}`,base:.08});ncField();$$(".nct",nc).forEach(x=>x._g=glyph($("canvas",x),"flower",{color:`--${x.dataset.cat}`,base:.1}));ncCat(NC.c);
+  nc.hidden=false;const ob=player.classList.contains("prompt"),r=(ob?$("#tpw"):ftl).getBoundingClientRect(),w=nc.offsetWidth,h=nc.offsetHeight,x=ob?r.left+r.width/2:r.left+(a+b)/2/LEN*r.width;nc.style.left=cl(x-w/2,8,innerWidth-w-8)+"px";nc.style.top=Math.max(8,r.top-h-10)+"px";$(".nc-n",nc).focus()}
+function closeNC(){nc.hidden=true;NC=null;placeLabel();if(ONB===2&&!onbAdding&&!FILM.length)onbSet(0)}
 nc.addEventListener("click",e=>{const c=e.target.closest("[data-cat]");if(c){ncCat(c.dataset.cat);$(".nc-n",nc).focus();return}
   const b=e.target.closest("[data-nc]");if(!b)return;if(b.dataset.nc==="x")return closeNC();addMarked()});
 nc.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();addMarked()}if(e.key==="Escape"){e.stopPropagation();closeNC()}});
-function addMarked(){if(!NC)return;const {a,b,c}=NC,name=$(".nc-n",nc).value.trim()||`${CATS[c]} at ${mmss(a)}`;lastCat=c;closeNC();checkpoint("add cue");
+function addMarked(){if(!NC)return;const {a,b,c}=NC,name=$(".nc-n",nc).value.trim()||`${CATS[c]} at ${mmss(a)}`;lastCat=c;const first=!FILM.length;onbAdding=true;closeNC();onbAdding=false;checkpoint("add cue");
+  if(first){onbHold=true;onbSet(3,"")}
   const id="u"+(++uid);insertCue(id,{c,n:name,s:"none",d:"",ft:a,dur:b-a});pause();seek(a);setCur(ownerAt(now()),true);toCue(id);changed();
-  toast(`Cue added [${span(CUES[id])}]`,CATS[c],c)}
+  toast(`Cue added [${span(CUES[id])}]`,CATS[c],c);if(first)onbLand(id)}
 /* a new cue goes everywhere a cue shows: the list (in reel order), the lanes, the legend, the counts */
-function insertCue(id,q){CUES[id]=REEL[id]=q;FILM.push(id);FILM.sort((a,b)=>CUES[a].ft-CUES[b].ft);const nx=FILM[FILM.indexOf(id)+1];
+function insertCue(id,q){born=id;CUES[id]=REEL[id]=q;FILM.push(id);FILM.sort((a,b)=>CUES[a].ft-CUES[b].ft);const nx=FILM[FILM.indexOf(id)+1];
   $(".cm-empty",clScroll)?.remove();clScroll.insertAdjacentHTML("beforeend",ciHTML(id));const ci=clScroll.lastElementChild;clScroll.insertBefore(ci,nx?$(`.ci[data-id="${nx}"]`):null);
-  RG[id]=glyph(ci.querySelector("canvas"),"seed",{color:`--${q.c}`,base:.14});counts();tally();renderTL()}
+  RG[id]=glyph(ci.querySelector("canvas"),"seed",{color:`--${q.c}`,base:.14});ci.classList.add("born");counts();tally();renderTL();born=null}
+let born=null;
 
 /* ---------- the current cue: list, lanes, label, script and the cue panel follow the playhead ---------- */
 let cur=null,lastT=-1;
@@ -341,12 +385,13 @@ function anchorIn(root){return cur?$(`.cue[data-id="${cur}"]`,root):null}
 function centreOn(el,instant){const b=doc.getBoundingClientRect(),r=el.getBoundingClientRect(),dy=r.top+r.height/2-(b.top+b.height/2);
   doc.scrollTo({top:doc.scrollTop+dy,behavior:instant||reduce||Math.abs(dy)>innerHeight*2?"auto":"smooth"})}
 function reveal(id){const el=$(`.cue[data-id="${id}"]`,doc);if(!el)return;centreOn(el);el.classList.remove("flash");void el.offsetWidth;el.classList.add("flash")}
-const SHARE=.26;
-const slotH=()=>{const ch=$(".col").clientHeight;return hasScript()?(innerWidth<=860?320:Math.round(cl(ch*SHARE,150,ch*.62))):APP?(innerWidth<=860?120:104):0};
-function layoutFilm(){if(EXP)return;const col=$(".col"),narrow=innerWidth<=860,ch=col.clientHeight,H=slotH();$("#ex").style.height=H+"px";
+function layoutFilm(){if(EXP)return;const col=$(".col"),narrow=innerWidth<=860,ch=col.clientHeight,ex=$("#ex"),H=ex.hidden?0:ex.offsetHeight;
   if(narrow){col.style.width="";col.style.flex="";screen.style.width="100%";return}
-  const other=player.offsetHeight-screen.offsetHeight,ratio=vid.videoWidth&&vid.videoHeight?vid.videoWidth/vid.videoHeight:16/9,maxW=$(".main").clientWidth-$("#cuelist").offsetWidth-48;
+  const other=$(".tp",player).offsetHeight+24+10+40,ratio=vid.videoWidth&&vid.videoHeight?vid.videoWidth/vid.videoHeight:16/9,side=$(".main").classList.contains("side-off")?0:$("#cuelist").offsetWidth+32,maxW=$(".main").clientWidth-side;
   const W=Math.round(Math.max(420,Math.min(maxW,(ch-H-(H?14:0)-other)*ratio)));col.style.flex="none";col.style.width=W+"px";screen.style.width=W+"px";screen.style.aspectRatio=ratio}
+/* the side panel (cues and comments) starts folded away; the button in the header opens it */
+function setSide(on){$(".main").classList.toggle("side-off",!on);$("#sideT").setAttribute("aria-expanded",String(on));$("#sideT").title=on?"Hide cues and comments":"Show cues and comments";$("#sideT").setAttribute("aria-label",$("#sideT").title);layoutFilm();if(EXP)placeCard()}
+$("#sideT").addEventListener("click",()=>setSide($(".main").classList.contains("side-off")));
 new ResizeObserver(()=>{layoutFilm();if(EXP)placeCard()}).observe($(".main"));
 /* the script under the film is a preview: it scrolls, and a click opens script view (a click on a highlighted line also jumps the film to it) */
 $("#ex").addEventListener("click",e=>{if(EXP||ANIM||!hasScript()||e.target.closest("button,.sdrop"))return;const c=e.target.closest(".cue:not(.off)");if(c){const id=c.dataset.id;seek(CUES[id].ft);toCue(id)}openScript()});
@@ -363,15 +408,15 @@ const svLabel=()=>{$("#sv").hidden=!EXP;$("#ex").classList.toggle("peek",!EXP&&h
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
 let exTop=0;
 /* paper sliding: a damped spring on the panel's top edge whose pull eases in (the sheet takes a moment to get going), with a touch of overshoot as it settles */
-function slide(el,from,to,k,c){if(reduce){el.style.top=to+"px";return Promise.resolve()}return new Promise(res=>{let x=from,v=0,last=performance.now();
-  const t0=last;(function f(n){const dt=Math.min(.032,(n-last)/1000);last=n;const e=Math.min(1,((n-t0)/150)**2);v+=(-k*e*(x-to)-c*v)*dt;x+=v*dt;el.style.top=x+"px";if(Math.abs(x-to)<.3&&Math.abs(v)<6){el.style.top=to+"px";return res()}requestAnimationFrame(f)})(last)})}
+function slide(el,from,to,k,c,prop="top"){if(reduce){el.style[prop]=to+"px";return Promise.resolve()}return new Promise(res=>{let x=from,v=0,last=performance.now();
+  const t0=last;(function f(n){const dt=Math.min(.032,(n-last)/1000);last=n;const e=Math.min(1,((n-t0)/150)**2);v+=(-k*e*(x-to)-c*v)*dt;x+=v*dt;el.style[prop]=x+"px";if(Math.abs(x-to)<.3&&Math.abs(v)<6){el.style[prop]=to+"px";return res()}requestAnimationFrame(f)})(last)})}
 async function openScript(){if(EXP||ANIM||!hasScript())return;ANIM=true;closeNC();hideTools();closeMenu();
-  const ex=$("#ex");exTop=ex.offsetTop;Object.assign(ex.style,{position:"absolute",left:0,right:0,bottom:0,top:exTop+"px",height:"auto",zIndex:6});ex.offsetWidth;
+  const ex=$("#ex"),sp=document.createElement("div");sp.className="exsp";sp.style.height=ex.offsetHeight+"px";ex.after(sp);exTop=$(".col").clientHeight-ex.offsetHeight;Object.assign(ex.style,{position:"absolute",left:0,right:0,top:0,bottom:exTop+"px",height:"auto",zIndex:6});ex.offsetWidth;
   EXP=true;document.body.classList.add("sview");dock.innerHTML="";svLabel();
-  await slide(ex,exTop,0,95,15.5);ANIM=false;manualAt=-1e9;follow(true);cardFollow(true)}
+  await slide(ex,exTop,0,95,15.5,"bottom");ANIM=false;manualAt=-1e9;follow(true);cardFollow(true)}
 async function closeScript(){if(!EXP||ANIM)return;ANIM=true;closeMenu();hideTools();closeNC();scard.hidden=true;SC.free=false;
-  const ex=$("#ex");await slide(ex,0,exTop,140,19);
-  ["position","left","right","bottom","top","zIndex","transition"].forEach(k=>ex.style[k]="");EXP=false;document.body.classList.remove("sview");svLabel();ANIM=false;layoutFilm();cardFollow(true)}
+  const ex=$("#ex");exTop=$(".col").clientHeight-$("#sph").offsetHeight;await slide(ex,0,exTop,140,19,"bottom");
+  ["position","left","right","bottom","top","zIndex","transition"].forEach(k=>ex.style[k]="");$(".exsp")?.remove();EXP=false;document.body.classList.remove("sview");svLabel();ANIM=false;layoutFilm();cardFollow(true)}
 $("#sv").addEventListener("click",e=>{e.stopPropagation();closeScript()});
 function follow(instant){if(!EXP||performance.now()-manualAt<3000||!hl.hidden||!ctx.hidden)return;const el=anchorIn(doc);if(el)centreOn(el,instant)}
 
@@ -384,7 +429,7 @@ function buildTrifold(src,W,Hs,name){const sh=document.createElement("div");sh.c
   const clone=y=>{const c=src.cloneNode(true);c.querySelectorAll("[id]").forEach(e=>e.removeAttribute("id"));c.removeAttribute("id");c.classList.remove("pre");c.classList.add("clone");
     Object.assign(c.style,{top:-y+"px",width:W+"px",height:2*Hs+"px",display:"flex"});return c};
   const panel=(cls,t)=>{const el=document.createElement("div");el.className="pnl "+cls;Object.assign(el.style,{top:t+"px",height:Hs+"px"});el.innerHTML='<div class="face"></div><div class="cr"></div>';sh.appendChild(el);return el};
-  const sc=SCRIPT[0].scenes,first=sc.find(s=>s.slug)?.slug||"";
+  const sc=SCRIPT.flatMap(a=>a.scenes),first=sc.find(s=>s.slug)?.slug||"";
   const up=panel("up",0);$(".face",up).innerHTML=`<div class="cover"><b>${esc(TITLE)}</b><span>${esc(name||"Script")}</span><small>${sc.length} scene${sc.length===1?"":"s"}${first?` · opens on ${esc(first)}`:""}</small></div>`;
   const dn=panel("dn",2*Hs);$(".face",dn).appendChild(clone(Hs));const mid=panel("mid",Hs);$(".face",mid).appendChild(clone(0));
   document.body.appendChild(sh);$$(".doc",sh).forEach(d=>d.scrollTop=0);return {sh,up,dn}}
@@ -392,14 +437,14 @@ function poseTrifold(S,x,y,s,fu,fd){S.sh.style.transform=`translate3d(${x}px,${y
   const v=(el,f,sign,z)=>{el.style.setProperty("--a",sign*180*f+"deg");el.style.setProperty("--z",-z*f+"px");el.style.setProperty("--c",Math.sin(f*PI).toFixed(3))};v(S.up,fu,1,2);v(S.dn,fd,-1,1)}
 async function introScript(name){if(!hasScript()||ANIM)return;const ex=$("#ex");doc.scrollTop=0;if(reduce)return;
   ANIM=true;closeNC();hideTools();ex.classList.add("pre");await new Promise(r=>requestAnimationFrame(r));
-  const A=ex.getBoundingClientRect(),W=A.width,Hs=A.height,s0=Math.min(1.2,(innerHeight-80)/(3*Hs),(innerWidth-80)/W);
+  const A=ex.getBoundingClientRect(),W=A.width,Hs=Math.round(cl((innerHeight-120)/3.6,140,300)),s0=Math.min(1.2,(innerHeight-80)/(3*Hs),(innerWidth-80)/W);
   const S=buildTrifold(ex,W,Hs,name),scrim=document.createElement("div");scrim.className="scrim";document.body.appendChild(scrim);let skip=false;scrim.addEventListener("click",()=>skip=true);
   const IN=320,TOP=[340,440],BOT=[620,440],HOLD=1100,shutB=[TOP[0]+TOP[1]+HOLD+180,420],shutT=[shutB[0]+260,420],FLY=[shutT[0]+shutT[1]-60,600],END=FLY[0]+FLY[1];
   await run(END,ms=>{if(skip)return false;const a=easeIO(seg(ms,0,IN)),p=easeIO(seg(ms,...FLY)),s=s0*(.9+.1*a)*(1-p)+p;
     const fu=ms<shutT[0]?1-easeIO(seg(ms,...TOP)):easeIO(seg(ms,...shutT)),fd=ms<shutB[0]?1-easeIO(seg(ms,...BOT)):easeIO(seg(ms,...shutB));
-    /* the middle third stays put mid-screen, then flies to the panel */
+    /* the middle third stays put mid-screen, then flies up into the script bar and tucks away */
     const mx=(innerWidth-W*s)/2,my=(innerHeight-Hs*s)/2;
-    poseTrifold(S,mx*(1-p)+A.left*p,(my-Hs*s)*(1-p)+(A.top-Hs)*p,s,fu,fd);S.sh.style.opacity=a;scrim.style.opacity=(.3*Math.min(a,1-p)).toFixed(3)});
+    poseTrifold(S,mx*(1-p)+A.left*p,(my-Hs*s)*(1-p)+(A.top-Hs)*p,s,fu,fd);S.sh.style.opacity=a*(1-easeIO(seg(ms,FLY[0]+FLY[1]*.35,FLY[1]*.65)));scrim.style.opacity=(.3*Math.min(a,1-p)).toFixed(3)});
   S.sh.remove();scrim.remove();ex.classList.remove("pre");ANIM=false;cardFollow(true)}
 
 /* ---------- the cue panel: docked under the list in the film view, a draggable card beside the line in script view (with the clip on top: click it to go back).
@@ -458,7 +503,7 @@ function trimTick(){const t=$(".trim .tph",host());if(t&&TW)t.style.left=TX(cl(n
 function trimDone(id){FILM.sort((a,b)=>CUES[a].ft-CUES[b].ft);const ci=$(`.ci[data-id="${id}"]`),nx=FILM[FILM.indexOf(id)+1];if(ci)clScroll.insertBefore(ci,nx?$(`.ci[data-id="${nx}"]`):null);
   refreshCue(id);renderTL();renderComments();setCur(ownerAt(now()),true);renderCard();changed()}
 function renderCard(focus){const h=host();scard.hidden=!EXP||!SC.id||!CUES[SC.id];
-  if(!SC.id||!CUES[SC.id]){if(!EXP)dock.innerHTML=`<p class="dock-e">${!VID?"Upload the reel to start the board.":FILM.length?"Play or click a cue to see its notes and comments here.":"Mark a cue to start the board: press <kbd>M</kbd> where a sound starts and again where it ends."}</p>`;markSel();return}
+  if(!SC.id||!CUES[SC.id]){if(!EXP){dock.innerHTML=`<div class="dock-sf"></div><p class="dock-e">${!VID?"Upload the reel to start the board.":FILM.length?"Play or click a cue to see its notes and comments here.":"Mark a cue to start the board: press <kbd>M</kbd> where a sound starts and again where it ends."}</p>`;requestAnimationFrame(()=>{const d=$(".dock-sf",dock);if(d)softField(d,{cols:4,alpha:[28,62],size:.55,seed:3,top:[.15,.4],stack:[2,4]})})}markSel();return}
   const q=CUES[SC.id],p=!vid.paused&&!vid.ended,ph=SC.mode==="thread"?"Reply… @ to mention":SC.mode==="draft"?"What should change here?":`Comment at ${tc(cl(now(),q.ft,q.ft+q.dur))}`;
   h.innerHTML=`<div class="panel">${EXP?`<div class="clipslot" data-act="film" title="Back to the film"><canvas id="tcv" width="480" height="270" aria-hidden="true"></canvas><span class="cliptag" style="--c:var(--${q.c})"><i></i>${span(q)}</span>
       <button class="btn btn-icon pz" data-act="pp" aria-label="Play or pause">${p?ICON.pause:ICON.play}</button><span class="bk2">${ICON.film}Back to film</span></div>`:""}
@@ -628,7 +673,7 @@ function renderComments(){const ms=openComments(),el=$("#cmScroll");
 $("#cmScroll").addEventListener("click",e=>{const b=e.target.closest(".cm-i");if(!b)return;const m=COMMENTS[b.dataset.cid];
   if(e.target.closest("[data-addr]")){checkpoint("comment status");m.status="addressed";m.msgs.push(sysMsg("marked this addressed"));renderComments();if(SC.cid===m.id)renderCard();changed();return}
   openThread(m.id)});
-function counts(){$("#allN").textContent=FILM.length;renderComments();renderBar()}
+function counts(){list.classList.toggle("empty",!FILM.length);prompt();$("#allN").textContent=FILM.length;renderComments();renderBar()}
 function tally(){const ap=FILM.filter(id=>ok(CUES[id])),n=ap.filter(id=>done(CUES[id])).length;garden.count=ap.length?Math.round(n/ap.length*9):0;$("#navTally").textContent=`${n}/${ap.length}`}
 
 /* ---------- filter by sound: a small legend naming every kind of sound; click one to show only it, click it again for all ---------- */

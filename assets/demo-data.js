@@ -4,21 +4,21 @@ const DEMO_FOUNTAIN="EXT. PHIL'S TIRE TOWN CHALLENGER - EVENING\n\nA. Donaldson:
 /* each cue: sound, name, status, director's note, start on the reel and length (s) */
 const DEMO_REEL={"f_crowd": {"c": "ambience", "n": "Hushed crowd at match point", "s": "approved", "d": "Hundreds of people holding their breath. A cough, a fan clicking somewhere.", "ft": 0, "dur": 14},
  "f_breath": {"c": "cloth", "n": "Patrick's deep breath", "s": "none", "d": "Close and dry. His shirt shifting as his chest rises.", "ft": 11, "dur": 4},
- "f_bounce": {"c": "hardfx", "n": "Slow-motion ball bounce", "s": "approved", "d": "Huge and slow. Felt and rubber, then a long ring off the hard court.", "ft": 15, "dur": 5},
+ "f_bounce": {"c": "props", "n": "Slow-motion ball bounce", "s": "approved", "d": "Huge and slow. Felt and rubber, then a long ring off the hard court.", "ft": 15, "dur": 5},
  "f_tell": {"c": "props", "n": "Ball in the racket throat", "s": "recorded", "d": "The tell. A soft click as the ball settles in the throat. Almost nothing.", "ft": 21, "dur": 6},
- "f_pulse": {"c": "score", "n": "Pulse under the stare-down", "s": "none", "d": "The score creeps in under the looks and keeps tightening until the serve.", "ft": 28, "dur": 29},
- "f_serve": {"c": "hardfx", "n": "Serve thwack", "s": "approved", "d": "The sound the whole film rhymes with. Hard, dry, a little too loud.", "ft": 57, "dur": 3},
- "f_rally": {"c": "hardfx", "n": "Whip-pan rally", "s": "none", "d": "Ball-cam. Every hit lands like a door slam; whooshes on the pans.", "ft": 60, "dur": 17},
+ "f_pulse": {"c": "ambience", "n": "Pulse under the stare-down", "s": "none", "d": "The score creeps in under the looks and keeps tightening until the serve.", "ft": 28, "dur": 29},
+ "f_serve": {"c": "props", "n": "Serve thwack", "s": "approved", "d": "The sound the whole film rhymes with. Hard, dry, a little too loud.", "ft": 57, "dur": 3},
+ "f_rally": {"c": "props", "n": "Whip-pan rally", "s": "none", "d": "Ball-cam. Every hit lands like a door slam; whooshes on the pans.", "ft": 60, "dur": 17},
  "f_tashi": {"c": "cloth", "n": "Tashi, head swiveling", "s": "none", "d": "Linen dress, a chair creak. Her breath catching with every hit.", "ft": 82, "dur": 8},
- "f_net": {"c": "hardfx", "n": "Net cord", "s": "none", "d": "A dry tick on the tape, then nothing for a beat.", "ft": 90, "dur": 2.5},
+ "f_net": {"c": "props", "n": "Net cord", "s": "none", "d": "A dry tick on the tape, then nothing for a beat.", "ft": 90, "dur": 2.5},
  "f_sprint": {"c": "footsteps", "n": "Art sprints for the drop", "s": "none", "d": "Rubber biting hard court: a long squeal into the stop.", "ft": 94, "dur": 4},
  "f_feet": {"c": "footsteps", "n": "Both rushing the net", "s": "none", "d": "Close, rhythmic, squeaky. Both players, overlapping.", "ft": 114, "dur": 8},
- "f_volley": {"c": "hardfx", "n": "Volleys at the net", "s": "none", "d": "Quick, tight, almost overlapping. Bodies right on top of each other.", "ft": 130, "dur": 12},
+ "f_volley": {"c": "props", "n": "Volleys at the net", "s": "none", "d": "Quick, tight, almost overlapping. Bodies right on top of each other.", "ft": 130, "dur": 12},
  "f_leap": {"c": "footsteps", "n": "Art launches into the air", "s": "none", "d": "The push-off and the swish of the swing. Hold the breath before the hit.", "ft": 146, "dur": 4},
- "f_smash": {"c": "hardfx", "n": "Overhead smash", "s": "none", "d": "The biggest hit of the reel. Let it echo off the stands.", "ft": 150, "dur": 4},
+ "f_smash": {"c": "props", "n": "Overhead smash", "s": "none", "d": "The biggest hit of the reel. Let it echo off the stands.", "ft": 150, "dur": 4},
  "f_hug": {"c": "cloth", "n": "They embrace at the net", "s": "none", "d": "Wet shirts, a thump of bodies. Hold it close and long.", "ft": 160, "dur": 9},
  "f_roar": {"c": "ambience", "n": "The crowd erupts", "s": "approved", "d": "Everything they held back at once. Bigger than anything before it.", "ft": 161, "dur": 11},
- "f_finale": {"c": "score", "n": "The score slams in", "s": "none", "d": "Full volume on Tashi. Cut to black on the downbeat.", "ft": 170, "dur": 14.7}};
+ "f_finale": {"c": "ambience", "n": "The score slams in", "s": "none", "d": "Full volume on Tashi. Cut to black on the downbeat.", "ft": 170, "dur": 14.7}};
 /* comments on the demo cues: t0/t1 are seconds into the cue */
 const DEMO_COMMENTS=[];
 {const ago=min=>Date.now()-min*6e4, say=(by,min,text,react={})=>({by,at:ago(min),text,audio:[],react}), sys=(by,min,text)=>({sys:true,by,at:ago(min),text});
@@ -27,11 +27,11 @@ const DEMO_COMMENTS=[];
     say("theo",150,"Agreed. A thin murmur bed with a few close coughs and chair creaks on top, so it feels intimate.")]},
   {clip:"f_tell",t0:1,cat:"props",pri:"high",status:"open",msgs:[
     say("priya",95,"The ball settling in the throat should be almost inaudible. It's the whole tell; don't oversell it.")]},
-  {clip:"f_serve",t0:.3,t1:1.1,cat:"hardfx",pri:"high",status:"addressed",msgs:[
+  {clip:"f_serve",t0:.3,t1:1.1,cat:"props",pri:"high",status:"addressed",msgs:[
     say("maya",1560,"This thwack is the sound the whole film rhymes with. A little too loud, and dry.",{"🔥":["priya","theo"]}),
     say("theo",1200,"Two directions: keep some of the string ring, or go bone-dry with almost no tail. I'm leaning dry."),
     sys("theo",1200,"Theo marked this addressed")]},
-  {clip:"f_net",t0:.4,cat:"hardfx",pri:"high",status:"open",msgs:[
+  {clip:"f_net",t0:.4,cat:"props",pri:"high",status:"open",msgs:[
     say("maya",80,"Net cord needs to feel like time stops. Dry tick, then a full beat of nothing.")]},
   {clip:"f_tashi",t0:0,t1:6,cat:"cloth",pri:"low",status:"open",msgs:[
     say("sam",45,"Her dress is lost under the score here. @Theo can we get a closer pass on the linen?")]},
@@ -39,8 +39,8 @@ const DEMO_COMMENTS=[];
     say("maya",300,"Hold the hug close. I want to hear the wet shirts."),
     say("theo",240,"Two layers: the thump on contact and a slow cloth squeeze under it."),
     sys("theo",240,"Theo marked this addressed")]},
-  {clip:"f_finale",t0:0,t1:3,cat:"score",pri:"med",status:"open",msgs:[
+  {clip:"f_finale",t0:0,t1:3,cat:"ambience",pri:"med",status:"open",msgs:[
     say("maya",30,"Let the score hit on the cut to Tashi, not before. @Sam can you slip it a few frames?")]}
  ].forEach((m,i)=>DEMO_COMMENTS.push({id:"c"+(i+1),t1:null,box:null,edge:null,...m}))}
-const DEMO_SCRIPT=parseScreenplay(DEMO_FOUNTAIN,"Final scene");DEMO_SCRIPT[0].board="Donaldson 2, 6, 6 – 30 · Zweig 6, 2, 5 – 30";
+const DEMO_SCRIPT=parseScreenplay(DEMO_FOUNTAIN);
 const DEMO={mode:"demo",title:"Challengers · Final scene",video:"media/challengers-reel-6.mp4",duration:184.7,script:DEMO_SCRIPT,cues:DEMO_REEL,reel:Object.keys(DEMO_REEL),comments:DEMO_COMMENTS};
