@@ -7,7 +7,7 @@
 <!-- The board. With no cut yet, the page is just "Upload cut"; once one is chosen, the pixel flower blooms while it's read, and the board opens.
      The script, if there is one, is added from the board. Everything stays in this browser (IndexedDB): the video under "video", the board under "board". -->
 <section class="gate" id="gate" hidden>
-  <header class="top"><div class="brand"><canvas class="g" id="gateMark" width="16" height="16" style="width:16px;height:16px" aria-hidden="true"></canvas><span>Spotting</span><span class="crumb">/ New board</span></div><span></span><div class="meta"><a class="lk" href="demo/demo.html">See the demo</a></div></header>
+  <header class="top"><div class="brand"><canvas class="g" id="gateMark" width="16" height="16" style="width:16px;height:16px" aria-hidden="true"></canvas><span class="crumb">New board</span></div><span class="logo-l" id="gateLogo"></span><div class="meta"><a class="lk" href="demo/demo.html">See the demo</a></div></header>
   <div class="gate-c">
     <label class="gate-up" id="gateUp"><input type="file" accept="video/*" id="gateFile">
       <span class="gate-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V4.5M7.5 9L12 4.5 16.5 9"/><path d="M4.5 14.5v3a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-3"/></svg></span>
@@ -54,7 +54,7 @@ addEventListener("drop",e=>{if(!$("#gate")||$("#gate").hidden)return;e.preventDe
 /* a board already in this browser opens straight away; otherwise, the gate */
 (async()=>{let board=null,video=null;try{[board,video]=await Promise.all([store.get("board"),store.get("video")])}catch(e){}
   if(board&&video){$("#gate").remove();return open(board,video)}
-  $("#gate").hidden=false;glyph($("#gateMark"),"garden",{count:0,base:.14});gateRaf=requestAnimationFrame(gateTick);
+  $("#gate").hidden=false;$("#gateLogo").innerHTML=LOGO;glyph($("#gateMark"),"garden",{count:0,base:.14});gateRaf=requestAnimationFrame(gateTick);
   softField($("#gate"),{cols:Math.round(innerWidth/90),alpha:[34,78],seed:11,top:[-.05,.4],stack:[6,12]});
   /* the shapes lean a little toward the pointer, nearer ones more */
   $("#gate").addEventListener("pointermove",e=>{const f=$("#gate .sf");if(!f)return;f.style.setProperty("--px",(e.clientX/innerWidth-.5).toFixed(3));f.style.setProperty("--py",(e.clientY/innerHeight-.5).toFixed(3))})})();

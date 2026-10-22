@@ -1,6 +1,8 @@
 /* Spotting board engine: the reel, cue lanes, the script that unfolds over the reel, the cue panel (notes, comments, trim) and the cue list.
    Shared by the board (index.html, starts empty: you upload a reel and optionally a script) and the demo (demo.html, Challengers reel 6).
    Pages call boot(data); see the comment above boot() for what data holds. */
+/* the Stem logo (mark and wordmark), from the SVSD-Stem Figma file; it takes the colour of its text */
+const LOGO=`<svg class="logo" viewBox="0 0 337 116" fill="none" role="img" aria-label="Stem"><path d="M36 10C42.5239 10 47.8319 15.2061 47.9961 21.6904L48 22L47.9961 22.3096C47.8345 28.691 42.691 33.8345 36.3096 33.9961L35.6904 34.0039C29.2061 34.1681 24 39.4761 24 46V70C24 76.5239 29.2061 81.8319 35.6904 81.9961L36.3096 82.0039C42.691 82.1655 47.8345 87.309 47.9961 93.6904L48 94L47.9961 94.3096C47.8345 100.691 42.691 105.834 36.3096 105.996L36 106C29.4761 106 24.1681 100.794 24.0039 94.3096L23.9961 93.6904C23.8345 87.309 18.691 82.1655 12.3096 82.0039L11.6904 81.9961C5.20608 81.8319 0 76.5239 0 70V46C0 39.4761 5.20608 34.1681 11.6904 34.0039L12.3096 33.9961C18.691 33.8345 23.8345 28.691 23.9961 22.3096L24.0039 21.6904C24.1681 15.2061 29.4761 10 36 10ZM60 10C66.5239 10 71.8319 15.2061 71.9961 21.6904L72.0039 22.3096C72.1655 28.691 77.309 33.8345 83.6904 33.9961L84.3096 34.0039C90.7939 34.1681 96 39.4761 96 46V70C96 76.5239 90.7939 81.8319 84.3096 81.9961L83.6904 82.0039C77.309 82.1655 72.1655 87.309 72.0039 93.6904L71.9961 94.3096C71.8345 100.691 66.691 105.834 60.3096 105.996L60 106C53.4761 106 48.1681 100.794 48.0039 94.3096L48 94L48.0039 93.6904C48.1655 87.309 53.309 82.1655 59.6904 82.0039L60.3096 81.9961C66.7939 81.8319 72 76.5239 72 70V46C72 39.4761 66.7939 34.1681 60.3096 34.0039L59.6904 33.9961C53.309 33.8345 48.1655 28.691 48.0039 22.3096L48 22L48.0039 21.6904C48.1681 15.2061 53.4761 10 60 10Z" fill="currentColor"/><path d="M151.017 92.9446C147.049 92.9446 143.334 92.2834 139.87 90.9609C136.406 89.6384 133.446 87.8436 130.99 85.5764C128.597 83.2463 126.897 80.5699 125.889 77.547L132.88 70.7456L133.73 70.8401C134.674 76.0041 136.721 80.0031 139.87 82.837C143.082 85.6079 146.797 86.9934 151.017 86.9934C155.236 86.9934 158.668 85.9228 161.313 83.7816C163.958 81.5775 165.281 78.6491 165.281 74.9965C165.281 71.9107 164.368 69.3601 162.541 67.3449C160.715 65.3297 158.102 63.7553 154.701 62.6217L144.877 59.5044C139.775 57.804 135.745 55.5684 132.785 52.7974C129.888 49.9635 128.44 46.1535 128.44 41.3673C128.44 37.6517 129.416 34.4084 131.368 31.6375C133.32 28.8666 135.997 26.7254 139.398 25.2139C142.861 23.7025 146.829 22.9468 151.3 22.9468C154.638 22.9468 157.818 23.4821 160.841 24.5527C163.927 25.5603 166.635 27.0403 168.965 28.9925C171.295 30.9448 172.995 33.2749 174.066 35.9828L167.359 42.4064L166.603 42.3119C165.722 38.2185 163.927 34.9752 161.219 32.5821C158.574 30.1261 155.268 28.898 151.3 28.898C147.459 28.898 144.341 29.8427 141.948 31.732C139.555 33.5583 138.359 36.0458 138.359 39.1946C138.359 41.9026 139.24 44.0753 141.004 45.7126C142.767 47.35 145.223 48.6725 148.372 49.6801L158.763 53.0808C163.99 54.7812 168.083 57.1428 171.043 60.1656C174.066 63.1885 175.577 67.4079 175.577 72.8238C175.577 76.8543 174.507 80.3809 172.366 83.4038C170.287 86.4266 167.39 88.7882 163.675 90.4886C160.022 92.126 155.803 92.9446 151.017 92.9446ZM198.37 92.9446C194.529 92.9446 191.286 91.8426 188.641 89.6384C186.059 87.4342 184.768 83.8761 184.768 78.964V48.7355H176.36V44.0123C179.068 43.7604 181.272 43.2566 182.973 42.5009C184.736 41.6822 186.09 40.3912 187.035 38.6278C188.042 36.8015 188.767 34.2825 189.207 31.0707H194.497V42.9732L206.494 42.3119L206.872 48.7355H194.497V79.2474C194.497 81.9553 195.159 83.8761 196.481 85.0097C197.804 86.0803 199.378 86.6156 201.204 86.6156C202.086 86.6156 202.968 86.5211 203.849 86.3322C204.794 86.0803 205.676 85.7024 206.494 85.1986L206.778 89.8273C205.959 90.646 204.826 91.3702 203.377 92C201.929 92.6298 200.26 92.9446 198.37 92.9446ZM217.014 66.5892C217.077 72.5089 218.62 77.1377 221.643 80.4754C224.665 83.7501 228.412 85.3875 232.884 85.3875C236.41 85.3875 239.37 84.4744 241.763 82.6481C244.156 80.7588 245.951 78.0823 247.148 74.6186L252.532 76.13C251.399 81.1681 248.943 85.2301 245.164 88.3159C241.449 91.4017 236.757 92.9446 231.089 92.9446C226.177 92.9446 221.926 91.8111 218.336 89.5439C214.747 87.2138 211.976 84.128 210.023 80.2865C208.071 76.382 207.095 72.0996 207.095 67.4394C207.095 62.7791 208.008 58.5283 209.835 54.6867C211.724 50.8452 214.4 47.7908 217.864 45.5237C221.328 43.1936 225.453 42.0285 230.239 42.0285C234.395 42.0285 237.89 42.7213 240.724 44.1067C243.621 45.4922 245.92 47.35 247.62 49.6801C249.384 52.0102 250.612 54.6552 251.304 57.6151C252.06 60.512 252.343 63.5034 252.154 66.5892H217.014ZM230.239 47.0351C226.586 47.0351 223.658 48.4521 221.454 51.286C219.249 54.1199 217.864 57.6466 217.297 61.866H242.047C241.921 59.158 241.354 56.7019 240.346 54.4978C239.402 52.2307 238.079 50.4358 236.379 49.1133C234.679 47.7279 232.632 47.0351 230.239 47.0351ZM256.884 92V91.2443L260.095 86.71V50.4358L256.789 45.6182V44.8625L269.731 42.5009V52.3251C271.116 49.3652 273.1 46.9092 275.682 44.9569C278.264 43.0047 281.224 42.0285 284.562 42.0285C288.277 42.0285 291.394 42.9732 293.913 44.8625C296.432 46.7517 298.133 49.4282 299.014 52.8919C300.652 49.3652 302.856 46.6888 305.627 44.8625C308.398 42.9732 311.358 42.0285 314.507 42.0285C319.23 42.0285 323.008 43.54 325.842 46.5628C328.739 49.5227 330.188 53.5217 330.188 58.5597V86.71L333.305 91.2443V92H317.435V91.2443L320.458 86.71V59.9767C320.458 56.0092 319.576 53.2383 317.813 51.6639C316.112 50.0895 314.066 49.3023 311.673 49.3023C308.776 49.3023 306.225 50.4043 304.021 52.6085C301.817 54.8127 300.463 57.8355 299.959 61.6771V86.71L302.982 91.2443V92H287.206V91.2443L290.229 86.71V59.9767C290.229 56.0092 289.379 53.2383 287.679 51.6639C285.978 50.0895 283.932 49.3023 281.539 49.3023C278.642 49.3023 276.091 50.4358 273.887 52.703C271.683 54.9701 270.297 57.9615 269.731 61.6771V86.71L272.754 91.2443V92H256.884Z" fill="currentColor"/></svg>`;
 const CATS={ambience:"Ambience",footsteps:"Footsteps",props:"Props",cloth:"Cloth"};
 /* kinds of sound that have since been folded into others (boards saved before then still carry them) */
 const OLDCATS={hardfx:"props",score:"ambience"};
@@ -157,8 +159,8 @@ function boot(D){
 const APP=D.mode==="app";let TITLE=D.title||"Untitled reel";
 $("#app").innerHTML=`<div class="wrap">
 <header class="top">
-  <div class="brand"><canvas class="g" id="garden" width="16" height="16" style="width:16px;height:16px" aria-hidden="true"></canvas><span class="scr" data-scr>Spotting</span><span class="crumb">/ ${APP?`<button class="ttl" id="ttl" title="Rename this board">${esc(TITLE)}</button>`:`<span class="scr" data-scr>${esc(TITLE)}</span>`}</span></div>
-  <nav class="nav" role="tablist" aria-label="Stage"><button role="tab" aria-selected="true"><span class="scr" data-scr>Spot</span></button></nav>
+  <div class="brand"><canvas class="g" id="garden" width="16" height="16" style="width:16px;height:16px" aria-hidden="true"></canvas><span class="crumb">${APP?`<button class="ttl" id="ttl" title="Rename this board">${esc(TITLE)}</button>`:`<span class="scr" data-scr>${esc(TITLE)}</span>`}</span></div>
+  <a class="logo-l" href="${esc(D.home||"index.html")}" aria-label="Stem">${LOGO}</a>
   <div class="meta">${APP?`<button class="lk" id="newReel">New reel</button>`:`<a class="lk" href="${esc(D.home||"index.html")}">Start your own</a>`}<div class="toggles" id="role" role="group" aria-label="Working as"></div><span><span class="scr" data-scr>Takes</span> <b id="navTally">0/0</b></span><button class="sidet" id="sideT" aria-expanded="false" aria-controls="cuelist" aria-label="Show cues and comments" title="Show cues and comments"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><rect x="2" y="3" width="12" height="10" rx="1.5"/><path d="M10 3v10"/><path class="fill" d="M10 3h2.5a1.5 1.5 0 0 1 1.5 1.5v7a1.5 1.5 0 0 1-1.5 1.5H10z"/></svg></button></div>
 </header>
 <div class="main side-off">
@@ -171,9 +173,9 @@ $("#app").innerHTML=`<div class="wrap">
         <label class="vdrop" id="vdrop" hidden><input type="file" accept="video/*" id="fVid"><canvas class="g vdg" style="width:44px;height:44px" aria-hidden="true"></canvas><b>Upload the reel</b><span>Drop a video here, or choose a file. It stays in this browser.</span><em id="vErr"></em></label></div>
       <div class="tpw" id="tpw"><div class="tp">
         <div class="ctl"><div class="ctl-l"><button class="btn mkb" id="mark" title="Mark a cue: press at the start of the sound, then again at its end"><i></i><span>Mark cue</span><kbd>M</kbd></button></div>
-          <div class="ctl-m"><button class="btn btn-ghost btn-icon" id="prev" aria-label="Previous cue ([)"></button><button class="btn btn-ghost btn-icon pp" id="pp" aria-label="Play or pause (space)"></button><button class="btn btn-ghost btn-icon" id="next" aria-label="Next cue (])"></button><span class="tc" id="tc"></span></div>
+          <div class="ctl-m"><div class="clock" id="clock" aria-live="off"><div class="clock-in"><span class="tc face" id="tc"></span><span class="tc face rec" id="tcm" aria-label="Cue length so far"></span></div></div></div>
           <div class="legend" id="bar" role="group" aria-label="Filter by sound"></div></div>
-        <div class="tlh"><span id="tlL"></span><span id="tlR"></span></div>
+        <div class="tlh"><span id="tlR"></span><span class="tlh-r"><span id="tlL"></span><span class="skip"><button class="btn btn-ghost btn-icon sk" id="prev" aria-label="Previous cue ([)"></button><button class="btn btn-ghost btn-icon sk" id="next" aria-label="Next cue (])"></button></span></span></div>
         <div class="ftl" id="ftl"></div>
       </div>
       <div class="onb" id="onb" aria-hidden="true" data-step="0"><p class="onb-t" id="onbT"></p>
@@ -242,8 +244,8 @@ const vid=$("#vid"),screen=$("#screen");let LEN=D.duration||1;if(VID)vid.src=D.v
 vid.addEventListener("loadedmetadata",()=>{if(isFinite(vid.duration)){LEN=vid.duration;counts();renderTL();layoutFilm();renderCard()}});
 const now=()=>vid.currentTime||0;
 function ownerAt(t){let o=FILM[0];for(const id of FILM)if(CUES[id].ft<=t+.01)o=id;return o}
-const ppIcon=()=>{const p=!vid.paused&&!vid.ended;$("#pp").innerHTML=p?ICON.pause:ICON.play;$("#big").innerHTML=p?ICON.pause:ICON.play;screen.classList.toggle("paused",!p);const z=$("[data-act=pp]",host());if(z)z.innerHTML=p?ICON.pause:ICON.play};
-["play","pause","ended"].forEach(e=>vid.addEventListener(e,()=>{ppIcon();prompt()}));vid.addEventListener("play",()=>{SC.pin=false});
+const ppIcon=()=>{const p=!vid.paused&&!vid.ended;$("#big").innerHTML=p?ICON.pause:ICON.play;screen.classList.toggle("paused",!p);const z=$("[data-act=pp]",host());if(z)z.innerHTML=p?ICON.pause:ICON.play};
+["play","pause","ended"].forEach(e=>vid.addEventListener(e,()=>{ppIcon();prompt()}));vid.addEventListener("play",()=>{SC.pin=false;selRow()});
 const play=()=>{if(!VID)return;if(vid.ended)vid.currentTime=0;vid.play().catch(()=>{})},pause=()=>vid.pause();
 function seek(t){if(!VID)return;vid.currentTime=cl(t,0,LEN);update(cl(t,0,LEN))}
 const toggle=()=>vid.paused||vid.ended?play():pause();
@@ -285,12 +287,15 @@ function renderTL(){const W=ftl.clientWidth||800,px=t=>t/LEN*W;AX=LTOP+LANES.len
 let tlW=0;new ResizeObserver(()=>{if(ftl.clientWidth!==tlW){tlW=ftl.clientWidth;renderTL()}}).observe(ftl);
 function rngAt(el,q){el.style.setProperty("--c",`var(--${q.c})`);el.style.left=XP(q.ft);el.style.width=XP(q.dur)}
 /* the selected cue's bar, and its handles */
-function markSel(){$$(".fm.sel",ftl).forEach(x=>x.classList.remove("sel"));$$(".ci.sel").forEach(x=>x.classList.remove("sel"));if(CUES[SC.id])$(`.ci[data-id="${SC.id}"]`)?.classList.add("sel");const q=CUES[SC.id],fm=q&&$(`.fm[data-id="${SC.id}"]`,ftl),hs=$$(".fh",ftl);
+function markSel(){selRow();$$(".fm.sel",ftl).forEach(x=>x.classList.remove("sel"));$$(".ci.sel").forEach(x=>x.classList.remove("sel"));if(CUES[SC.id])$(`.ci[data-id="${SC.id}"]`)?.classList.add("sel");const q=CUES[SC.id],fm=q&&$(`.fm[data-id="${SC.id}"]`,ftl),hs=$$(".fh",ftl);
   if(!fm){hs.forEach(h=>h.hidden=true);return}fm.classList.add("sel");const top=LTOP+LANES.indexOf(q.c)*LH+4;
   hs.forEach(h=>{h.hidden=false;h.style.setProperty("--c",`var(--${q.c})`);h.style.top=top-5+"px";h.style.left=XP(h.dataset.h==="in"?q.ft:q.ft+q.dur)})}
-function placeLabel(){if(MARK)return;const q=CUES[cur],c=$("#crng");
-  if(!q){$("#tlL").innerHTML=`<span class="hint">${!VID?"Upload the reel to start.":FILM.length?"":"No cues yet. Play the reel and press M at the start of a sound, then again at its end."}</span>`;$("#tlR").textContent="";if(c)c.hidden=true;return}
-  $("#tlL").innerHTML=`<b>[${span(q)}]</b> ${esc(q.n)}`;$("#tlR").textContent=secs(q.dur);if(c){c.hidden=false;rngAt(c,q)}}
+/* the second row only opens while a cue is selected: its [interval] and length on the left, its name on the right (beside the skips).
+   Opening it lifts the row of controls above it */
+function selRow(){const q=typeof SC!=="undefined"&&SC.pin?CUES[SC.id]:null,row=$(".tlh");if(!row)return;row.classList.toggle("on",!!q);
+  if(q){$("#tlL").textContent=q.n;$("#tlR").innerHTML=`<b>[${span(q)}]</b> ${secs(q.dur)}`}}
+function placeLabel(){const q=CUES[cur],c=$("#crng");selRow();
+  if(!q){if(c)c.hidden=true;return}if(c){c.hidden=false;rngAt(c,q)}}
 /* while a cue's timing changes (here or in the panel), everything showing it follows along live */
 function liveTiming(id){const q=CUES[id],fm=$(`.fm[data-id="${id}"]`,ftl);if(fm){const W=ftl.clientWidth;fm.style.left=q.ft/LEN*W+"px";fm.style.width=Math.max(3,q.dur/LEN*W)+"px"}
   if(id===SC.id){markSel();trimShow()}if(id===cur)placeLabel()}
@@ -328,22 +333,25 @@ function onbSet(step,note){const o=$("#onb");if(!o)return;const was=ONB;ONB=step
   $("#onbC").textContent=note||"";if(step===0){const r=$("#onbR");r.style.width="";o.style.removeProperty("--c")}}
 $("#onbV").addEventListener("click",()=>mark());
 /* the first cue lands: the timeline fades back in, and the square between the brackets shrinks onto the cue's own line in it */
-function onbLand(id){const r=$("#onbR"),fm=$(`.fm[data-id="${id}"]`,ftl);player.classList.add("land");
-  const done=()=>{if(fm)fm.style.opacity="";r.style.opacity=0;onbHold=false;player.classList.remove("land");prompt();setTimeout(()=>{Object.assign(r.style,{transform:"",transition:"",opacity:"",borderRadius:""});onbSet(0)},400)};
-  if(!fm||reduce)return setTimeout(done,500);fm.removeAttribute("data-born");fm.style.opacity=0;
-  setTimeout(()=>{const a=r.getBoundingClientRect(),b=fm.getBoundingClientRect();r.style.transition="transform .75s cubic-bezier(.65,0,.25,1)";
-    r.style.transform=`translate(${b.left-a.left}px,${b.top-a.top}px) scale(${b.width/a.width},${b.height/a.height})`;setTimeout(done,780)},300)}
-function mark(){if(!VID)return;if(MARK){const t1=now();let a=Math.min(MARK.t0,t1),b=Math.max(MARK.t0,t1);if(b-a<.3)b=Math.min(LEN,a+3);MARK=null;mkb.classList.remove("on");$("span",mkb).textContent="Mark cue";$("#mrng").hidden=true;if(!FILM.length)onbSet(2,`[${mmss(a)}–${mmss(b)}] · ${secs(b-a)}`);newCueForm(a,b);return}
-  closeNC();MARK={t0:now()};if(vid.paused||vid.ended)play();if(!FILM.length)onbSet(1,`From ${tc(MARK.t0)}`);mkb.classList.add("on");$("span",mkb).textContent="Set end";const m=$("#mrng");m.hidden=false;markTick()}
-function cancelMark(){if(!MARK)return;MARK=null;if(!FILM.length)onbSet(0);mkb.classList.remove("on");$("span",mkb).textContent="Mark cue";$("#mrng").hidden=true;placeLabel()}
+function onbLand(id){const v=$("#onbV"),fm=$(`.fm[data-id="${id}"]`,ftl),hs=$$(".fh:not([hidden])",ftl),real=[fm,...hs].filter(Boolean);player.classList.add("land");
+  const done=()=>{real.forEach(e=>e.style.visibility="");v.style.opacity=0;onbHold=false;player.classList.remove("land");prompt();setTimeout(()=>{Object.assign(v.style,{transform:"",transition:"",opacity:""});onbSet(0)},400)};
+  if(!fm||reduce)return setTimeout(done,500);fm.removeAttribute("data-born");real.forEach(e=>e.style.visibility="hidden");
+  /* the brackets and the square travel together, onto the cue and its brackets in the timeline */
+  setTimeout(()=>{const a=v.getBoundingClientRect(),rs=real.map(e=>e.getBoundingClientRect()),L=Math.min(...rs.map(r=>r.left)),T=Math.min(...rs.map(r=>r.top)),R=Math.max(...rs.map(r=>r.right)),B=Math.max(...rs.map(r=>r.bottom));
+    v.style.transition="transform .75s cubic-bezier(.65,0,.25,1)";v.style.transform=`translate(${L-a.left}px,${T-a.top}px) scale(${(R-L)/a.width},${(B-T)/a.height})`;setTimeout(done,780)},300)}
+function mark(){if(!VID)return;if(MARK){const t1=now();let a=Math.min(MARK.t0,t1),b=Math.max(MARK.t0,t1);if(b-a<.3)b=Math.min(LEN,a+3);MARK=null;markUI(false);$("span",mkb).textContent="Mark cue";const m=$("#mrng");m.style.left=XP(a);m.style.width=XP(b-a);if(!FILM.length)onbSet(2,`[${mmss(a)}–${mmss(b)}] · ${secs(b-a)}`);newCueForm(a,b);return}
+  closeNC();MARK={t0:now()};if(vid.paused||vid.ended)play();if(!FILM.length)onbSet(1,`From ${tc(MARK.t0)}`);markUI(true);$("span",mkb).textContent="Set end";const m=$("#mrng");m.hidden=false;markTick()}
+/* while marking, the clock in the middle turns over from the reel's time to a stopwatch of the cue's length, and back once it's set */
+function markUI(on){mkb.classList.toggle("on",on);if(on)ftl.classList.add("mk");$("#clock").classList.toggle("rec",on);if(on)$("#tcm").textContent=tc(0)}
+function cancelMark(){if(!MARK)return;MARK=null;ftl.classList.remove("mk");if(!FILM.length)onbSet(0);markUI(false);$("span",mkb).textContent="Mark cue";$("#mrng").hidden=true;placeLabel()}
 function markTick(){const a=Math.min(MARK.t0,now()),b=Math.max(MARK.t0,now()),m=$("#mrng");if(m){m.style.left=XP(a);m.style.width=XP(Math.max(b-a,LEN/400))}
-  $("#tlL").innerHTML=`<b>[${mmss(a)}–${mmss(b)}]</b> <span class="hint">Marking. Press M again where the sound ends</span>`;$("#tlR").textContent=secs(b-a);
+  $("#tcm").textContent=tc(b-a);
   if(ONB===1){const o=$("#onb");$("#onbR").style.width=Math.min(o.clientWidth*.7,22+(b-a)*46)+"px";$("#onbC").textContent=`From ${tc(a)} · ${secs(b-a)}`}}
 mkb.addEventListener("click",mark);
 /* the new-cue card: a name, a tile per kind of sound, and the sound's flower blooming in the background in its colour */
 const nc=document.createElement("div");nc.className="nc";nc.hidden=true;document.body.appendChild(nc);let NC=null,NCG=null,lastCat="props";
 const ncField=()=>{const c=`--${NC.c}`;softField($(".nc-corner",nc),{cols:3,colors:[c,c,"--peach","--sky"],alpha:[16,34],size:.5,seed:hash(NC.c),top:[-.2,.1],stack:[2,4]})};
-function ncCat(c){const was=NC.c;NC.c=c;if(was!==c&&nc.querySelector(".nc-corner .sf"))ncField();nc.style.setProperty("--c",`var(--${c})`);if(ONB===2)$("#onb").style.setProperty("--c",`var(--${c})`);$$(".nct",nc).forEach(x=>{const on=x.dataset.cat===c;x.setAttribute("aria-checked",on);x._g.base=on?.16:.1;x._g.color=`--${x.dataset.cat}`});NCG.color=`--${c}`}
+function ncCat(c){const was=NC.c;NC.c=c;if(was!==c&&nc.querySelector(".nc-corner .sf"))ncField();nc.style.setProperty("--c",`var(--${c})`);if(ONB===2)$("#onb").style.setProperty("--c",`var(--${c})`);$$(".nct",nc).forEach(x=>{const on=x.dataset.cat===c;x.setAttribute("aria-checked",on);x._g.base=on?.16:.1;x._g.color=`--${x.dataset.cat}`});NCG.color=`--${c}`;const m=$("#mrng");if(m){m.classList.add("lane");m.style.setProperty("--c",`var(--${c})`);m.style.top=LTOP+LANES.indexOf(c)*LH+4+"px"}}
 function newCueForm(a,b){pause();seek(a);NC={a,b,c:curCat!=="all"?curCat:lastCat};
   nc.innerHTML=`<div class="nc-corner" aria-hidden="true"><canvas class="nc-bg" style="width:64px;height:64px"></canvas></div>
     <div class="nc-h"><span>New cue</span><b>[${mmss(a)}–${mmss(b)}]</b><small>${secs(b-a)}</small></div>
@@ -352,7 +360,8 @@ function newCueForm(a,b){pause();seek(a);NC={a,b,c:curCat!=="all"?curCat:lastCat
     <div class="nc-f"><button class="btn btn-ghost" data-nc="x">Cancel</button><button class="btn btn-default" data-nc="ok">Add cue</button></div>`;
   NCG=glyph($(".nc-bg",nc),"flower",{color:`--${NC.c}`,base:.08});ncField();$$(".nct",nc).forEach(x=>x._g=glyph($("canvas",x),"flower",{color:`--${x.dataset.cat}`,base:.1}));ncCat(NC.c);
   nc.hidden=false;const ob=player.classList.contains("prompt"),r=(ob?$("#tpw"):ftl).getBoundingClientRect(),w=nc.offsetWidth,h=nc.offsetHeight,x=ob?r.left+r.width/2:r.left+(a+b)/2/LEN*r.width;nc.style.left=cl(x-w/2,8,innerWidth-w-8)+"px";nc.style.top=Math.max(8,r.top-h-10)+"px";$(".nc-n",nc).focus()}
-function closeNC(){nc.hidden=true;NC=null;placeLabel();if(ONB===2&&!onbAdding&&!FILM.length)onbSet(0)}
+/* the dashed range stays on the timeline while the new cue is named; it goes once the cue is added or cancelled */
+function closeNC(){nc.hidden=true;NC=null;if(!MARK){const m=$("#mrng");if(m){m.hidden=true;m.classList.remove("lane");m.style.top=AX+"px";m.style.removeProperty("--c")}ftl.classList.remove("mk")}placeLabel();if(ONB===2&&!onbAdding&&!FILM.length)onbSet(0)}
 nc.addEventListener("click",e=>{const c=e.target.closest("[data-cat]");if(c){ncCat(c.dataset.cat);$(".nc-n",nc).focus();return}
   const b=e.target.closest("[data-nc]");if(!b)return;if(b.dataset.nc==="x")return closeNC();addMarked()});
 nc.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();addMarked()}if(e.key==="Escape"){e.stopPropagation();closeNC()}});
@@ -386,11 +395,18 @@ function centreOn(el,instant){const b=doc.getBoundingClientRect(),r=el.getBoundi
   doc.scrollTo({top:doc.scrollTop+dy,behavior:instant||reduce||Math.abs(dy)>innerHeight*2?"auto":"smooth"})}
 function reveal(id){const el=$(`.cue[data-id="${id}"]`,doc);if(!el)return;centreOn(el);el.classList.remove("flash");void el.offsetWidth;el.classList.add("flash")}
 function layoutFilm(){if(EXP)return;const col=$(".col"),narrow=innerWidth<=860,ch=col.clientHeight,ex=$("#ex"),H=ex.hidden?0:ex.offsetHeight;
-  if(narrow){col.style.width="";col.style.flex="";screen.style.width="100%";return}
-  const other=$(".tp",player).offsetHeight+24+10+40,ratio=vid.videoWidth&&vid.videoHeight?vid.videoWidth/vid.videoHeight:16/9,side=$(".main").classList.contains("side-off")?0:$("#cuelist").offsetWidth+32,maxW=$(".main").clientWidth-side;
-  const W=Math.round(Math.max(420,Math.min(maxW,(ch-H-(H?14:0)-other)*ratio)));col.style.flex="none";col.style.width=W+"px";screen.style.width=W+"px";screen.style.aspectRatio=ratio}
+  /* the transport always keeps room for the selected cue's row, so opening or closing it moves only the controls, never the film */
+  const tp=$(".tp",player),gap=parseFloat(getComputedStyle(tp).rowGap)||0;tp.style.minHeight=$(".ctl",tp).offsetHeight+$("#ftl").offsetHeight+36+2*gap+"px";
+  if(narrow){col.style.width="";col.style.flex="";screen.style.width="100%";screen.style.marginTop=screen.style.marginBottom="";return}
+  const open=!$(".main").classList.contains("side-off"),tpH=$("#tpw").offsetHeight,other=tpH+24+10+40,ratio=vid.videoWidth&&vid.videoHeight?vid.videoWidth/vid.videoHeight:16/9,maxW=$(".main").clientWidth-(open?SIDEW:0);
+  const W=Math.round(Math.max(420,Math.min(maxW,(ch-H-(H?14:0)-other)*ratio)));col.style.flex="none";col.style.width=W+"px";screen.style.width=W+"px";screen.style.aspectRatio=ratio;
+  /* closed: the film sits mid-way above the transport, which stays at the bottom. Open (the film is smaller): film and transport move as one block,
+     centred between the script bar and the bottom of the page */
+  const free=Math.max(0,ch-H-(H?14:0)-24-10-tpH-W/ratio);screen.style.marginTop=(open?Math.min(free,free/2+5):free/2)+"px";screen.style.marginBottom=(open?0:free/2)+"px"}
+const SIDEW=300+32;
 /* the side panel (cues and comments) starts folded away; the button in the header opens it */
-function setSide(on){$(".main").classList.toggle("side-off",!on);$("#sideT").setAttribute("aria-expanded",String(on));$("#sideT").title=on?"Hide cues and comments":"Show cues and comments";$("#sideT").setAttribute("aria-label",$("#sideT").title);layoutFilm();if(EXP)placeCard()}
+/* opening and closing the side panel springs: the film resizes and travels, the panel unfurls beside it */
+let sideT=0;function setSide(on){const m=$(".main");m.classList.add("anim");clearTimeout(sideT);sideT=setTimeout(()=>m.classList.remove("anim"),450);m.classList.toggle("side-off",!on);$("#sideT").setAttribute("aria-expanded",String(on));$("#sideT").title=on?"Hide cues and comments":"Show cues and comments";$("#sideT").setAttribute("aria-label",$("#sideT").title);layoutFilm();if(EXP)placeCard()}
 $("#sideT").addEventListener("click",()=>setSide($(".main").classList.contains("side-off")));
 new ResizeObserver(()=>{layoutFilm();if(EXP)placeCard()}).observe($(".main"));
 /* the script under the film is a preview: it scrolls, and a click opens script view (a click on a highlighted line also jumps the film to it) */
@@ -699,7 +715,7 @@ function link(id,on){const q=CUES[id];if(!q)return;$$(`[data-id="${id}"]`).forEa
 /* ---------- controls and keys: space play/pause, ←/→ five seconds (⇧ one), [ ] previous/next cue, M mark, C comment, Delete removes the selected cue,
    ⌘Z / ⇧⌘Z undo and redo, Esc cancels a mark or leaves script view ---------- */
 $("#prev").innerHTML=ICON.prev;$("#next").innerHTML=ICON.next;$("i",mkb).outerHTML=ICON.mark;
-$("#pp").addEventListener("click",toggle);screen.addEventListener("click",e=>{if(!e.target.closest(".vdrop"))toggle()});
+screen.addEventListener("click",e=>{if(!e.target.closest(".vdrop"))toggle()});
 $("#prev").addEventListener("click",()=>step(-1));$("#next").addEventListener("click",()=>step(1));
 document.addEventListener("keydown",e=>{const inText=e.target.closest?.("textarea,input");
   if((e.metaKey||e.ctrlKey)&&!e.altKey&&!inText){const k=e.key.toLowerCase();if(k==="z"){e.preventDefault();return e.shiftKey?redo():undo()}if(k==="y"){e.preventDefault();return redo()}}

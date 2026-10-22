@@ -907,15 +907,93 @@ body:not(.sview) #ex .sp-h{border-bottom:0}
 /* the transport: Mark cue on the left with the most weight, play and skip centred, the sound filter on the right */
 .ctl{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px}
 .ctl-l{display:flex;align-items:center;min-width:0}
-.ctl-m{display:flex;align-items:center;gap:2px;position:relative}
-.ctl-m .tc{position:absolute;left:100%;margin:0 0 0 10px;color:var(--muted-foreground)}
-.ctl-m .pp{width:34px;height:34px;border-radius:50%;background:var(--foreground);color:var(--background)}
-.ctl-m .pp:hover{background:color-mix(in srgb,var(--foreground) 85%,transparent);color:var(--background)}
-.ctl-m .pp svg{width:14px;height:14px}
+.ctl-m{display:flex;align-items:center;justify-content:center}
 .ctl .legend{margin-left:0;justify-self:end}
-.mkb{height:34px;margin:0;padding:0 10px 0 12px;gap:8px;border:0;border-radius:3px;background:var(--hardfx);color:#fff;font:600 13.5px var(--f-sans)}
-.mkb:hover{background:color-mix(in srgb,var(--hardfx) 88%,#000)}
-.mkb kbd{margin-left:4px;color:#fff;background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.35)}
-.mkb.on{background:var(--foreground);color:var(--background);border-color:transparent}
-.mkb.on kbd{color:var(--background);border-color:color-mix(in srgb,var(--background) 40%,transparent)}
 .nc-c{grid-template-columns:repeat(4,1fr)}
+
+/* the clock: the reel's time, turning over (a drum rotating on its axis) to the cue's running length while you mark */
+.clock{height:22px;perspective:240px}
+.clock-in{position:relative;height:22px;transform-style:preserve-3d;transition:transform .55s var(--spring)}
+.clock .face{display:flex;align-items:center;justify-content:center;height:22px;margin:0;font:500 14px/22px var(--f-mono);letter-spacing:.02em;color:var(--foreground);white-space:nowrap;backface-visibility:hidden;-webkit-backface-visibility:hidden;transform:translateZ(11px)}
+.clock .face.rec{position:absolute;inset:0;color:var(--hardfx);transform:rotateX(-90deg) translateZ(11px)}
+.clock .face.rec::before{content:"";width:6px;height:6px;margin-right:7px;border-radius:50%;background:currentColor;animation:rec 1s ease-in-out infinite}
+.clock.rec .clock-in{transform:rotateX(90deg)}
+@media (prefers-reduced-motion:reduce){.clock-in{transition:none}}
+/* the ranges on the axis (the selected cue's, and the one being marked) are rectangles too */
+.rng-ax,.rng-ax.hov,.rng-ax.mrk{border-radius:1px}
+.ftl.mk #crng,.ftl.mk #hrng{opacity:0}
+/* the dashed cue, once it has a kind of sound: on that sound's lane, in its colour, gliding between lanes as you pick */
+.rng-ax.mrk.lane{border-color:var(--c);background:color-mix(in srgb,var(--c) 14%,transparent);transition:top .3s var(--spring),border-color .2s,background-color .2s;z-index:4}
+/* in the onboarding the brackets and square land as one piece, so the brackets stay */
+.land .onb .bk{opacity:1}
+.onb-v{transform-origin:0 0}
+.onb-r{transform-origin:50% 50%}
+/* the second row: the cue at the playhead, its length, and the skips to the cue before and after; set a little lower under the transport */
+.tlh{margin-top:8px;align-items:center}
+.tlh-r{flex:none;display:flex;align-items:center;gap:8px}
+.tlh-r #tlR{min-width:0}
+.skip{display:flex;align-items:center;gap:0;margin-right:-6px}
+.skip .sk{width:24px;height:24px;color:var(--muted-foreground)}
+.skip .sk:hover{color:var(--foreground)}
+.skip .sk svg{width:13px;height:13px}
+/* second row, all in the same quiet grey: the cue's length and the skips on the left, [interval] name on the right */
+.tlh,.tlh #tlL,.tlh #tlL b,.tlh #tlR,.tlh .hint{color:var(--muted-foreground)}
+.tlh #tlL{text-align:right}
+.skip{margin:0 0 0 -2px}
+/* second row: the cue's length on the left; [interval] name, then the skips, on the right */
+.tlh-r{flex:1 1 auto;min-width:0;justify-content:flex-end}
+.tlh-r #tlL{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.skip{margin:0 -6px 0 0}
+
+/* Mark cue: a flat light-grey tile, no border, uppercase label in the board's sans at regular weight, spaced out; the M shortcut sits in it as plain text.
+   While marking, the tile darkens a step and the text goes to ink */
+.mkb{height:34px;margin:0;padding:0 12px 0 11px;gap:9px;border:0;border-radius:4px;background:#efefef;color:#5f5f5f;font:400 13.5px var(--f-sans);letter-spacing:.08em;text-transform:uppercase;box-shadow:none;transition:background-color .15s,color .15s,transform .15s var(--spring)}
+.mkb:hover{background:#e6e6e6;color:#3f3f3f}
+.mkb:active{transform:scale(.97)}
+.mkb svg{width:15px;height:15px}
+.mkb kbd{margin:0 0 0 2px;padding:0;border:0;background:none;font:400 12px var(--f-mono);letter-spacing:0;color:#9a9a9a}
+.mkb.on{background:#e2e2e2;color:var(--foreground)}
+.mkb.on kbd{color:#6f6f6f}
+
+/* ---------- header: the Stem logo in the middle ---------- */
+.logo-l{display:flex;align-items:center;color:var(--foreground);text-decoration:none}
+.logo-l .logo{display:block;height:22px;width:auto}
+/* every button: 2px corners */
+button,.btn,.mkb,.tg,.lg,.nct,.sidet,.ci,.cm-i{border-radius:2px!important}
+/* Mark cue in regular case; its M key a lighter filled cap */
+.mkb{text-transform:none;letter-spacing:.01em}
+.mkb kbd{display:inline-grid;place-items:center;min-width:18px;height:18px;padding:0 4px;border-radius:2px;background:#fafafa;color:#8a8a8a}
+.mkb.on kbd{background:#fff;color:#5f5f5f}
+/* play / pause on the picture: just the white glyph */
+.screen .big{background:none;color:#fff;width:40px;height:40px;margin:-20px;filter:drop-shadow(0 1px 1.5px rgba(0,0,0,.35))}
+.screen .big svg{width:26px;height:26px}
+/* the clock: the reel's time in the same grey as the other text; the cue stopwatch in charcoal */
+.clock .face{color:var(--muted-foreground)}
+.clock .face.rec{color:#222}
+/* the playhead sits in front of every cue */
+.ftl .fph{z-index:200}
+/* second row: [interval] length on the left, the name on the right; all one grey */
+.tlh #tlR{font:400 12px var(--f-mono)}
+.tlh #tlR b{font-weight:500;margin-right:4px}
+/* the second row folds away unless a cue is selected */
+.tlh{display:grid;grid-template-columns:auto 1fr;max-height:0;min-height:0;margin-top:0;opacity:0;overflow:hidden;pointer-events:none;
+  transition:max-height .3s var(--spring),margin-top .3s var(--spring),opacity .2s ease}
+.tlh.on{max-height:28px;margin-top:8px;opacity:1;pointer-events:auto}
+.tp{justify-content:flex-end}
+
+/* ---------- side panel: it unfurls (width, gap and fade together) rather than popping in, and the film springs to its new size and place ---------- */
+.main{gap:0}
+.cuelist{width:300px;margin-left:32px;overflow:hidden;animation:none!important}
+.cuelist>*{width:300px;flex-shrink:0}
+.main.side-off .cuelist{display:flex;width:0;margin-left:0;opacity:0;pointer-events:none;visibility:hidden}
+.player{justify-content:flex-start}
+.player .screen{margin-top:0;margin-bottom:0}
+.main.anim .col,.main.anim .screen{transition:width .38s cubic-bezier(.34,1.3,.64,1),margin-top .38s cubic-bezier(.34,1.3,.64,1),margin-bottom .38s cubic-bezier(.34,1.3,.64,1)}
+.main.anim .cuelist{transition:width .38s cubic-bezier(.34,1.15,.64,1),margin-left .38s cubic-bezier(.34,1.15,.64,1),opacity .2s ease,visibility 0s}
+.main.anim.side-off .cuelist{transition:width .3s cubic-bezier(.5,0,.2,1),margin-left .3s cubic-bezier(.5,0,.2,1),opacity .15s ease,visibility 0s .3s}
+.main.anim:not(.side-off) .cuelist>*{animation:side-kid .34s cubic-bezier(.34,1.4,.64,1) both}
+.main.anim:not(.side-off) .cuelist>*:nth-child(2){animation-delay:.03s}
+.main.anim:not(.side-off) .cuelist>*:nth-child(3),.main.anim:not(.side-off) .cuelist>*:nth-child(4){animation-delay:.06s}
+@keyframes side-kid{from{opacity:0;transform:translateX(26px)}}
+@media (prefers-reduced-motion:reduce){.main.anim .col,.main.anim .screen,.main.anim .cuelist{transition:none}.main.anim .cuelist>*{animation:none}}
+@media (max-width:860px){.cuelist{margin-left:0}.cuelist>*{width:auto}}
