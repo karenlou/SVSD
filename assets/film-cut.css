@@ -677,8 +677,8 @@ mark.cue{color:inherit;background-color:transparent}
 .acts .cmt b{font:500 11px var(--f-mono);color:var(--muted-foreground)}
 
 /* ---------- comments rise as a sheet over the list, in the same paper, borders and type as the rest of the board ---------- */
-.dock.up{position:absolute;left:-8px;right:-8px;bottom:0;z-index:30;height:auto;max-height:min(80%,620px);margin:0;padding:0 14px 14px;
-  border:1px solid var(--border);border-radius:3px;background:var(--popover);box-shadow:0 1px 8px rgba(0,0,0,.12);display:flex;flex-direction:column}
+.dock.up{position:absolute;left:0;right:0;width:auto;bottom:0;z-index:30;height:auto;max-height:min(80%,620px);margin:0;padding:0 8px 14px;
+  border:0;border-top:1px solid var(--border);border-radius:0;background:var(--background);box-shadow:none;display:flex;flex-direction:column}
 .dock.rise{animation:sheetUp .3s cubic-bezier(.22,1,.36,1)}
 @keyframes sheetUp{from{transform:translateY(40px);opacity:0}}
 @media (prefers-reduced-motion:reduce){.dock.rise{animation:none}}
@@ -1248,3 +1248,23 @@ button,.btn,.mkb,.tg,.lg,.nct,.sidet,.ci,.cm-i{border-radius:2px!important}
 @keyframes side-kid{from{opacity:0;transform:translateX(26px)}}
 @media (prefers-reduced-motion:reduce){.main.anim .col,.main.anim .screen,.main.anim .cuelist{transition:none}.main.anim .cuelist>*{animation:none}}
 @media (max-width:860px){.cuelist{margin-left:0}.cuelist>*{width:auto}}
+
+/* ---------- tidy-up: the cue panel sits in the list's column, the playhead keeps its cap, the sound filter is one quiet row ---------- */
+/* the cue panel is the second half of the cue column rather than a sheet laid over it: the list gives it room (and keeps its own scroll), and both share one left and right edge */
+.dock.up{position:relative;left:auto;right:auto;bottom:auto;z-index:auto;flex:none;width:auto;height:auto;max-height:min(60%,560px);margin:8px 0 0;padding:0 8px 14px;border:0;border-top:1px solid var(--border);background:transparent;box-shadow:none;filter:none}
+.dock.up .panel{box-shadow:none;background:transparent}
+.dock.rise{animation:sheetUp .28s cubic-bezier(.22,1,.36,1)}
+@keyframes sheetUp{from{transform:translateY(10px);opacity:0}}
+/* the list fades only at its own ends (the old long fade sat under the panel and left rows sliced at its top edge) */
+.cl-scroll{-webkit-mask-image:linear-gradient(to bottom,transparent,#000 14px,#000 calc(100% - 14px),transparent);mask-image:linear-gradient(to bottom,transparent,#000 14px,#000 calc(100% - 14px),transparent)}
+.dock .cnote.ed textarea{overflow-y:auto;resize:none}
+
+/* the playhead's cap slides inward at either end of the view (see capFit) instead of being cut by the timeline's edge */
+.ftl .fph::before{left:calc(-4px + var(--cap,0px))}
+
+/* the sound filter: five small colour dots in one row, balancing Mark cue on the other side of the clock. The name appears beside the one you've picked; every dot says its name on hover */
+.ctl .legend{flex-wrap:nowrap;justify-self:end;justify-content:flex-end;gap:0}
+.legend .lg{gap:0;height:28px;padding:0 7px}
+.legend .lg i{width:8px;height:8px}
+.legend .lg span{max-width:0;margin-left:0;overflow:hidden;opacity:0;white-space:nowrap;transition:max-width .3s var(--spring),margin-left .3s var(--spring),opacity .2s}
+.legend .lg[aria-pressed=true] span{max-width:96px;margin-left:6px;opacity:1}

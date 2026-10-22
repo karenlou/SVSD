@@ -524,7 +524,9 @@ let born=null;
 
 /* ---------- the current cue: list, lanes, label, script and the cue panel follow the playhead ---------- */
 let cur=null,lastT=-1;
-function update(t){if(t===lastT)return;lastT=t;const ph=$("#fph");if(!ph)return;keepInView(t);ph.style.left=XP(t);sounding(t);navHead(t);if(!TCE)$("#tc").textContent=VID?`${tc(t)} / ${mmss(LEN)}`:"–:–";setCur(ownerAt(t));renderEdge(t);draftTick()}
+/* the playhead's cap is wider than its line; at either end of the view it slides inward so the timeline's edge never slices it */
+function capFit(ph,t){const W=ftl.clientWidth,x=(t-V0)/vw()*W;ph.style.setProperty("--cap",(W?Math.max(0,4-x)+Math.min(0,W-x-6):0).toFixed(1)+"px")}
+function update(t){if(t===lastT)return;lastT=t;const ph=$("#fph");if(!ph)return;keepInView(t);ph.style.left=XP(t);capFit(ph,t);sounding(t);navHead(t);if(!TCE)$("#tc").textContent=VID?`${tc(t)} / ${mmss(LEN)}`:"–:–";setCur(ownerAt(t));renderEdge(t);draftTick()}
 function setCur(id,force){if(!id){if(cur&&!CUES[cur]){cur=null;placeLabel();cardFollow(true)}return}if(id===cur&&!force)return;const prev=cur;cur=id;const q=CUES[id];
   $$(".ci.in").forEach(x=>x.classList.remove("in"));$(`.ci[data-id="${id}"]`)?.classList.add("in");settleList();
   $$(".fm.cur").forEach(x=>x.classList.remove("cur"));$(`.fm[data-id="${id}"]`)?.classList.add("cur");placeLabel();
@@ -666,8 +668,15 @@ function trimTick(){const t=$(".trim .tph",host());if(t&&TW)t.style.left=TX(cl(n
 /* after a trim or move, everything that shows the cue's timing catches up */
 function trimDone(id){FILM.sort((a,b)=>CUES[a].ft-CUES[b].ft);const ci=$(`.ci[data-id="${id}"]`),nx=FILM[FILM.indexOf(id)+1];if(ci)clScroll.insertBefore(ci,nx?$(`.ci[data-id="${nx}"]`):null);
   refreshCue(id);renderTL();renderComments();setCur(ownerAt(now()),true);renderCard();changed()}
+/* the director's note grows to hold what's written (up to a few lines), so it's never cut off mid-line */
+function fitNote(t){if(!t)return;t.style.height="auto";t.style.height=Math.min(112,t.scrollHeight+(t.offsetHeight-t.clientHeight))+"px"}
+/* and again whenever the panel's width settles (it opens while the side panel is still unfurling) */
+{let w=0;new ResizeObserver(es=>{const nw=Math.round(es[0].contentRect.width);if(nw===w)return;w=nw;[dock,scard].forEach(h=>fitNote($("[data-note]",h)))}).observe($("#cuelist"))}
+/* the cue panel now takes room from the list instead of covering it; keep the selected row where it can be seen */
+function keepSelSeen(){requestAnimationFrame(()=>{const a=$(".ci.sel",clScroll);if(!a)return;const t=a.offsetTop,b=t+a.offsetHeight,v=clScroll.scrollTop,h=clScroll.clientHeight;
+  if(t<v+12)clScroll.scrollTop=Math.max(0,t-12);else if(b>v+h-12)clScroll.scrollTop=b-h+12})}
 function renderCard(focus){const h=host(),show=!!(SC.id&&CUES[SC.id]&&(EXP||SC.pin));scard.hidden=!EXP||!show;
-  if(!EXP){const was=dock.classList.contains("up");dock.classList.toggle("up",show);if(show&&!was)dock.classList.add("rise")}
+  if(!EXP){const was=dock.classList.contains("up");dock.classList.toggle("up",show);if(show&&!was)dock.classList.add("rise");if(show)keepSelSeen()}
   if(!show){if(!EXP){dock.innerHTML=!VID||!FILM.length?`<div class="dock-sf"></div><p class="dock-e">${!VID?"Upload the reel to start the board.":"Mark a cue to start the board: press <kbd>M</kbd> where a sound starts and again where it ends."}</p>`:"";
     requestAnimationFrame(()=>{const d=$(".dock-sf",dock);if(d)softField(d,{cols:4,alpha:[28,62],size:.55,seed:3,top:[.15,.4],stack:[2,4]})})}markSel();return}
   /* picking a cue opens the side panel if it was folded away */
@@ -678,7 +687,7 @@ function renderCard(focus){const h=host(),show=!!(SC.id&&CUES[SC.id]&&(EXP||SC.p
       <button class="btn btn-icon pz" data-act="pp" aria-label="Play or pause">${p?ICON.pause:ICON.play}</button><span class="bk2">${ICON.film}Back to film</span></div>${trimHTML()}`:""}
     ${headHTML()}<div class="cbody">${bodyHTML()}</div>${rt?`<div class="rng rto"><span>Replying to <b>${esc(PEOPLE[rt.msgs[0].by].n)}</b> · ${esc(snip(rt,40))}</span><button class="btn btn-ghost btn-icon" data-act="norep" title="Cancel the reply (Esc)" aria-label="Cancel the reply">${ICON.x}</button></div>`:SC.draft?rangeHTML():""}
     <div class="compose"><div class="cin">${avHTML(ME())}<textarea rows="1" data-new placeholder="${ph}" aria-label="${ph}">${esc(SC.text)}</textarea><button class="btn send" data-act="send" aria-label="Send">${ICON.send}</button></div></div></div>`;
-  $(".cbody",h).scrollTop=keep;
+  $(".cbody",h).scrollTop=keep;fitNote($("[data-note]",h));
   if(EXP&&vid.readyState>=2)tcx()?.drawImage(vid,0,0,480,270);
   if(SC.rename){const i=$(".rn",h);i.focus();i.select()}
   else if(focus){const ta=$("[data-new]",h);if(ta){ta.focus();ta.setSelectionRange(ta.value.length,ta.value.length)}}
@@ -748,7 +757,7 @@ dock.addEventListener("animationend",e=>{if(e.target===dock)dock.classList.remov
 [scard,dock].forEach(h=>{
   h.addEventListener("click",cardClick);
   h.addEventListener("focusin",e=>{if(e.target.matches("[data-new]")&&!SC.draft)openDraft();if(e.target.matches("[data-note]"))noteOpen=false});
-  h.addEventListener("input",e=>{const t=e.target;if(t.matches("[data-note]")){if(!noteOpen){checkpoint("edit note");noteOpen=true}const q=CUES[SC.id];q.d=t.value;clearTimeout(noteT);noteT=setTimeout(changed,400)}
+  h.addEventListener("input",e=>{const t=e.target;if(t.matches("[data-note]")){if(!noteOpen){checkpoint("edit note");noteOpen=true}const q=CUES[SC.id];q.d=t.value;fitNote(t);clearTimeout(noteT);noteT=setTimeout(changed,400)}
     else if(t.closest(".cin")){SC.text=t.value;t.style.height="auto";t.style.height=Math.min(120,t.scrollHeight)+"px";mentionScan(t)}});
   h.addEventListener("pointerdown",e=>{if(e.target.closest(".mpop"))e.preventDefault()});
   h.addEventListener("focusout",e=>{if(e.target.matches(".rn")&&SC.rename)rename(e.target.value)});
@@ -855,7 +864,7 @@ function tally(){const n=FILM.filter(id=>done(CUES[id])).length;garden.count=FIL
 /* ---------- filter by sound: a small legend naming every kind of sound; click one to show only it, click it again for all ---------- */
 let curCat="all";
 function renderBar(){const n={};FILM.forEach(id=>n[CUES[id].c]=(n[CUES[id].c]||0)+1);$("#bar").classList.toggle("filtering",curCat!=="all");
-  $("#bar").innerHTML=LANES.map(k=>`<button class="lg${n[k]?"":" none"}" data-cat="${k}" aria-pressed="${curCat===k}" title="${curCat===k?"Show all sounds":`Only ${CATS[k]} (${n[k]||0})`}" style="--c:var(--${k})"><i></i>${CATS[k]}</button>`).join("")}
+  $("#bar").innerHTML=LANES.map(k=>`<button class="lg${n[k]?"":" none"}" data-cat="${k}" aria-pressed="${curCat===k}" aria-label="${CATS[k]}" title="${curCat===k?"Show all sounds":`Only ${CATS[k]} (${n[k]||0})`}" style="--c:var(--${k})"><i></i><span>${CATS[k]}</span></button>`).join("")}
 function applyFilter(){const on=curCat!=="all",hit=id=>!on||CUES[id]?.c===curCat;
   doc.classList.toggle("filtering",on);list.classList.toggle("filtering",on);
   $$(".cue:not(.off)",doc).forEach(el=>el.classList.toggle("match",hit(el.dataset.id)&&on));$$(".ci").forEach(el=>el.classList.toggle("match",hit(el.dataset.id)));
