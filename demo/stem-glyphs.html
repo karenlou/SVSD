@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Stem glyphs</title>
+<style>
+:root{--bg:#fff;--fg:#111;--muted:#777;--line:#e6e6e6;--card:#fafafa;--accent:#1a7f4b}
+:root[data-theme=dark]{--bg:#111;--fg:#f2f2f2;--muted:#8a8a8a;--line:#2a2a2a;--card:#181818;--accent:#5fd08d}
+body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.5 ui-sans-serif,system-ui,-apple-system,sans-serif;padding:32px 24px 64px;max-width:1040px;margin-inline:auto}
+h1{font-size:20px;font-weight:600;margin:0 0 4px}h2{font-size:13px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin:40px 0 12px}
+p{color:var(--muted);max-width:640px;margin:0 0 12px}
+.row{display:flex;gap:40px;align-items:center;flex-wrap:wrap}
+.card{border:1px solid var(--line);background:var(--card);border-radius:12px;padding:20px 24px;display:flex;flex-direction:column;gap:10px;align-items:center}
+.card small{color:var(--muted);font-size:11px;letter-spacing:.04em;text-transform:uppercase}
+table{border-collapse:collapse;width:100%}th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:middle}
+th{font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);font-weight:500}
+td.g{white-space:nowrap}td.g canvas{vertical-align:middle;margin-right:14px}
+td.n{font-weight:600}td.n span{display:block;font-weight:400;color:var(--muted);font-size:12px}
+.tools{position:fixed;top:16px;right:16px;display:flex;gap:6px}
+button{border:1px solid var(--line);background:var(--card);color:var(--fg);border-radius:8px;padding:6px 10px;font:inherit;font-size:12px;cursor:pointer}
+button[aria-pressed=true]{border-color:var(--fg)}
+.big{display:flex;gap:24px;align-items:center;flex-wrap:wrap}
+.big .card{background:var(--accent);color:#fff}.big .card small{color:rgba(255,255,255,.75)}
+</style>
+</head>
+<body>
+<div class="tools"><button id="theme">Dark</button><button id="sqOn" aria-pressed="false">Show module grid</button></div>
+<h1>Stem glyphs</h1>
+<p>Same 5×5 state machine as the spotting board, re-rendered with the brand contour's construction rule instead of a dot matrix.</p>
+
+<h2>1 · The rule, checked against the logo</h2>
+<p>Left: the contour SVG from Figma. Right: a 4×2 module grid with four modules "on", drawn by the rule. An isolated module is a circle; orthogonal neighbours bridge into a capsule; and wherever an <em>off</em> module sits between two lit neighbours (an inside corner, or a diagonal step) its inscribed circle is cut away as the fillet. Nothing else — the diagonal join is the whole signature.</p>
+<div class="row">
+  <div class="card"><svg width="192" height="96" viewBox="0 0 96 48" fill="var(--fg)"><path d="M96 36C96 42.5239 90.7939 47.8319 84.3096 47.9961L84 48L83.6904 47.9961C77.309 47.8345 72.1655 42.691 72.0039 36.3096L71.9961 35.6904C71.8319 29.2061 66.5239 24 60 24L36 24C29.4761 24 24.1681 29.2061 24.0039 35.6904L23.9961 36.3096C23.8345 42.691 18.691 47.8345 12.3096 47.9961L12 48L11.6904 47.9961C5.30896 47.8345 0.165504 42.691 0.00390624 36.3096L0 36C2.85169e-07 29.4761 5.20609 24.1681 11.6904 24.0039L12.3096 23.9961C18.691 23.8345 23.8345 18.691 23.9961 12.3096L24.0039 11.6904C24.1681 5.20609 29.4761 5.46077e-06 36 5.74593e-06L60 6.79501e-06C66.5239 7.08018e-06 71.8319 5.20609 71.9961 11.6904L72.0039 12.3096C72.1655 18.691 77.309 23.8345 83.6904 23.9961L84.3096 24.0039C90.7939 24.1681 96 29.4761 96 36Z"/></svg><small>Figma contour</small></div>
+  <div class="card"><canvas id="logo" width="384" height="192" style="width:192px;height:96px"></canvas><small>Rule, 4×2 grid</small></div>
+</div>
+
+<h2>2 · Every state, side by side</h2>
+<p>Left pair is the current dot matrix (16 px and 40 px). Right pair is the stem rendering at the same sizes. Both run the same state function at 12 fps; intensity still quantises to quarters, and the stem version draws each quarter as a nested blob so fades read as the shape growing rather than dots brightening.</p>
+<table id="tbl"><thead><tr><th>State</th><th>Current · dots</th><th>Proposed · stem</th></tr></thead><tbody></tbody></table>
+
+<h2>3 · At category colour, large</h2>
+<div class="big" id="big"></div>
+
+<script>
+/* ---------- states, copied verbatim from assets/engine.js ---------- */
+const PI=Math.PI,TAU=PI*2, cl=(v,a=0,b=1)=>Math.min(b,Math.max(a,v)), ramp=(p,at,len=.08)=>cl((p-at)/len);
+const ix=(x,y)=>(y+2)*5+(x+2), blank=()=>new Float32Array(25);
+const CELLS=[];for(let y=-2;y<=2;y++)for(let x=-2;x<=2;x++)CELLS.push([x,y]);
+const setv=(b,pts,v)=>{for(const[x,y]of pts){const i=ix(x,y);b[i]=Math.max(b[i],v)}};
+const FLOWER=[[0,0,1],[0,-1,.35],[0,1,.35],[-1,0,.35],[1,0,.35],[0,-2,1],[0,2,1],[-2,0,1],[2,0,1],[-1,-1,1],[1,-1,1],[-1,1,1],[1,1,1]];
+const PLUS=[[0,0],[0,-1],[0,1],[-1,0],[1,0]];
+const DIAMOND=CELLS.filter(([x,y])=>Math.abs(x)+Math.abs(y)===2).sort((a,b)=>((Math.atan2(a[0],-a[1])+TAU)%TAU)-((Math.atan2(b[0],-b[1])+TAU)%TAU));
+const CHECK=[[-2,0],[-1,1],[0,0],[1,-1],[2,-2]];
+const GARDEN=[[0,0],[0,-2],[2,-2],[2,0],[2,2],[0,2],[-2,2],[-2,0],[-2,-2]];
+const G={
+  seed:{kind:"loop",f(t){const b=blank(),s=.5+.5*Math.sin(t/2.4*TAU);b[ix(0,0)]=.35+.5*s;setv(b,PLUS.slice(1),.12+.1*s);return b}},
+  bud:{kind:"loop",f(t){const b=blank(),s=.5+.5*Math.sin(t/2*TAU);b[ix(0,0)]=1;setv(b,PLUS.slice(1),.35+.65*s);return b}},
+  unfurl:{kind:"shot",dur:.6,f(t,p){const b=blank();b[ix(0,0)]=ramp(p,0,.2);const k1=ramp(p,.22,.2),k2=ramp(p,.48,.25);
+    for(const[x,y]of PLUS.slice(1))b[ix(x,y)]=k1*(k2>0?1-.65*k2:1);for(const[x,y]of DIAMOND)b[ix(x,y)]=k2;return b}},
+  orbit:{kind:"loop",f(t){const b=blank(),ph=(t/1.2%1)*8;DIAMOND.forEach(([x,y],i)=>{const d=(ph-i+8)%8;b[ix(x,y)]=d<4?1-d/4:0});b[ix(0,0)]=.25+.2*Math.sin(t*5);return b}},
+  pulse:{kind:"loop",f(t){const b=blank();for(const[x,y]of CELLS){const d=Math.abs(x)+Math.abs(y);if(!d){b[ix(x,y)]=1;continue}const a=Math.atan2(y,x),amp=cl(.5+.5*Math.sin(t*6.5+a*1.7)*Math.cos(t*3.1-a*1.3));b[ix(x,y)]=cl(amp*2.4-(d-1))*(d>2?.6:1)}return b}},
+  set:{kind:"shot",dur:1.1,f(t,p){const b=blank();if(p<.5){const k=p<.3?1:1-ramp(p,.3,.2);for(const[x,y,v]of FLOWER)b[ix(x,y)]=(x===0&&y===0)?1:v*k}
+    CHECK.forEach(([x,y],i)=>{b[ix(x,y)]=Math.max(b[ix(x,y)]*(p<.5?1:0),ramp(p,.5+i*.08,.08))});return b}},
+  check:{kind:"loop",f(){const b=blank();setv(b,CHECK,1);return b}},
+  pollinate:{kind:"loop",f(t){const b=blank(),p=(t/1.8)%1,path=[[-1,0],[0,-1],[1,0]];setv(b,[[-2,-1],[-2,1]],.45);b[ix(-2,0)]=.9;
+    const glow=p>.7?1-(p-.7)*1.2:.25;setv(b,[[2,-1],[2,1]],.25+.4*Math.max(0,glow-.25));b[ix(2,0)]=Math.max(.35,glow);
+    if(p>.1&&p<.72){const q=(p-.1)/.62,j=Math.min(2,Math.floor(q*3)),[x,y]=path[j];b[ix(x,y)]=1}return b}},
+  flower:{kind:"loop",f(){const b=blank();for(const[x,y,v]of FLOWER)b[ix(x,y)]=v;return b}},
+  garden:{kind:"count",f(t,p,it){const b=blank(),n=it.count||0;GARDEN.forEach(([x,y],i)=>{b[ix(x,y)]=i<n?1:.12});return b}}
+};
+const DESC={seed:"idle cue, breathing",bud:"hover / armed",unfurl:"opened (one-shot)",orbit:"loading, in review",pulse:"playing / live",set:"approved (one-shot)",check:"approved, resting",pollinate:"handing off",flower:"category picker",garden:"progress tally"};
+
+function rr(c,x,y,w,h,r){c.beginPath();c.moveTo(x+r,y);c.arcTo(x+w,y,x+w,y+h,r);c.arcTo(x+w,y+h,x,y+h,r);c.arcTo(x,y+h,x,y,r);c.arcTo(x,y,x+w,y,r);c.closePath()}
+const fg=()=>getComputedStyle(document.documentElement).getPropertyValue("--fg").trim();
+
+/* ---------- current renderer (dot matrix) ---------- */
+function drawDots(it,b){
+  const c=it.ctx,S=it.w*it.d,cell=S/5,dot=cell*(it.w<=14?.78:.74),off=(cell-dot)/2;
+  c.setTransform(1,0,0,1,0,0);c.clearRect(0,0,S,S);c.fillStyle=it.color||fg();
+  for(let i=0;i<25;i++){const v=Math.round(cl(b[i])*4)/4;c.globalAlpha=it.base+(1-it.base)*v;rr(c,(i%5)*cell+off,((i/5)|0)*cell+off,dot,dot,dot*.3);c.fill()}
+  c.globalAlpha=1;
+}
+
+/* ---------- proposed renderer: stem modules ----------
+   on(x,y) → one Path2D of inscribed circles + bridges between orthogonal neighbours (nonzero union),
+   plus a wedge per inside corner: the off module's quarter square minus its inscribed circle.   */
+function stemPath(on,cols,rows,cell){
+  const r=cell/2,p=new Path2D(),wedges=[];
+  const o=(x,y)=>x>=0&&y>=0&&x<cols&&y<rows&&on(x,y);
+  for(let y=0;y<rows;y++)for(let x=0;x<cols;x++){
+    if(!o(x,y))continue;
+    const cx=x*cell+r,cy=y*cell+r;
+    p.moveTo(cx+r,cy);p.arc(cx,cy,r,0,TAU);
+    if(o(x+1,y))p.rect(cx,cy-r,cell,cell);
+    if(o(x,y+1))p.rect(cx-r,cy,cell,cell);
+  }
+  /* fillets: around each grid vertex, an OFF module whose two orthogonal neighbours at that vertex are both ON
+     gets a wedge — its quarter square minus its inscribed circle. Covers inside corners (3 on, 1 off)
+     and the brand's diagonal join (2 on diagonally, 2 off). */
+  for(let y=0;y<=rows;y++)for(let x=0;x<=cols;x++){
+    for(const [ox,oy] of [[x-1,y-1],[x,y-1],[x-1,y],[x,y]]){
+      if(o(ox,oy))continue;
+      const hx=ox===x?x-1:x, vy=oy===y?y-1:y;            // horizontal and vertical neighbours of the off cell at this vertex
+      if(!o(hx,oy)||!o(ox,vy))continue;
+      const r2=r,cx=ox*cell+r2,cy=oy*cell+r2,vx=x*cell,vyy=y*cell;
+      /* square off the two lit neighbours' quadrants that face this vertex (already covered by a bridge at an inside corner) */
+      p.rect(Math.min(vx,hx*cell+r),Math.min(vyy,oy*cell+r),r,r);p.rect(Math.min(vx,ox*cell+r),Math.min(vyy,vy*cell+r),r,r);
+      const sx=Math.sign(vx-cx),sy=Math.sign(vyy-cy);
+      const w=new Path2D();w.moveTo(vx,vyy);w.lineTo(vx,cy);
+      w.arc(cx,cy,r2,sx>0?0:PI,sy>0?PI/2:-PI/2,(sx*sy)<0);w.closePath();wedges.push(w);
+    }
+  }
+  return {p,wedges};
+}
+function fillStem(c,on,cols,rows,cell){const {p,wedges}=stemPath(on,cols,rows,cell);c.fill(p,"nonzero");for(const w of wedges)c.fill(w)}
+function drawStem(it,b){
+  const c=it.ctx,S=it.w*it.d,cell=S/5;
+  c.setTransform(1,0,0,1,0,0);c.clearRect(0,0,S,S);c.fillStyle=it.color||fg();
+  const v=i=>Math.round(cl(b[i])*4)/4;
+  /* base: faint modules where nothing is lit */
+  c.globalAlpha=it.base;const d=cell*.62;
+  for(let i=0;i<25;i++)if(v(i)<.25){c.beginPath();c.arc((i%5)*cell+cell/2,((i/5)|0)*cell+cell/2,d/2,0,TAU);c.fill()}
+  /* levels: nested blobs so cumulative alpha hits base+(1-base)*v */
+  let prev=0;
+  for(const L of [.25,.5,.75,1]){
+    const target=it.base+(1-it.base)*L,a=1-(1-target)/(1-prev);prev=target;
+    c.globalAlpha=a;fillStem(c,(x,y)=>v(y*5+x)>=L,5,5,cell);
+  }
+  c.globalAlpha=1;
+}
+
+/* ---------- logo check ---------- */
+{
+  const cv=document.getElementById("logo"),c=cv.getContext("2d"),cell=96;
+  const LOGO=new Set(["0,1","1,0","2,0","3,1"]);
+  function paint(){c.setTransform(1,0,0,1,0,0);c.clearRect(0,0,384,192);c.fillStyle=fg();fillStem(c,(x,y)=>LOGO.has(x+","+y),4,2,cell);
+    if(document.getElementById("sqOn").getAttribute("aria-pressed")==="true"){c.strokeStyle="rgba(127,127,127,.5)";c.lineWidth=1;for(let x=0;x<=4;x++){c.beginPath();c.moveTo(x*cell,0);c.lineTo(x*cell,192);c.stroke()}for(let y=0;y<=2;y++){c.beginPath();c.moveTo(0,y*cell);c.lineTo(384,y*cell);c.stroke()}}}
+  paint();window._paintLogo=paint;
+}
+
+/* ---------- table ---------- */
+const insts=[];let NOW=performance.now()/1000;
+function mk(size,key,draw,o={}){const cv=document.createElement("canvas");cv.style.width=cv.style.height=size+"px";const d=Math.min(devicePixelRatio||1,2);cv.width=cv.height=Math.round(size*d);
+  const it={cv,ctx:cv.getContext("2d"),w:size,d,key,start:NOW,base:o.base??.12,color:o.color,count:o.count,draw};insts.push(it);return cv}
+const tb=document.querySelector("#tbl tbody");
+for(const key in G){
+  const tr=document.createElement("tr");
+  const n=document.createElement("td");n.className="n";n.textContent=key;const s=document.createElement("span");s.textContent=DESC[key];n.appendChild(s);
+  const a=document.createElement("td");a.className="g";a.append(mk(16,key,drawDots,{count:5}),mk(40,key,drawDots,{count:5}));
+  const b=document.createElement("td");b.className="g";b.append(mk(16,key,drawStem,{count:5}),mk(40,key,drawStem,{count:5}));
+  tr.append(n,a,b);tb.appendChild(tr);
+}
+const big=document.getElementById("big");
+for(const key of ["seed","bud","orbit","check","flower","garden"]){const card=document.createElement("div");card.className="card";card.append(mk(96,key,drawStem,{color:"#fff",base:.18,count:6}));const sm=document.createElement("small");sm.textContent=key;card.appendChild(sm);big.appendChild(card)}
+
+function tick(){NOW=performance.now()/1000;
+  for(const it of insts){const g=G[it.key];let t=Math.floor((NOW-it.start)*12)/12,p=1;
+    if(g.kind==="shot"){p=Math.floor(cl((NOW-it.start)/g.dur)*12)/12;if(NOW-it.start>g.dur+1.4)it.start=NOW}
+    it.draw(it,g.f(t,p,it))}
+  requestAnimationFrame(tick)}
+tick();
+document.getElementById("theme").onclick=e=>{const r=document.documentElement,dark=r.dataset.theme!=="dark";r.dataset.theme=dark?"dark":"light";e.target.textContent=dark?"Light":"Dark";_paintLogo()};
+document.getElementById("sqOn").onclick=e=>{e.target.setAttribute("aria-pressed",e.target.getAttribute("aria-pressed")!=="true");_paintLogo()};
+</script>
+</body>
+</html>

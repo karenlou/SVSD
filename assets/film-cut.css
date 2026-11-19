@@ -66,7 +66,10 @@ header.top{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;ga
 .card-t{font-weight:600;font-size:14px;line-height:20px}
 .card-d{color:var(--muted-foreground);font-size:13px}
 /* shadcn: Tooltip */
-.tip{position:fixed;z-index:50;pointer-events:none;background:var(--primary);color:var(--primary-foreground);font-size:12px;line-height:16px;border-radius:calc(var(--radius) - 2px);padding:6px 10px;white-space:nowrap;transform:translate(-50%,-100%);margin-top:-10px;animation:tipin .12s ease-out}
+.tip{position:fixed;z-index:50;pointer-events:none;display:flex;flex-direction:column;justify-content:center;width:max-content;min-width:96px;max-width:200px;padding:4px 8px;background:#0c0a09;color:#fff;border-radius:3px;overflow:hidden;overflow-wrap:break-word;transform:translate(-50%,-100%);margin-top:-10px;animation:tipin .12s ease-out}
+.tip-h{display:flex;align-items:center;justify-content:space-between;gap:8px;min-width:80px;font:400 10px/13px var(--f-mono);white-space:nowrap}
+.tip-r{color:#d6d3d1}.tip-d{color:#a8a29e}
+.tip-n{font:500 11px/14px var(--f-sans);color:#fff}
 @keyframes tipin{from{opacity:0;transform:translate(-50%,-90%)}}
 
 /* script card: fixed height down to the bottom of the screen, scrolls inside */
