@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sound flowers</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --background:#f1efeb; --foreground:#0c0a09; --card:#ffffff; --muted-foreground:#78716c; --border:#e5e2dd;
+  --blue:#2fbdff; --pink:#fc99f1; --orange:#ff9621; --paper:#fdf7eb;
+  --f-sans:"Geist",ui-sans-serif,system-ui,-apple-system,sans-serif; --f-mono:"Geist Mono",ui-monospace,Menlo,monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--background);color:var(--foreground);font:14px/20px var(--f-sans);-webkit-font-smoothing:antialiased}
+main{max-width:1120px;margin:0 auto;padding:40px 16px 80px}
+h1{font-size:22px;font-weight:600;margin:0 0 6px;letter-spacing:-.01em}
+h2{font:500 11px/16px var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted-foreground);margin:48px 0 14px}
+p{color:var(--muted-foreground);max-width:680px;margin:0 0 12px}
+
+/* reference */
+.ref{display:grid;grid-template-columns:minmax(0,400px) 1fr;gap:32px;align-items:start}
+.ref .frame{background:var(--paper);border:1px solid var(--border);border-radius:12px;overflow:hidden;aspect-ratio:1}
+.ref .frame svg{display:block;width:100%;height:100%}
+.spec{font:12px/18px var(--f-mono);border-collapse:collapse;width:100%}
+.spec td{padding:7px 0;border-bottom:1px solid var(--border);vertical-align:top}
+.spec td:first-child{color:var(--muted-foreground);width:120px}
+.sw{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:-1px}
+
+
+/* variants */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;display:flex;flex-direction:column}
+.card .art{background:var(--paper);aspect-ratio:1;border-bottom:1px solid var(--border);position:relative}
+.card .art svg{display:block;width:100%;height:100%}
+.card .meta{padding:12px 14px 14px;display:flex;flex-direction:column;gap:4px}
+.card .top{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.card .name{font-weight:600}
+.card .tag{font:500 10.5px/16px var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted-foreground)}
+.card .why{color:var(--muted-foreground);font-size:13px;line-height:18px}
+.card button{position:absolute;top:8px;right:8px;border:1px solid var(--border);background:var(--card);border-radius:6px;font:500 11px/16px var(--f-mono);padding:3px 8px;cursor:pointer;opacity:0;transition:opacity .15s;color:var(--foreground)}
+.card:hover button,.card button:focus-visible{opacity:1}
+
+/* sizes */
+.sizes{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:8px 16px;overflow-x:auto}
+.sizes table{border-collapse:collapse}
+.sizes td{padding:10px 14px 10px 0;border-bottom:1px solid var(--border);white-space:nowrap}
+.sizes tr:last-child td{border-bottom:0}
+.sizes td:first-child{font:12px/16px var(--f-mono);color:var(--muted-foreground);padding-right:24px}
+.sizes svg{display:block}
+
+@media (max-width:720px){.ref{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<main>
+<h1>Sound flowers</h1>
+<p>One construction kit for every sound type. Every flower follows the same four rules: it fills the same 3-module square (168&nbsp;px at 56&nbsp;px per module), it is symmetric about the centre, the four-point spark is cut through to the background, and the only overlaps are pink × blue and orange × pink.</p>
+
+<h2>1 · Reference, Figma node 161:2</h2>
+<div class="ref">
+  <div class="frame" id="ref"></div>
+  <table class="spec">
+    <tr><td>Frame</td><td>400 × 400; flower fills a 168 × 170 square at the centre</td></tr>
+    <tr><td>Module</td><td>56 px thick, fully rounded (r 100)</td></tr>
+    <tr><td>Stem</td><td><i class="sw" style="background:var(--blue)"></i>#2FBDFF · capsule 170 tall · normal blend, bottom layer</td></tr>
+    <tr><td>Petals</td><td><i class="sw" style="background:var(--pink)"></i>#FC99F1 · two capsules 125 tall at ±28 · multiply</td></tr>
+    <tr><td>Buds</td><td><i class="sw" style="background:var(--orange)"></i>#FF9621 · two circles Ø56 at ±56 · multiply</td></tr>
+    <tr><td>Spark</td><td>four-point star, 56 × 56, centred, cut out to the background</td></tr>
+    <tr><td>Overlaps</td><td><i class="sw" style="background:#2e71f1"></i>pink × blue &nbsp; <i class="sw" style="background:#fc5a1f"></i>orange × pink</td></tr>
+  </table>
+</div>
+
+<h2>2 · Variants</h2>
+<div class="grid" id="grid"></div>
+
+<h2>3 · At working sizes</h2>
+<div class="sizes"><table id="sizes"></table></div>
+</main>
+
+<script>
+const C = { b:"#2fbdff", p:"#fc99f1", o:"#ff9621" };
+const STAR = "M28 0C28 15.2224 40.1474 27.6079 55.2773 27.9912L56 28C40.536 28 28 40.536 28 56C28 40.536 15.464 28 0 28C15.464 28 28 15.464 28 0Z";
+
+/* Parts. Coordinates are relative to the frame centre (200,200); one module = 56.
+   Every flower must stay inside ±85 on both axes (the reference's footprint). */
+const pill = (x, y, len, rot, c, mul = true) => ({ k:"pill", x, y, len, rot, c, mul });
+const dot  = (x, y, d, c, mul = true) => ({ k:"dot", x, y, d, c, mul });
+const V = 90, D = 56 * Math.SQRT1_2; // vertical; 56 along a diagonal
+
+function part(s) {
+  const blend = s.mul ? ' style="mix-blend-mode:multiply"' : "";
+  if (s.k === "pill")
+    return `<rect x="${-s.len/2}" y="-28" width="${s.len}" height="56" rx="28" fill="${C[s.c]}"${blend} transform="translate(${200+s.x} ${200+s.y}) rotate(${s.rot})"/>`;
+  return `<circle cx="${200+s.x}" cy="${200+s.y}" r="${s.d/2}" fill="${C[s.c]}"${blend}/>`;
+}
+let uid = 0;
+function svg(v, { size, view = "0 0 400 400" } = {}) {
+  const id = "spark" + (++uid), dim = size ? ` width="${size}" height="${size}"` : "";
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${view}"${dim} role="img" aria-label="${v.n}">` +
+    `<defs><mask id="${id}" maskUnits="userSpaceOnUse" x="0" y="0" width="400" height="400">` +
+    `<rect width="400" height="400" fill="#fff"/><path d="${STAR}" fill="#000" transform="translate(172 172)"/></mask></defs>` +
+    `<g transform="rotate(${v.rot || 0} 200 200)"><g mask="url(#${id})" style="isolation:isolate">${v.p.map(part).join("")}</g></g></svg>`;
+}
+
+/* ---------- 1. reference: exact values from Figma ---------- */
+const BLOOM = [
+  pill(0, -1, 170, V, "b", false),
+  pill(-28, .5, 125, V, "p"),
+  pill( 28, .5, 125, V, "p"),
+  dot(-56, 0, 56, "o"),
+  dot( 56, 0, 56, "o"),
+];
+document.getElementById("ref").innerHTML = svg({ n:"Bloom", p:BLOOM });
+
+/* ---------- 2. variants ---------- */
+const VARIANTS = [
+  { n:"Bloom", t:"Reference", why:"The Figma frame, unchanged.", p:BLOOM },
+
+  { n:"Bloom · 90°", t:"Ambience", why:"Laid on its side. Reads as a bed under the mix.", rot:90, p:BLOOM },
+
+  { n:"Bloom · 45°", t:"Whoosh", why:"Turned to the diagonal. The sound moves.", rot:45, p:BLOOM },
+
+  { n:"Full bloom", t:"Dialogue", why:"Buds stretched into capsules so the petals close up into a full square.",
+    p:[ pill(0,0,170,V,"b",false), pill(-28,0,125,V,"p"), pill(28,0,125,V,"p"), pill(-56,0,84,V,"o"), pill(56,0,84,V,"o") ] },
+
+  { n:"Ember", t:"Hard FX", why:"Bloom with stem and buds swapped: an orange stem, blue buds. Same build, hotter.",
+    p:[ pill(0,0,170,V,"o",false), pill(-28,0,125,V,"p"), pill(28,0,125,V,"p"), dot(-56,0,56,"b"), dot(56,0,56,"b") ] },
+
+  { n:"Quatrefoil", t:"Score", why:"The stem crossed with itself, a petal in each quadrant. Four-way symmetry.",
+    p:[ pill(0,0,170,V,"b",false), pill(0,0,170,0,"b",false),
+        dot(-28,-28,56,"p"), dot(28,-28,56,"p"), dot(-28,28,56,"p"), dot(28,28,56,"p") ] },
+
+  { n:"Compass", t:"Walla", why:"Diagonal stems with a pink bud at each compass point.",
+    p:[ pill(0,0,170,45,"b",false), pill(0,0,170,-45,"b",false),
+        dot(0,-56,56,"p"), dot(56,0,56,"p"), dot(0,56,56,"p"), dot(-56,0,56,"p") ] },
+
+  { n:"Burst", t:"Footsteps", why:"No capsules: a ring of eight circles around an orange centre. All transient.",
+    p:[ dot(-D,-D,56,"b",false), dot(D,-D,56,"b",false), dot(-D,D,56,"b",false), dot(D,D,56,"b",false),
+        dot(0,-56,56,"p"), dot(56,0,56,"p"), dot(0,56,56,"p"), dot(-56,0,56,"p"), dot(0,0,56,"o") ] },
+
+  { n:"Weave", t:"Cloth", why:"Two blue capsules across, two pink down, woven into a square.",
+    p:[ pill(0,-28,168,0,"b",false), pill(0,28,168,0,"b",false), pill(-28,0,168,V,"p"), pill(28,0,168,V,"p") ] },
+
+  { n:"Frame", t:"Room tone", why:"The capsules pushed out to the edge, leaving an orange centre in an open room.",
+    p:[ pill(0,-56,168,0,"b",false), pill(0,56,168,0,"b",false), pill(-56,0,168,V,"p"), pill(56,0,168,V,"p"), dot(0,0,56,"o") ] },
+
+  { n:"Bud", t:"Stinger", why:"A single pink disc with four orange buds biting into it.",
+    p:[ dot(0,0,112,"p",false), dot(0,-56,56,"o"), dot(56,0,56,"o"), dot(0,56,56,"o"), dot(-56,0,56,"o") ] },
+
+  { n:"Props", t:"Props", why:"Bloom with the petals turned into four circles, so the stem shows through between them.",
+    p:[ pill(0,0,170,V,"b",false), dot(-28,-28,56,"p"), dot(28,-28,56,"p"), dot(-28,28,56,"p"), dot(28,28,56,"p"),
+        dot(-56,0,56,"o"), dot(56,0,56,"o") ] },
+];
+
+document.getElementById("grid").innerHTML = VARIANTS.map((v,i) => `
+  <article class="card">
+    <div class="art">${svg(v)}<button data-i="${i}">Copy SVG</button></div>
+    <div class="meta"><div class="top"><span class="name">${v.n}</span><span class="tag">${v.t}</span></div>
+    <div class="why">${v.why}</div></div>
+  </article>`).join("");
+
+document.getElementById("grid").addEventListener("click", async e => {
+  const b = e.target.closest("button[data-i]"); if (!b) return;
+  try { await navigator.clipboard.writeText(svg(VARIANTS[+b.dataset.i], { view:"112 112 176 176" })); b.textContent = "Copied"; }
+  catch { b.textContent = "Blocked"; }
+  setTimeout(() => b.textContent = "Copy SVG", 1200);
+});
+
+/* ---------- 3. sizes: cropped to the shared 176 square ---------- */
+document.getElementById("sizes").innerHTML = [16, 24, 40, 64].map(s =>
+  `<tr><td>${s} px</td>${VARIANTS.map(v => `<td title="${v.n}">${svg(v,{size:s,view:"112 112 176 176"})}</td>`).join("")}</tr>`).join("");
+</script>
+</body>
+</html>

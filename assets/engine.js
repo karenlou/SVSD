@@ -33,7 +33,7 @@ const FIRST=Object.fromEntries(Object.keys(PEOPLE).map(k=>[first(k).toLowerCase(
 const fmtText=t=>esc(t).replace(/@(\w+)/g,(s,w)=>FIRST[w.toLowerCase()]?`<b class="mention">@${w}</b>`:s);
 const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
 const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
-/* ---------- glyphs: 5x5 dot-matrix states, stepped at 12fps ---------- */
+/* ---------- glyphs: 5x5 module states, stepped at 12fps, rendered as stem contours ---------- */
 const PI=Math.PI,TAU=PI*2, cl=(v,a=0,b=1)=>Math.min(b,Math.max(a,v)), ramp=(p,at,len=.08)=>cl((p-at)/len);
 const ix=(x,y)=>(y+2)*5+(x+2), blank=()=>new Float32Array(25);
 const CELLS=[];for(let y=-2;y<=2;y++)for(let x=-2;x<=2;x++)CELLS.push([x,y]);
@@ -60,7 +60,7 @@ const G={
   garden:{kind:"count",f(t,p,it){const b=blank(),n=it.count||0;GARDEN.forEach(([x,y],i)=>{b[ix(x,y)]=i<n?1:.12});return b}}
 };
 const insts=new Set(); let NOW=performance.now()/1000;
-function glyph(cv,key,o={}){const it={cv,ctx:cv.getContext("2d"),key,start:NOW,color:o.color||"--foreground",count:o.count,base:o.base??.1};size(it);insts.add(it);return it}
+function glyph(cv,key,o={}){const it={cv,ctx:cv.getContext("2d"),key,start:NOW,color:o.color||"--foreground",count:o.count,base:o.base??.08};size(it);insts.add(it);return it}
 function size(it){const w=parseFloat(it.cv.style.width)||it.cv.getBoundingClientRect().width||16,d=Math.min(devicePixelRatio||1,2);it.w=w;it.d=d;it.cv.width=it.cv.height=Math.round(w*d)}
 function setG(it,key,color){if(!it)return;it.key=key;it.start=NOW;if(color)it.color=color}
 function rr(c,x,y,w,h,r){c.beginPath();c.moveTo(x+r,y);c.arcTo(x+w,y,x+w,y+h,r);c.arcTo(x+w,y+h,x,y+h,r);c.arcTo(x,y+h,x,y,r);c.arcTo(x,y,x+w,y,r);c.closePath()}
@@ -69,13 +69,50 @@ const clearCols=()=>{for(const k in colCache)delete colCache[k]};
 new MutationObserver(clearCols).observe(document.documentElement,{attributes:true});
 matchMedia("(prefers-color-scheme:dark)").addEventListener?.("change",clearCols);
 const reduce=matchMedia("(prefers-reduced-motion:reduce)").matches;
+/* stem rendering (the brand contour's rule): a lit module is its inscribed circle, orthogonal neighbours bridge into a capsule, and an unlit
+   module sitting between two lit neighbours at a grid vertex (an inside corner, or a diagonal step) is filled to its quarter square minus its
+   inscribed circle, with the lit neighbours' facing quadrants squared off. stemPath → one nonzero-union Path2D plus the fillet wedges. */
+function stemPath(on,cols,rows,cell){
+  const r=cell/2,p=new Path2D(),wedges=[];
+  const o=(x,y)=>x>=0&&y>=0&&x<cols&&y<rows&&on(x,y);
+  for(let y=0;y<rows;y++)for(let x=0;x<cols;x++){
+    if(!o(x,y))continue;
+    const cx=x*cell+r,cy=y*cell+r;
+    p.moveTo(cx+r,cy);p.arc(cx,cy,r,0,TAU);
+    if(o(x+1,y))p.rect(cx,cy-r,cell,cell);
+    if(o(x,y+1))p.rect(cx-r,cy,cell,cell);
+  }
+  for(let y=0;y<=rows;y++)for(let x=0;x<=cols;x++){
+    for(const [ox,oy] of [[x-1,y-1],[x,y-1],[x-1,y],[x,y]]){
+      if(o(ox,oy))continue;
+      const hx=ox===x?x-1:x, vy=oy===y?y-1:y;
+      if(!o(hx,oy)||!o(ox,vy))continue;
+      const cx=ox*cell+r,cy=oy*cell+r,vx=x*cell,vyy=y*cell;
+      p.rect(Math.min(vx,hx*cell+r),Math.min(vyy,oy*cell+r),r,r);p.rect(Math.min(vx,ox*cell+r),Math.min(vyy,vy*cell+r),r,r);
+      const sx=Math.sign(vx-cx),sy=Math.sign(vyy-cy);
+      const w=new Path2D();w.moveTo(vx,vyy);w.lineTo(vx,cy);
+      w.arc(cx,cy,r,sx>0?0:PI,sy>0?PI/2:-PI/2,(sx*sy)<0);w.closePath();wedges.push(w);
+    }
+  }
+  return {p,wedges};
+}
+function fillStem(c,on,cols,rows,cell){const {p,wedges}=stemPath(on,cols,rows,cell);c.fill(p,"nonzero");for(const w of wedges)c.fill(w)}
 function draw(it){
   const g=G[it.key];let t=Math.floor((NOW-it.start)*12)/12,p=1;
   if(g.kind==="shot")p=Math.floor(cl((NOW-it.start)/g.dur)*12)/12;
   if(reduce){t=0;p=1}
-  const b=g.f(t,p,it),c=it.ctx,S=it.w*it.d,cell=S/5,dot=cell*(it.w<=14?.78:.74),off=(cell-dot)/2;
+  const b=g.f(t,p,it),c=it.ctx,S=it.w*it.d,cell=S/5;
   c.setTransform(1,0,0,1,0,0);c.clearRect(0,0,S,S);c.fillStyle=col(it.color);
-  for(let i=0;i<25;i++){const v=Math.round(cl(b[i])*4)/4;c.globalAlpha=it.base+(1-it.base)*v;rr(c,(i%5)*cell+off,((i/5)|0)*cell+off,dot,dot,dot*.42);c.fill()}
+  const v=i=>Math.round(cl(b[i])*4)/4;
+  /* base: faint modules where nothing is lit */
+  c.globalAlpha=it.base;const d=cell*.62;
+  for(let i=0;i<25;i++)if(v(i)<.25){c.beginPath();c.arc((i%5)*cell+cell/2,((i/5)|0)*cell+cell/2,d/2,0,TAU);c.fill()}
+  /* quarter levels as nested blobs, so cumulative alpha lands on base+(1-base)*v and fades read as the shape growing */
+  let prev=0;
+  for(const L of [.25,.5,.75,1]){
+    const target=it.base+(1-it.base)*L,a=1-(1-target)/(1-prev);prev=target;
+    c.globalAlpha=a;fillStem(c,(x,y)=>v(y*5+x)>=L,5,5,cell);
+  }
   c.globalAlpha=1;
 }
 const restKey=q=>done(q)?"check":ok(q)?"bud":"seed";
@@ -873,12 +910,14 @@ $("#bar").addEventListener("click",e=>{const b=e.target.closest("[data-cat]");if
 
 /* ---------- hover: a cue lights up wherever it appears; on the lanes its interval shows on the axis ---------- */
 let tip=null;
-const showTip=(el,text)=>{tip?.remove();const r=el.getBoundingClientRect();tip=document.createElement("div");tip.className="tip";tip.textContent=text;tip.style.left=r.left+Math.min(r.width/2,40)+"px";tip.style.top=r.top-4+"px";document.body.appendChild(tip)};
+/* tooltip: {r: range, d: duration, n: name} renders the meta row over the name; a plain string is just the name line */
+const tipHTML=t=>typeof t==="string"?`<span class="tip-n">${esc(t)}</span>`:`<span class="tip-h"><span class="tip-r">${esc(t.r)}</span>${t.d?`<span class="tip-d">${esc(t.d)}</span>`:""}</span><span class="tip-n">${esc(t.n)}</span>`;
+const showTip=(el,text)=>{tip?.remove();const r=el.getBoundingClientRect();tip=document.createElement("div");tip.className="tip";tip.innerHTML=tipHTML(text);tip.style.left=r.left+Math.min(r.width/2,40)+"px";tip.style.top=r.top-4+"px";document.body.appendChild(tip)};
 function link(id,on){const q=CUES[id];if(!q)return;$$(`[data-id="${id}"]`).forEach(el=>el.classList.toggle("hot",on));
   if(id!==cur&&RG[id])setG(RG[id],on?"unfurl":restKey(q),`--${q.c}`)}
 [ftl,clScroll,doc].forEach(r=>{
   r.addEventListener("pointerover",e=>{const t=e.target.closest("[data-id]");if(!t||t.contains(e.relatedTarget))return;link(t.dataset.id,true);
-    if(t.classList.contains("fm")&&!drag){const q=CUES[t.dataset.id],h=$("#hrng");showTip(t,`[${span(q)}] ${q.n} · ${secs(q.dur)}${t.dataset.id===SC.id?" · drag to move, ends to trim":" · drag an end to trim"}`);rngAt(h,q);h.hidden=t.dataset.id===cur}});
+    if(t.classList.contains("fm")&&!drag){const q=CUES[t.dataset.id],h=$("#hrng");showTip(t,{r:span(q),d:secs(q.dur),n:q.n});rngAt(h,q);h.hidden=t.dataset.id===cur}});
   r.addEventListener("pointerout",e=>{const t=e.target.closest("[data-id]");if(t&&!t.contains(e.relatedTarget)){link(t.dataset.id,false);tip?.remove();tip=null;const h=$("#hrng");if(h)h.hidden=true}})});
 
 /* ---------- controls and keys: space play/pause, ←/→ five seconds (⇧ one), [ ] previous/next cue, M mark (start, then end), C comment, Delete removes the selected cue,
