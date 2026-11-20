@@ -1465,8 +1465,8 @@ kbd{padding-top:2px;padding-bottom:2px}
 .dock .cnote.ed textarea{box-sizing:border-box;width:calc(100% + 16px);margin:0 -8px;padding:6px 7px}
 .cnote.ed{overflow:visible}
 /* cue header meta: the sound category leads as a tinted pill with its dot (Geist, it is a label), then the range and length in mono */
-.ch small{display:flex;align-items:center;gap:8px;margin-top:2px}
-.cpill{flex:none;display:inline-flex;align-items:center;gap:5px;height:18px;padding:0 7px 0 6px;border-radius:999px;
+.ch small{display:flex;flex-wrap:wrap;align-items:center;gap:2px 6px;margin-top:2px;overflow:visible;white-space:normal}
+.cpill{flex:none;display:inline-flex;align-items:center;gap:4px;height:18px;padding:0 6px 0 5px;border-radius:999px;
   background:color-mix(in srgb,var(--c) 14%,transparent);font:500 11px/1 var(--f-sans);color:color-mix(in oklab,var(--c) 50%,var(--foreground))}
 .cpill i{width:6px;height:6px;border-radius:50%;background:var(--c)}
 
@@ -1491,4 +1491,5 @@ kbd{padding-top:2px;padding-bottom:2px}
 /* a tooltip with no room above the control opens below it */
 .tip.below{transform:translate(-50%,0);margin-top:6px;animation-name:tipin-b}
 @keyframes tipin-b{from{opacity:0;transform:translate(-50%,-10%)}}
-.cmeta{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cmeta{white-space:nowrap}
+.dock .ch{gap:4px}
