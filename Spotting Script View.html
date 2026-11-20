@@ -435,9 +435,25 @@ header .tg{height:24px;padding:0 8px;font:inherit;letter-spacing:inherit;text-tr
 
 /* shadcn Sonner toast */
 .toasts{position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:60;display:flex;flex-direction:column;gap:8px}
-.toast{display:flex;align-items:center;gap:10px;background:var(--popover);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-md);padding:12px 14px;font-size:13px;min-width:260px;animation:tin .25s cubic-bezier(.2,1.2,.4,1)}
+.toast{display:flex;align-items:center;gap:10px;background:var(--popover);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-md);padding:12px 14px;font-size:13px;min-width:260px}
 .toast small{display:block;color:var(--muted-foreground);font:400 11.5px var(--f-mono)}
-@keyframes tin{from{opacity:0;transform:translateY(10px)}}
+/* toast motion, per transitions.dev. Arrive and stack: "Banner stacking" (P34). Time-up close: "Toast open/close" (P22).
+   Every state shares one transition on transform/opacity/filter; arriving and pushing back use the open clock, leaving the close clock */
+:root{--toast-open:350ms;--toast-close:250ms;--toast-distance:16px;--toast-blur:2px;--toast-scale:.97;--toast-ease:cubic-bezier(.22,1,.36,1);
+  --stack-rise:60px;--stack-peek:12px;--stack-gap:8px;--stack-depth-scale:.06;--stack-depth-fade:.4;--stack-d1-blur:1px;--stack-d2-blur:2px}
+.toasts{display:block;width:min(340px,calc(100vw - 32px))}
+.toast{position:absolute;left:0;right:0;bottom:0;min-width:0;transform-origin:50% 50%;filter:blur(0);will-change:transform,opacity,filter;
+  transition:transform var(--toast-open) var(--toast-ease),opacity var(--toast-open) var(--toast-ease),filter var(--toast-open) var(--toast-ease)}
+.toast[data-depth="0"]{z-index:3;transform:translateY(0) scale(1);opacity:1}
+.toast[data-depth="1"]{z-index:2;transform-origin:50% 100%;transform:translateY(calc(var(--stack-peek) * -1)) scale(calc(1 - var(--stack-depth-scale)));opacity:calc(1 - var(--stack-depth-fade));filter:blur(var(--stack-d1-blur))}
+.toast[data-depth="2"]{z-index:1;transform-origin:50% 100%;transform:translateY(calc(var(--stack-peek) * -2)) scale(calc(1 - var(--stack-depth-scale) * 2));opacity:calc(1 - var(--stack-depth-fade) * 1.6);filter:blur(var(--stack-d2-blur))}
+/* spread: the newest stays put, older ones climb by the heights in front of them (--sy, set in JS since toasts differ in height) */
+.toasts.spread .toast[data-depth="1"],.toasts.spread .toast[data-depth="2"]{opacity:1;filter:blur(0);transform:translateY(var(--sy)) scale(1)}
+.toast.enter{transition:none;transform:translateY(var(--stack-rise)) scale(var(--toast-scale));opacity:0;filter:blur(var(--toast-blur))}
+.toast.out,.toast.leaving{pointer-events:none;transition:transform var(--toast-close) var(--toast-ease),opacity var(--toast-close) var(--toast-ease),filter var(--toast-close) var(--toast-ease)}
+.toast.out{z-index:4;transform:translateY(var(--toast-distance)) scale(var(--toast-scale));opacity:0;filter:blur(var(--toast-blur))}
+.toast.leaving{z-index:0;transform-origin:50% 100%;transform:translateY(calc(var(--stack-peek) * -3)) scale(calc(1 - var(--stack-depth-scale) * 3));opacity:0;filter:blur(var(--toast-blur))}
+@media (prefers-reduced-motion:reduce){.toast{transform:none!important;filter:none!important}}
 
 @media (max-width:860px){
   .script{flex-direction:column}
@@ -644,7 +660,7 @@ const stage={id:null,clip:null,unsub:null,lastT:0,anc:null,pz:null,ph:null};
  ].forEach(m=>{const id="c"+(++cuid);COMMENTS[id]={id,t1:null,box:null,edge:null,...m}})}
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const tc=t=>{t=Math.max(0,t);const s=(t%60).toFixed(1);return Math.floor(t/60)+":"+s.padStart(4,"0")};
-const rel=at=>{const s=(Date.now()-at)/1000;return s<45?"just now":s<3600?Math.round(s/60)+"m ago":s<86400?Math.round(s/3600)+"h ago":Math.round(s/86400)+"d ago"};
+const rel=at=>{const s=(Date.now()-at)/1000;return s<45?"just now":s<3600?Math.round(s/60)+"m":s<86400?Math.round(s/3600)+"h":Math.round(s/86400)+"d"};
 const rangeTxt=m=>m.t1!=null?`${tc(m.t0)} – ${tc(m.t1)}`:`at ${tc(m.t0)}`;
 const snip=(m,n=60)=>{const x=m.msgs.find(x=>!x.sys&&(x.text||x.audio?.length));const t=x?.text||(x?.audio?.length?KIND[AUD[x.audio[0]].kind]:"");return t.length>n?t.slice(0,n-2).trimEnd()+"…":t};
 const commentsOf=id=>Object.values(COMMENTS).filter(m=>m.clip===id).sort((a,b)=>a.t0-b.t0);
@@ -689,6 +705,26 @@ const clearCols=()=>{for(const k in colCache)delete colCache[k]};
 new MutationObserver(clearCols).observe(document.documentElement,{attributes:true});
 matchMedia("(prefers-color-scheme:dark)").addEventListener?.("change",clearCols);
 const reduce=matchMedia("(prefers-reduced-motion:reduce)").matches;
+/* toast stack, per transitions.dev "Banner stacking" (P34): the newest toast rises in at the front, older ones push back (higher, smaller,
+   dimmer, blurred), three visible at most, a fourth leaves out the back. Pointer over the stack spreads it into a list and pauses the timers.
+   A toast whose time is up closes with "Toast open/close" (P22) and the rest step forward. life 0 = stays until pushed out */
+function stackToast(box,t,life=3200){
+  const L=box._toasts||(box._toasts=[]);
+  const close=()=>parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--toast-close"))||250;
+  const arm=x=>{if(!x._life||box.classList.contains("spread"))return;x._end=performance.now()+x._left;x._tm=setTimeout(()=>out(x),x._left)};
+  const hold=x=>{if(x._tm){clearTimeout(x._tm);x._tm=0;x._left=Math.max(600,x._end-performance.now())}};
+  const gone=(x,cls)=>{hold(x);x._life=0;const i=L.indexOf(x);if(i>-1)L.splice(i,1);x.classList.add(cls);x.removeAttribute("data-depth");setTimeout(()=>x.remove(),close()+60)};
+  const out=x=>{gone(x,"out");lay()};
+  const lay=()=>{L.slice(3).forEach(x=>gone(x,"leaving"));let y=0;const gap=parseFloat(getComputedStyle(box).getPropertyValue("--stack-gap"))||8;
+    L.forEach((x,i)=>{x.dataset.depth=i;x.style.setProperty("--sy",-y+"px");y+=x.offsetHeight+gap});
+    box.style.height=L.length?L[0].offsetHeight+"px":"";if(!L.length)box.classList.remove("spread")};
+  if(!box._wired){box._wired=1;
+    const inside=(e,above)=>{const r=box.getBoundingClientRect();return e.clientX>=r.left&&e.clientX<=r.right&&e.clientY<=r.bottom&&e.clientY>=r.top-above};
+    document.addEventListener("pointermove",e=>{if(!L.length)return;const on=box.classList.contains("spread");
+      if(on&&!inside(e,L.slice(1).reduce((s,x)=>s+x.offsetHeight+8,0))){box.classList.remove("spread");L.forEach(arm)}
+      else if(!on&&inside(e,0)){box.classList.add("spread");L.forEach(hold)}});}
+  t.classList.add("enter");t.dataset.depth=0;L.unshift(t);box.appendChild(t);lay();
+  t.offsetWidth;t.classList.remove("enter");t._life=life;t._left=life;arm(t);return t}
 /* stem rendering (the brand contour's rule): a lit module is its inscribed circle, orthogonal neighbours bridge into a capsule, and an unlit
    module sitting between two lit neighbours at a grid vertex (an inside corner, or a diagonal step) is filled to its quarter square minus its
    inscribed circle, with the lit neighbours' facing quadrants squared off. stemPath → one nonzero-union Path2D plus the fillet wedges. */
@@ -1251,7 +1287,7 @@ function addCue(range,cat){
 
 /* shadcn Sonner-style toast */
 function toast(msg,file,cat,key="set"){const t=document.createElement("div");t.className="toast";t.innerHTML=`<canvas class="g" style="width:16px;height:16px" aria-hidden="true"></canvas><div>${msg}<small>${file}</small></div>`;
-  $("#toasts").appendChild(t);glyph(t.querySelector("canvas"),key,{color:`--${cat}`,base:.08});setTimeout(()=>t.remove(),2800)}
+  stackToast($("#toasts"),t,2800);glyph(t.querySelector("canvas"),key,{color:`--${cat}`,base:.08})}
 
 /* ---------- comment layer: actions ---------- */
 function setCue(id,s){const q=CUES[id],c=`--${q.c}`;q.s=s;
