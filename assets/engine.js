@@ -157,7 +157,7 @@ function hash(s){let h=2166136261;for(const ch of s)h=Math.imul(h^ch.charCodeAt(
 const rtc=(m,q=CUES[m.clip])=>m.t1!=null?`${tc(q.ft+m.t0,2)} – ${tc(q.ft+m.t1,2)}`:`at ${tc(q.ft+m.t0,2)}`;
 const commentsOf=id=>Object.values(COMMENTS).filter(m=>m.clip===id).sort((a,b)=>a.t0-b.t0);
 const mmss=t=>tc(t,2);
-const span=q=>`${mmss(q.ft)}–${mmss(q.ft+q.dur)}`, secs=d=>(Math.round(d*10)/10)+"s";
+const span=q=>`${mmss(q.ft)}–${mmss(q.ft+q.dur)}`, secs=d=>Math.max(0,d).toFixed(2)+"s";
 const ICON={play:'<svg viewBox="0 0 16 16" fill="currentColor"><path d="M5 3.5v9l7-4.5z"/></svg>',pause:'<svg viewBox="0 0 16 16" fill="currentColor"><rect x="4" y="3.5" width="2.6" height="9" rx=".6"/><rect x="9.4" y="3.5" width="2.6" height="9" rx=".6"/></svg>',
   mark:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 21.5H3.5a1 1 0 0 1-1-1v-17a1 1 0 0 1 1-1H8M16 21.5h4.5a1 1 0 0 0 1-1v-17a1 1 0 0 0-1-1H16M12 8v8M8 12h8"/></svg>',
   more:'<svg viewBox="0 0 16 16" fill="currentColor"><circle cx="3.5" cy="8" r="1.3"/><circle cx="8" cy="8" r="1.3"/><circle cx="12.5" cy="8" r="1.3"/></svg>',
