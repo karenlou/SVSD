@@ -1113,6 +1113,7 @@ body:not(.sview) #ex .sp-h{border-bottom:0}
    with a window on what's showing: drag it to move, drag its ends to expand or compress) ---------- */
 .ftl{overflow-x:clip}
 .ftl .tk.z b{transform:none}
+.ftl .tk.e b{transform:translateX(-100%)}
 .tzr{margin-top:6px;align-items:center}
 .tzb{display:flex;align-items:center;gap:2px}
 .tzb .btn{height:22px;min-width:22px;padding:0 5px;font:500 12px/1 var(--f-sans);color:var(--muted-foreground)}
@@ -1490,3 +1491,4 @@ kbd{padding-top:2px;padding-bottom:2px}
 /* a tooltip with no room above the control opens below it */
 .tip.below{transform:translate(-50%,0);margin-top:6px;animation-name:tipin-b}
 @keyframes tipin-b{from{opacity:0;transform:translate(-50%,-10%)}}
+.cmeta{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}

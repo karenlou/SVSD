@@ -349,7 +349,7 @@ function renderTL(){const W=ftl.clientWidth||800,w=vw(),px=t=>(t-V0)/w*W;let ly=
   $("#tll").innerHTML=TLL.map(c=>`<span data-lane="${c}" class="${laneOpen(c)?"":"fold"}" style="top:${LY(c)}px;height:${LHo(c)}px;--c:var(--${c})" title="${laneOpen(c)?"Fold":"Unfold"} ${CATS[c]}"><i></i>${CATS[c]}</span>`).join("");
   h+=`<div class="ax" style="top:${AX}px"></div>`;
   if(VID){const [stp,big]=tickSteps(W/w),k0=Math.max(0,Math.floor(V0/stp)),k1=Math.min(Math.floor(LEN/stp),Math.ceil((V0+w)/stp)),per=Math.round(big/stp);
-    for(let k=k0;k<=k1;k++){const t=k*stp,l=k%per===0;h+=`<i class="tk${l?" l":""}${k===0?" z":""}" style="left:${XP(t)};top:${AX}px">${l?`<b>${big<1?tc(t):mmss(t)}</b>`:""}</i>`}}
+    for(let k=k0;k<=k1;k++){const t=k*stp,l=k%per===0;h+=`<i class="tk${l?" l":""}${k===0?" z":""}${(V0+w-t)*W/w<32?" e":""}" style="left:${XP(t)};top:${AX}px">${l?`<b>${big<1?tc(t):mmss(t)}</b>`:""}</i>`}}
   const cueB=id=>{const q=CUES[id];return `<button class="fm${id===cur?" cur":""}${q.c==="ambience"?" bed":""}${laneOpen(q.c)?"":" mini"}" data-id="${id}"${id===born?" data-born":""} style="--c:var(--${q.c});--zz:${100-Math.min(98,Math.round(q.dur))};left:${px(q.ft)}px;width:${Math.max(3,q.dur/w*W)}px;top:${LY(q.c)}px" aria-label="${span(q)} ${esc(q.n)}"></button>`};
   const vis=FILM.filter(id=>{const q=CUES[id];return q.ft+q.dur>=V0-w&&q.ft<=V0+2*w}),tiny=id=>id!==SC.id&&CUES[id].dur/w*W<4,GAP=4;
   TLL.forEach(c=>{const ids=vis.filter(id=>CUES[id].c===c).sort((a,b)=>CUES[a].ft-CUES[b].ft);let run=[],end=-1e9;
@@ -703,7 +703,7 @@ function openDraft(){const q=CUES[SC.id];if(!q)return;SC.pin=true;if(!SC.draft&&
 function closePanel(){SC.pin=false;SC.draft=null;SC.replyTo=null;SC.text="";SC.open={};renderCard()}
 const linked=id=>!!$(`.cue[data-id="${id}"]`,doc);
 function headHTML(){const q=CUES[SC.id],title=SC.rename?`<input class="rn" value="${esc(q.n)}" aria-label="Cue name">`:`<b>${esc(q.n)}</b>`;
-  return `<div class="ch"><div class="tt">${title}<small><span class="cpill" style="--c:var(--${q.c})"><i></i>${CATS[q.c]}</span>${span(q)} · ${secs(q.dur)}</small></div><button class="btn btn-ghost btn-icon more" data-act="more" aria-label="Edit cue">${ICON.more}</button>${EXP?"":`<button class="btn btn-ghost btn-icon cls" data-act="close" aria-label="Close (Esc)">${ICON.x}</button>`}</div>`}
+  return `<div class="ch"><div class="tt">${title}<small><span class="cpill" style="--c:var(--${q.c})"><i></i>${CATS[q.c]}</span><span class="cmeta">${span(q)} · ${secs(q.dur)}</span></small></div><button class="btn btn-ghost btn-icon more" data-act="more" aria-label="Edit cue">${ICON.more}</button>${EXP?"":`<button class="btn btn-ghost btn-icon cls" data-act="close" aria-label="Close (Esc)">${ICON.x}</button>`}</div>`}
 /* a message: who, and (on a thread's opening message) the moment of the cue it points at; when it was posted sits on the right */
 function msgHTML(x,at){if(x.sys)return `<div class="msg sys">${esc(x.text)} · ${rel(x.at)}</div>`;const p=PEOPLE[x.by],rx=Object.entries(x.react||{}).filter(([,a])=>a.length);
   return `<div class="msg">${avHTML(x.by)}<div><div class="who"><span>${p.n}</span><small>${rel(x.at)}</small></div>${at?`<div class="at">${at}</div>`:""}${x.text?`<p>${fmtText(x.text)}</p>`:""}${rx.length?`<div class="rxs">${rx.map(([e,a])=>`<span class="rx" title="${a.map(first).join(", ")}">${e}<b>${a.length}</b></span>`).join("")}</div>`:""}</div></div>`}
