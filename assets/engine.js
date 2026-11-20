@@ -1,7 +1,7 @@
 /* Spotting board engine: the reel, cue lanes, the script that unfolds over the reel, the cue panel (notes, comments, trim) and the cue list.
    Shared by the board (index.html, starts empty: you upload a reel and optionally a script) and the demo (demo.html, Challengers reel 6).
    Pages call boot(data); see the comment above boot() for what data holds. */
-/* the Stem logo (mark and wordmark), from the SVSD-Stem Figma file; it takes the colour of its text */
+/* the Stem logo (mark and wordmark), from the SVSD-Stem Figma file; it takes the color of its text */
 const LOGO=`<svg class="logo" viewBox="0 0 337 116" fill="none" role="img" aria-label="Stem"><path d="M36 10C42.5239 10 47.8319 15.2061 47.9961 21.6904L48 22L47.9961 22.3096C47.8345 28.691 42.691 33.8345 36.3096 33.9961L35.6904 34.0039C29.2061 34.1681 24 39.4761 24 46V70C24 76.5239 29.2061 81.8319 35.6904 81.9961L36.3096 82.0039C42.691 82.1655 47.8345 87.309 47.9961 93.6904L48 94L47.9961 94.3096C47.8345 100.691 42.691 105.834 36.3096 105.996L36 106C29.4761 106 24.1681 100.794 24.0039 94.3096L23.9961 93.6904C23.8345 87.309 18.691 82.1655 12.3096 82.0039L11.6904 81.9961C5.20608 81.8319 0 76.5239 0 70V46C0 39.4761 5.20608 34.1681 11.6904 34.0039L12.3096 33.9961C18.691 33.8345 23.8345 28.691 23.9961 22.3096L24.0039 21.6904C24.1681 15.2061 29.4761 10 36 10ZM60 10C66.5239 10 71.8319 15.2061 71.9961 21.6904L72.0039 22.3096C72.1655 28.691 77.309 33.8345 83.6904 33.9961L84.3096 34.0039C90.7939 34.1681 96 39.4761 96 46V70C96 76.5239 90.7939 81.8319 84.3096 81.9961L83.6904 82.0039C77.309 82.1655 72.1655 87.309 72.0039 93.6904L71.9961 94.3096C71.8345 100.691 66.691 105.834 60.3096 105.996L60 106C53.4761 106 48.1681 100.794 48.0039 94.3096L48 94L48.0039 93.6904C48.1655 87.309 53.309 82.1655 59.6904 82.0039L60.3096 81.9961C66.7939 81.8319 72 76.5239 72 70V46C72 39.4761 66.7939 34.1681 60.3096 34.0039L59.6904 33.9961C53.309 33.8345 48.1655 28.691 48.0039 22.3096L48 22L48.0039 21.6904C48.1681 15.2061 53.4761 10 60 10Z" fill="currentColor"/><path d="M151.017 92.9446C147.049 92.9446 143.334 92.2834 139.87 90.9609C136.406 89.6384 133.446 87.8436 130.99 85.5764C128.597 83.2463 126.897 80.5699 125.889 77.547L132.88 70.7456L133.73 70.8401C134.674 76.0041 136.721 80.0031 139.87 82.837C143.082 85.6079 146.797 86.9934 151.017 86.9934C155.236 86.9934 158.668 85.9228 161.313 83.7816C163.958 81.5775 165.281 78.6491 165.281 74.9965C165.281 71.9107 164.368 69.3601 162.541 67.3449C160.715 65.3297 158.102 63.7553 154.701 62.6217L144.877 59.5044C139.775 57.804 135.745 55.5684 132.785 52.7974C129.888 49.9635 128.44 46.1535 128.44 41.3673C128.44 37.6517 129.416 34.4084 131.368 31.6375C133.32 28.8666 135.997 26.7254 139.398 25.2139C142.861 23.7025 146.829 22.9468 151.3 22.9468C154.638 22.9468 157.818 23.4821 160.841 24.5527C163.927 25.5603 166.635 27.0403 168.965 28.9925C171.295 30.9448 172.995 33.2749 174.066 35.9828L167.359 42.4064L166.603 42.3119C165.722 38.2185 163.927 34.9752 161.219 32.5821C158.574 30.1261 155.268 28.898 151.3 28.898C147.459 28.898 144.341 29.8427 141.948 31.732C139.555 33.5583 138.359 36.0458 138.359 39.1946C138.359 41.9026 139.24 44.0753 141.004 45.7126C142.767 47.35 145.223 48.6725 148.372 49.6801L158.763 53.0808C163.99 54.7812 168.083 57.1428 171.043 60.1656C174.066 63.1885 175.577 67.4079 175.577 72.8238C175.577 76.8543 174.507 80.3809 172.366 83.4038C170.287 86.4266 167.39 88.7882 163.675 90.4886C160.022 92.126 155.803 92.9446 151.017 92.9446ZM198.37 92.9446C194.529 92.9446 191.286 91.8426 188.641 89.6384C186.059 87.4342 184.768 83.8761 184.768 78.964V48.7355H176.36V44.0123C179.068 43.7604 181.272 43.2566 182.973 42.5009C184.736 41.6822 186.09 40.3912 187.035 38.6278C188.042 36.8015 188.767 34.2825 189.207 31.0707H194.497V42.9732L206.494 42.3119L206.872 48.7355H194.497V79.2474C194.497 81.9553 195.159 83.8761 196.481 85.0097C197.804 86.0803 199.378 86.6156 201.204 86.6156C202.086 86.6156 202.968 86.5211 203.849 86.3322C204.794 86.0803 205.676 85.7024 206.494 85.1986L206.778 89.8273C205.959 90.646 204.826 91.3702 203.377 92C201.929 92.6298 200.26 92.9446 198.37 92.9446ZM217.014 66.5892C217.077 72.5089 218.62 77.1377 221.643 80.4754C224.665 83.7501 228.412 85.3875 232.884 85.3875C236.41 85.3875 239.37 84.4744 241.763 82.6481C244.156 80.7588 245.951 78.0823 247.148 74.6186L252.532 76.13C251.399 81.1681 248.943 85.2301 245.164 88.3159C241.449 91.4017 236.757 92.9446 231.089 92.9446C226.177 92.9446 221.926 91.8111 218.336 89.5439C214.747 87.2138 211.976 84.128 210.023 80.2865C208.071 76.382 207.095 72.0996 207.095 67.4394C207.095 62.7791 208.008 58.5283 209.835 54.6867C211.724 50.8452 214.4 47.7908 217.864 45.5237C221.328 43.1936 225.453 42.0285 230.239 42.0285C234.395 42.0285 237.89 42.7213 240.724 44.1067C243.621 45.4922 245.92 47.35 247.62 49.6801C249.384 52.0102 250.612 54.6552 251.304 57.6151C252.06 60.512 252.343 63.5034 252.154 66.5892H217.014ZM230.239 47.0351C226.586 47.0351 223.658 48.4521 221.454 51.286C219.249 54.1199 217.864 57.6466 217.297 61.866H242.047C241.921 59.158 241.354 56.7019 240.346 54.4978C239.402 52.2307 238.079 50.4358 236.379 49.1133C234.679 47.7279 232.632 47.0351 230.239 47.0351ZM256.884 92V91.2443L260.095 86.71V50.4358L256.789 45.6182V44.8625L269.731 42.5009V52.3251C271.116 49.3652 273.1 46.9092 275.682 44.9569C278.264 43.0047 281.224 42.0285 284.562 42.0285C288.277 42.0285 291.394 42.9732 293.913 44.8625C296.432 46.7517 298.133 49.4282 299.014 52.8919C300.652 49.3652 302.856 46.6888 305.627 44.8625C308.398 42.9732 311.358 42.0285 314.507 42.0285C319.23 42.0285 323.008 43.54 325.842 46.5628C328.739 49.5227 330.188 53.5217 330.188 58.5597V86.71L333.305 91.2443V92H317.435V91.2443L320.458 86.71V59.9767C320.458 56.0092 319.576 53.2383 317.813 51.6639C316.112 50.0895 314.066 49.3023 311.673 49.3023C308.776 49.3023 306.225 50.4043 304.021 52.6085C301.817 54.8127 300.463 57.8355 299.959 61.6771V86.71L302.982 91.2443V92H287.206V91.2443L290.229 86.71V59.9767C290.229 56.0092 289.379 53.2383 287.679 51.6639C285.978 50.0895 283.932 49.3023 281.539 49.3023C278.642 49.3023 276.091 50.4358 273.887 52.703C271.683 54.9701 270.297 57.9615 269.731 61.6771V86.71L272.754 91.2443V92H256.884Z" fill="currentColor"/></svg>`;
 const CATS={ambience:"Ambience",footsteps:"Footsteps",props:"Props",cloth:"Cloth",offscreen:"Off screen"};
 /* an off-screen cue comes from one side of the frame (its .side) */
@@ -25,8 +25,9 @@ const KIND={memo:"Voice memo"}, EMO=["👍","🔥","👀","🎧","✅","❓"], A
 const AUD={};let aidN=0;const newAud=o=>{const id="a"+(++aidN);AUD[id]={id,...o};return id};
 const CUES={},COMMENTS={};let cuid=0;
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-const tc=t=>{t=Math.max(0,t);const s=(t%60).toFixed(1),h=Math.floor(t/3600);return h?`${h}:${String(Math.floor(t/60)%60).padStart(2,"0")}:${s.padStart(4,"0")}`:Math.floor(t/60)+":"+s.padStart(4,"0")};
-const rel=at=>{const s=(Date.now()-at)/1000;return s<45?"just now":s<3600?Math.round(s/60)+"m ago":s<86400?Math.round(s/3600)+"h ago":Math.round(s/86400)+"d ago"};
+/* d = decimal places: tenths by default, hundredths where a moment is pinned down (comment ranges). Rounds once, so 59.99 never prints as 0:60.0 */
+const tc=(t,d=2)=>{const k=10**d,n=Math.round(Math.max(0,t)*k),m=Math.floor(n/(60*k)),h=Math.floor(m/60),ss=((n%(60*k))/k).toFixed(d).padStart(d+3,"0");return h?`${h}:${String(m%60).padStart(2,"0")}:${ss}`:m+":"+ss};
+const rel=at=>{const s=(Date.now()-at)/1000;return s<45?"just now":s<3600?Math.round(s/60)+"m":s<86400?Math.round(s/3600)+"h":Math.round(s/86400)+"d"};
 const rangeTxt=m=>m.t1!=null?`${tc(m.t0)} – ${tc(m.t1)}`:`at ${tc(m.t0)}`;
 const snip=(m,n=60)=>{const x=m.msgs.find(x=>!x.sys&&(x.text||x.audio?.length));const t=x?.text||(x?.audio?.length?KIND[AUD[x.audio[0]].kind]:"");return t.length>n?t.slice(0,n-2).trimEnd()+"…":t};
 const FIRST=Object.fromEntries(Object.keys(PEOPLE).map(k=>[first(k).toLowerCase(),k]));
@@ -69,6 +70,26 @@ const clearCols=()=>{for(const k in colCache)delete colCache[k]};
 new MutationObserver(clearCols).observe(document.documentElement,{attributes:true});
 matchMedia("(prefers-color-scheme:dark)").addEventListener?.("change",clearCols);
 const reduce=matchMedia("(prefers-reduced-motion:reduce)").matches;
+/* toast stack, per transitions.dev "Banner stacking" (P34): the newest toast rises in at the front, older ones push back (higher, smaller,
+   dimmer, blurred), three visible at most, a fourth leaves out the back. Pointer over the stack spreads it into a list and pauses the timers.
+   A toast whose time is up closes with "Toast open/close" (P22) and the rest step forward. life 0 = stays until pushed out */
+function stackToast(box,t,life=3200){
+  const L=box._toasts||(box._toasts=[]);
+  const close=()=>parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--toast-close"))||250;
+  const arm=x=>{if(!x._life||box.classList.contains("spread"))return;x._end=performance.now()+x._left;x._tm=setTimeout(()=>out(x),x._left)};
+  const hold=x=>{if(x._tm){clearTimeout(x._tm);x._tm=0;x._left=Math.max(600,x._end-performance.now())}};
+  const gone=(x,cls)=>{hold(x);x._life=0;const i=L.indexOf(x);if(i>-1)L.splice(i,1);x.classList.add(cls);x.removeAttribute("data-depth");setTimeout(()=>x.remove(),close()+60)};
+  const out=x=>{gone(x,"out");lay()};
+  const lay=()=>{L.slice(3).forEach(x=>gone(x,"leaving"));let y=0;const gap=parseFloat(getComputedStyle(box).getPropertyValue("--stack-gap"))||8;
+    L.forEach((x,i)=>{x.dataset.depth=i;x.style.setProperty("--sy",-y+"px");y+=x.offsetHeight+gap});
+    box.style.height=L.length?L[0].offsetHeight+"px":"";if(!L.length)box.classList.remove("spread")};
+  if(!box._wired){box._wired=1;
+    const inside=(e,above)=>{const r=box.getBoundingClientRect();return e.clientX>=r.left&&e.clientX<=r.right&&e.clientY<=r.bottom&&e.clientY>=r.top-above};
+    document.addEventListener("pointermove",e=>{if(!L.length)return;const on=box.classList.contains("spread");
+      if(on&&!inside(e,L.slice(1).reduce((s,x)=>s+x.offsetHeight+8,0))){box.classList.remove("spread");L.forEach(arm)}
+      else if(!on&&inside(e,0)){box.classList.add("spread");L.forEach(hold)}});}
+  t.classList.add("enter");t.dataset.depth=0;L.unshift(t);box.appendChild(t);lay();
+  t.offsetWidth;t.classList.remove("enter");t._life=life;t._left=life;arm(t);return t}
 /* stem rendering (the brand contour's rule): a lit module is its inscribed circle, orthogonal neighbours bridge into a capsule, and an unlit
    module sitting between two lit neighbours at a grid vertex (an inside corner, or a diagonal step) is filled to its quarter square minus its
    inscribed circle, with the lit neighbours' facing quadrants squared off. stemPath → one nonzero-union Path2D plus the fillet wedges. */
@@ -133,14 +154,15 @@ function softField(host,o={}){const {cols=12,colors=SOFT,alpha=[35,85],size=1,se
   f.innerHTML=h;host.prepend(f);return f}
 function hash(s){let h=2166136261;for(const ch of s)h=Math.imul(h^ch.charCodeAt(0),16777619);return h>>>0}
 /* comment times are kept relative to their cue and shown on the reel's clock */
-const rtc=(m,q=CUES[m.clip])=>m.t1!=null?`${tc(q.ft+m.t0)} – ${tc(q.ft+m.t1)}`:`at ${tc(q.ft+m.t0)}`;
+const rtc=(m,q=CUES[m.clip])=>m.t1!=null?`${tc(q.ft+m.t0,2)} – ${tc(q.ft+m.t1,2)}`:`at ${tc(q.ft+m.t0,2)}`;
 const commentsOf=id=>Object.values(COMMENTS).filter(m=>m.clip===id).sort((a,b)=>a.t0-b.t0);
-const mmss=t=>{t=Math.max(0,Math.round(t));const h=Math.floor(t/3600),ss=String(t%60).padStart(2,"0");return h?`${h}:${String(Math.floor(t/60)%60).padStart(2,"0")}:${ss}`:Math.floor(t/60)+":"+ss};
+const mmss=t=>tc(t,2);
 const span=q=>`${mmss(q.ft)}–${mmss(q.ft+q.dur)}`, secs=d=>(Math.round(d*10)/10)+"s";
 const ICON={play:'<svg viewBox="0 0 16 16" fill="currentColor"><path d="M5 3.5v9l7-4.5z"/></svg>',pause:'<svg viewBox="0 0 16 16" fill="currentColor"><rect x="4" y="3.5" width="2.6" height="9" rx=".6"/><rect x="9.4" y="3.5" width="2.6" height="9" rx=".6"/></svg>',
-  mark:'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 2.5H3.5v11H5M11 2.5h1.5v11H11"/><path d="M8 5.5v5M5.5 8h5"/></svg>',
+  mark:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 21.5H3.5a1 1 0 0 1-1-1v-17a1 1 0 0 1 1-1H8M16 21.5h4.5a1 1 0 0 0 1-1v-17a1 1 0 0 0-1-1H16M12 8v8M8 12h8"/></svg>',
   more:'<svg viewBox="0 0 16 16" fill="currentColor"><circle cx="3.5" cy="8" r="1.3"/><circle cx="8" cy="8" r="1.3"/><circle cx="12.5" cy="8" r="1.3"/></svg>',
   up:'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 9.5L8 6l3.5 3.5"/></svg>',
+  clap:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.06478 11.7789H22V20.0029C22 21.1018 21.1921 22 20.0672 22H4.85028C3.78344 22 3.06478 21.2893 3.06478 20.2427V11.7789ZM3.06478 11.7789L2.22869 9.93487C1.80382 8.98176 2.11572 8.03951 3.15875 7.63152L17.4948 2.01091C18.4491 1.63913 19.2794 2.23734 19.7007 3.25156L20.6459 4.97756L3.06478 11.7789ZM7.59995 10.0245L9.26173 5.25134M12.8331 8L14.4769 3.21141M3.06478 15.1932H22M7.59995 11.7789L11.037 15.1932M13.7599 11.7789L17.197 15.1932"/></svg>',
   pen:'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.5 3l2.5 2.5L6 12.5 3 13l.5-3z"/></svg>',
   prev:'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 4L6 8l4 4"/><path d="M3.5 4v8"/></svg>',
   next:'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4l4 4-4 4"/><path d="M12.5 4v8"/></svg>',
@@ -204,11 +226,11 @@ $("#app").innerHTML=`<div class="wrap">
 <header class="top">
   <div class="brand"><canvas class="g" id="garden" width="16" height="16" style="width:16px;height:16px" aria-hidden="true"></canvas><span class="crumb">${APP?`<button class="ttl" id="ttl" title="Rename this board">${esc(TITLE)}</button>`:`<span class="scr" data-scr>${esc(TITLE)}</span>`}</span></div>
   <a class="logo-l" href="${esc(D.home||"index.html")}" aria-label="Stem">${LOGO}</a>
-  <div class="meta">${APP?`<button class="lk" id="newReel">New reel</button>`:`<a class="lk" href="${esc(D.home||"index.html")}">Start your own</a>`}<div class="toggles" id="role" role="group" aria-label="Working as"></div><span><span class="scr" data-scr>Takes</span> <b id="navTally">0/0</b></span><button class="sidet" id="sideT" aria-expanded="false" aria-controls="cuelist" aria-label="Show cues and comments" title="Show cues and comments"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><rect x="2" y="3" width="12" height="10" rx="1.5"/><path d="M10 3v10"/><path class="fill" d="M10 3h2.5a1.5 1.5 0 0 1 1.5 1.5v7a1.5 1.5 0 0 1-1.5 1.5H10z"/></svg></button></div>
+  <div class="meta">${APP?`<button class="lk" id="newReel">New Reel</button>`:`<a class="lk" href="${esc(D.home||"index.html")}">Start Your Own</a>`}<div class="toggles" id="role" role="group" aria-label="Working as"></div><span><span class="scr" data-scr>Takes</span> <b id="navTally">0/0</b></span><button class="sidet" id="sideT" aria-expanded="false" aria-controls="cuelist" aria-label="Show cues and comments" title="Show cues and comments"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><rect x="2" y="3" width="12" height="10" rx="1.5"/><path d="M10 3v10"/><path class="fill" d="M10 3h2.5a1.5 1.5 0 0 1 1.5 1.5v7a1.5 1.5 0 0 1-1.5 1.5H10z"/></svg></button></div>
 </header>
 <div class="main side-off">
   <div class="col">
-    <section class="pane ex" id="ex" aria-label="Script"><div class="sp-h" id="sph"><span>Script</span><button class="btn btn-ghost sv" id="sv" hidden>${ICON.down}Back to film<kbd>Esc</kbd></button></div>
+    <section class="pane ex" id="ex" aria-label="Script"><div class="sp-h" id="sph"><span>Script</span><button class="btn btn-ghost sv" id="sv" hidden>${ICON.down}Back to film<kbd>esc</kbd></button></div>
       <label class="sdrop" id="sdrop" hidden><input type="file" accept=".pdf,.txt,.fountain,.md,text/plain,application/pdf" id="fScript"><b id="sdT"></b><span id="sdS"></span></label>
       <main class="doc scroller" id="doc" tabindex="-1"></main></section>
     <section class="card player" id="player" aria-label="Film">
@@ -216,16 +238,16 @@ $("#app").innerHTML=`<div class="wrap">
         <label class="vdrop" id="vdrop" hidden><input type="file" accept="video/*" id="fVid"><canvas class="g vdg" style="width:44px;height:44px" aria-hidden="true"></canvas><b>Upload the reel</b><span>Drop a video here, or choose a file. It stays in this browser.</span><em id="vErr"></em></label></div>
       <div class="tpw" id="tpw"><div class="tp">
         <div class="ctl"><div class="ctl-l"><button class="btn mkb" id="mark" title="Mark a cue: press at the start of the sound, then again at its end"><i></i><span>Mark cue</span><kbd>M</kbd></button></div>
-          <div class="ctl-m"><div class="clock" id="clock" aria-live="off"><div class="clock-in"><span class="tc face" id="tc"></span><span class="tc face rec" id="tcm" aria-label="Cue length so far"></span></div></div></div>
-          <div class="legend" id="bar" role="group" aria-label="Filter by sound"></div></div>
-        <div class="tlh"><span id="tlR"></span><span class="tlh-r"><span id="tlL"></span><span class="skip"><button class="btn btn-ghost btn-icon sk" id="prev" aria-label="Previous cue ([)"></button><button class="btn btn-ghost btn-icon sk" id="next" aria-label="Next cue (])"></button></span></span></div>
-        <div class="tlg"><div class="tll" id="tll" aria-hidden="true"></div><div class="ftl" id="ftl"></div></div><div class="tlg tzr"><div class="tzb" role="group" aria-label="Zoom the timeline"><button class="btn btn-ghost" id="zOut" title="Zoom out (−)" aria-label="Zoom out">−</button><button class="btn btn-ghost" id="zIn" title="Zoom in (=)" aria-label="Zoom in">+</button></div><div class="tnvw"><div class="tnv" id="tnv" title="Drag the window to move through the reel, drag its ends to zoom. Double-click to fit."><canvas id="tnc" aria-hidden="true"></canvas><i class="tnp" id="tnp"></i><div class="tnw" id="tnw"><i data-e="in"></i><i data-e="out"></i></div></div><b class="tnl" id="tnl"></b></div><div class="tzp" role="group" aria-label="Show"><button class="btn btn-ghost" data-z="10" title="Show 10 seconds around the playhead">10s</button><button class="btn btn-ghost" data-z="60" title="Show a minute around the playhead">1m</button><button class="btn btn-ghost" data-z="scene" title="Fit the scene at the playhead ({ } step scenes)">Scene</button><button class="btn btn-ghost" data-z="fit" id="zFit" title="Fit the whole reel (\\)">Reel</button><span class="tzs"></span><button class="btn btn-ghost" id="zFol" title="While playing, the view pages along with the playhead. Click to keep the playhead centred instead.">Page</button></div></div>
+          <div class="ctl-m"><div class="clock" id="clock" aria-live="off"><div class="clock-in"><span class="tc face" id="tc"></span><span class="tc face rec" id="tcm" aria-label="Cue length so far"></span></div></div></div><span class="tlh-r ctl-r"><span id="tlL"></span><span class="skip"><button class="btn btn-ghost btn-icon sk" id="prev" aria-label="Previous cue ([)"></button><button class="btn btn-ghost btn-icon sk" id="next" aria-label="Next cue (])"></button></span></span>
+          </div>
+        <div class="tlh"><span id="tlR"></span></div>
+        <div class="tlg"><div class="tll" id="tll" aria-hidden="true"></div><div class="ftl" id="ftl"></div></div><div class="tlg tzr"><div class="tzb" role="group" aria-label="Zoom the timeline"><button class="btn btn-ghost" id="zOut" title="Zoom out (−)" aria-label="Zoom out">−</button><button class="btn btn-ghost" id="zIn" title="Zoom in (=)" aria-label="Zoom in">+</button></div><div class="tnvw"><div class="tnv" id="tnv" title="Click or drag to move the playhead. Drag the window to move through the reel, its ends to zoom. Double-click to fit."><canvas id="tnc" aria-hidden="true"></canvas><i class="tnp" id="tnp"></i><div class="tnw" id="tnw"><i data-e="in"></i><i data-e="out"></i></div></div><b class="tnl" id="tnl"></b></div><div class="tzp" role="group" aria-label="Show"><button class="btn btn-ghost" data-z="10" title="Show 10 seconds around the playhead">10s</button><button class="btn btn-ghost" data-z="60" title="Show a minute around the playhead">1m</button><button class="btn btn-ghost" data-z="scene" title="Fit the scene at the playhead ({ } step scenes)">Scene</button><button class="btn btn-ghost" data-z="fit" id="zFit" title="Fit the whole reel (\\)">Reel</button><span class="tzs"></span><button class="btn btn-ghost" id="zFol" title="While playing, the view pages along with the playhead. Click to keep the playhead centred instead.">Page</button></div></div>
       </div>
       <div class="onb" id="onb" aria-hidden="true" data-step="0"><p class="onb-t" id="onbT"></p>
         <button class="onb-v" id="onbV" tabindex="-1" title="Press M"><span class="bk l"></span><span class="onb-r" id="onbR"></span><span class="bk r"></span></button><span class="onb-c" id="onbC"></span></div></div>
     </section>
   </div>
-  <aside class="cuelist" id="cuelist" aria-label="Cues"><div class="cuelist-h"><span>Cues <b id="allN"></b></span></div><div class="cl-scroll" id="clScroll"></div><section class="dock" id="dock" aria-label="Selected cue"></section></aside>
+  <aside class="cuelist" id="cuelist" aria-label="Cues"><div class="cuelist-h"><span>Cues <b id="allN"></b></span><div class="legend" id="bar" role="group" aria-label="Filter by sound"></div></div><div class="cl-scroll" id="clScroll"></div><section class="dock" id="dock" aria-label="Selected cue"></section></aside>
 </div>
 </div>
 <div class="pop" id="scard" hidden></div>
@@ -251,8 +273,8 @@ function restore(str){const o=JSON.parse(str);
   renderDoc();renderList();counts();tally();renderTL();applyFilter();
   if(SC.id&&!CUES[SC.id])SC.id=null;for(const k in SC.open)if(!COMMENTS[k])delete SC.open[k];
   setCur(ownerAt(now()),true);renderCard();if(EXP)placeCard();changed()}
-function undo(){const u=UNDO.pop();if(!u)return toast("Nothing to undo","Edits to cues, comments and the script can be undone","score","seed");REDO.push({s:snap(),label:u.label});restore(u.s);toast(`Undone: ${u.label}`,"⇧⌘Z to redo","score","seed")}
-function redo(){const r=REDO.pop();if(!r)return;UNDO.push({s:snap(),label:r.label});restore(r.s);toast(`Redone: ${r.label}`,"⌘Z to undo","score","seed")}
+function undo(){const u=UNDO.pop();if(!u)return toast("Nothing to undo","Edits to cues, comments and the script can be undone","score","seed");REDO.push({s:snap(),label:u.label});restore(u.s);toast(`Undone: ${u.label}`,"<kbd>⇧⌘Z</kbd> to redo","score","seed")}
+function redo(){const r=REDO.pop();if(!r)return;UNDO.push({s:snap(),label:r.label});restore(r.s);toast(`Redone: ${r.label}`,"<kbd>⌘Z</kbd> to undo","score","seed")}
 
 /* ---------- the script: one sticky section per set. Sets that belong to other reels start folded and their phrases aren't live here.
    Every paragraph knows which block it came from, so a cue made or removed in the text is written back to the script ---------- */
@@ -301,7 +323,7 @@ function loop(t){NOW=t/1000;for(const it of insts){if(!it.cv.isConnected){insts.
 function setVideo(f){if(!f)return;if(!f.type.startsWith("video/")){$("#vErr").textContent="That isn't a video file.";return}
   D.onVideo?.(f);vid.src=URL.createObjectURL(f);VID=true;document.body.classList.remove("novid");$("#vdrop").hidden=true;
   if(TITLE==="Untitled reel")setTitle(f.name.replace(/\.[^.]+$/,"").replace(/[-_]+/g," "));
-  renderSlot();layoutFilm();prompt();toast("Reel loaded","Press M where a sound starts, and again where it ends","ambience");if(!hasScript())$("#sdrop").classList.add("ping")}
+  renderSlot();layoutFilm();prompt();toast("Reel loaded","Press <kbd>M</kbd> where a sound starts, and again where it ends","ambience");if(!hasScript())$("#sdrop").classList.add("ping")}
 function setTitle(t){TITLE=t.trim()||"Untitled reel";const b=$("#ttl");if(b)b.textContent=TITLE;document.title=`${TITLE} · Spotting`;changed()}
 /* a script arriving: read it, then let it make its entrance */
 async function setScriptFile(f){if(!f||!VID)return;const sd=$("#sdrop");$("#sdT").textContent="Reading "+f.name+"…";$("#sdS").textContent="";sd.classList.remove("bad","ping");
@@ -347,7 +369,7 @@ function markSel(){selRow();if(CUES[SC.id]&&$(`.fm.mini[data-id="${SC.id}"]`,ftl
   hs.forEach(h=>{h.hidden=false;h.style.setProperty("--c",`var(--${q.c})`);h.style.top=top+"px";h.style.left=XP(h.dataset.h==="in"?q.ft:q.ft+q.dur)})}
 /* the second row only opens while a cue is selected: its [interval] and length on the left, its name on the right (beside the skips).
    Opening it lifts the row of controls above it */
-function selRow(){const q=typeof SC!=="undefined"&&SC.pin?CUES[SC.id]:null,row=$(".tlh");if(!row)return;row.classList.toggle("on",!!q);
+function selRow(){const q=typeof SC!=="undefined"&&SC.pin?CUES[SC.id]:null,row=$(".tlh");if(!row)return;row.classList.toggle("on",!!q);$(".ctl-r")?.classList.toggle("on",!!q);
   if(q){$("#tlL").textContent=q.n;$("#tlR").innerHTML=`<b>[${span(q)}]</b> ${secs(q.dur)}`}}
 function placeLabel(){const q=CUES[cur],c=$("#crng");selRow();
   if(!q){if(c)c.hidden=true;return}if(c){c.hidden=false;rngAt(c,q)}}
@@ -380,16 +402,16 @@ ftl.addEventListener("pointerup",e=>{if(!drag)return;const d=drag;drag=null;ftl.
 ftl.addEventListener("pointercancel",()=>{drag=null;ftl.classList.remove("grabbing")});
 
 
-/* ---------- off-screen cues on the picture: while one is playing, its edge of the frame glows in its colour, with its name ---------- */
+/* ---------- off-screen cues on the picture: while one is playing, its edge of the frame glows in its color, with its name ---------- */
 const oedge=document.createElement("div");oedge.className="oedge";oedge.setAttribute("aria-hidden","true");screen.appendChild(oedge);let edgeH="";
 /* picking where it comes from, on the film itself: every edge shows a gradient and an arrow; click one (Esc to go back) */
 let PICK=null;
 function pickSide(cur,done){if(PICK)endPick(null);pause();document.activeElement?.blur?.();const o=document.createElement("div");o.className="osel";
-  o.innerHTML=Object.keys(SIDE).map(k=>`<button class="oz ${k}${k===cur?" on":""}" data-side="${k}" aria-label="Off screen ${SIDE[k].toLowerCase()}"><span class="oza">${ARW[k]}</span><span class="ozl">${SIDE[k]}</span></button>`).join("")+`<p class="osq">Where is the sound coming from?<small>Click a side · Esc to go back</small></p>`;
+  o.innerHTML=Object.keys(SIDE).map(k=>`<button class="oz ${k}${k===cur?" on":""}" data-side="${k}" aria-label="Off screen ${SIDE[k].toLowerCase()}"><span class="oza">${ARW[k]}</span></button>`).join("")+`<p class="osq">Where is the sound coming from?<small><kbd>esc</kbd> to go back</small></p>`;
   screen.appendChild(o);screen.classList.add("picking");PICK={o,done};o.addEventListener("click",e=>{e.stopPropagation();const b=e.target.closest("[data-side]");endPick(b?b.dataset.side:null)})}
 function endPick(side){if(!PICK)return;const {o,done}=PICK;PICK=null;o.remove();screen.classList.remove("picking");done(side)}
 function renderEdge(t,force){const on={};for(const id of FILM){const q=CUES[id],k=offOf(q);if(k&&t>=q.ft&&t<=q.ft+q.dur&&!on[k])on[k]=q}
-  const h=Object.entries(on).map(([k,q])=>`<span class="oe ${k}"><b><i>${ARW[k]}</i>${esc(q.n)}</b></span>`).join("");if(h!==edgeH||force){edgeH=h;oedge.innerHTML=h}}
+  const h=Object.entries(on).map(([k,q])=>`<span class="oe ${k}"><b><i>${ARW[k]}</i><span>${esc(q.n)}</span></b></span>`).join("");if(h!==edgeH||force){edgeH=h;oedge.innerHTML=h}}
 
 /* ---------- marking a cue from the reel: M (or the button) at the start of the sound, again at its end, then name it and pick what kind of sound it is ---------- */
 let MARK=null;const mkb=$("#mark");
@@ -483,14 +505,22 @@ function navHead(t){const p=$("#tnp");if(p&&LEN)p.style.left=t/LEN*100+"%"}
 new ResizeObserver(()=>renderNav()).observe(tnv);
 const navT=e=>{const r=tnv.getBoundingClientRect();return cl((e.clientX-r.left)/r.width)*LEN};
 tnv.addEventListener("pointerdown",e=>{if(e.button||!VID)return;e.preventDefault();cancelAnimationFrame(zRaf);try{tnv.setPointerCapture(e.pointerId)}catch(_){}
-  const ed=e.target.closest(".tnw i")?.dataset.e,t=navT(e),w=vw();
-  if(!ed&&!e.target.closest(".tnw")){setView(t-w/2,w,true)}  /* click outside the window: centre it there, then keep dragging */
-  navDrag={kind:ed||"pan",t0:t,v0:V0,v1:V0+vw()};tnv.classList.add("grabbing");tnw.classList.add("live")});
-tnv.addEventListener("pointermove",e=>{if(!navDrag)return;const d=navDrag,t=navT(e),dt=t-d.t0,m=MINW();
-  if(d.kind==="pan")setView(d.v0+dt,d.v1-d.v0,true);
+  const ed=e.target.closest(".tnw i")?.dataset.e,t=navT(e);
+  /* the strip is a scrubber: press anywhere but the zoom window (or anywhere at all when the whole reel is in view) and the playhead follows the pointer.
+     Grab the zoomed window to pan it, or its ends to zoom; a click on the window without dragging also moves the playhead there */
+  const kind=ed||(!VW||!e.target.closest(".tnw")?"scrub":"pan");
+  navDrag={kind,t0:t,v0:V0,v1:V0+vw(),x:e.clientX,moved:false,was:!vid.paused};
+  if(kind==="scrub"){if(navDrag.was)pause();navSeek(t)}
+  tnv.classList.add("grabbing");if(kind!=="scrub")tnw.classList.add("live")});
+/* seek from the strip, bringing the view along when the playhead leaves it */
+function navSeek(t){seek(t);const w=vw();if(VW&&(t<V0||t>V0+w))setView(t-w/2,w)}
+tnv.addEventListener("pointermove",e=>{if(!navDrag)return;const d=navDrag,t=navT(e),dt=t-d.t0,m=MINW();if(Math.abs(e.clientX-d.x)>=3)d.moved=true;
+  if(d.kind==="scrub")navSeek(t);
+  else if(d.kind==="pan")setView(d.v0+dt,d.v1-d.v0,true);
   else if(d.kind==="in"){const a=cl(d.v0+dt,0,d.v1-m);setView(a,d.v1-a,true)}
   else{const b=cl(d.v1+dt,d.v0+m,LEN);setView(d.v0,b-d.v0,true)}});
-const navUp=()=>{if(!navDrag)return;navDrag=null;tnv.classList.remove("grabbing");tnw.classList.remove("live")};
+const navUp=e=>{if(!navDrag)return;const d=navDrag;navDrag=null;tnv.classList.remove("grabbing");tnw.classList.remove("live");
+  if(e.type!=="pointerup")return;if(d.kind==="pan"&&!d.moved)seek(navT(e));if(d.kind==="scrub"&&d.was)play()};
 tnv.addEventListener("pointerup",navUp);tnv.addEventListener("pointercancel",navUp);
 tnv.addEventListener("dblclick",fit);
 tnv.addEventListener("wheel",e=>{if(!VID)return;e.preventDefault();
@@ -530,7 +560,7 @@ async function buildStrip(){const src=vid.currentSrc||vid.src;if(!src||!LEN)retu
   for(let i=0;i<STRIP.N;i++){if(STRIP.src!==src)return;await new Promise(r=>{const ok=()=>r();v.addEventListener("seeked",ok,{once:true});setTimeout(ok,2000);v.currentTime=Math.min((i+.5)/STRIP.N*LEN,LEN-.05)});
     const c=document.createElement("canvas");c.width=fw;c.height=fh;try{c.getContext("2d").drawImage(v,0,0,fw,fh)}catch(_){return}STRIP.frames[i]=c;if(i%4===3||i===STRIP.N-1)renderNav()}
   v.removeAttribute("src");v.load()}
-/* the new-cue card: a name, a tile per kind of sound, and the sound's flower blooming in the background in its colour */
+/* the new-cue card: a name, a tile per kind of sound, and the sound's flower blooming in the background in its color */
 const nc=document.createElement("div");nc.className="nc";nc.hidden=true;document.body.appendChild(nc);let NC=null,NCG=null,lastCat="props";
 const ncField=()=>{const c=`--${NC.c}`;softField($(".nc-corner",nc),{cols:3,colors:[c,c,"--peach","--sky"],alpha:[16,34],size:.5,seed:hash(NC.c),top:[-.2,.1],stack:[2,4]})};
 function ncCat(c){const was=NC.c;NC.c=c;if(was!==c&&nc.querySelector(".nc-corner .sf"))ncField();nc.style.setProperty("--c",`var(--${c})`);const ot=$('.nct[data-cat="offscreen"]',nc);if(ot){if(c==="offscreen"&&NC.picked){ot.dataset.arrow=ARW[NC.side];ot.title=`Off screen, ${SIDE[NC.side].toLowerCase()}. Click to change the side`}else{delete ot.dataset.arrow;ot.title=""}}if(ONB===2)$("#onb").style.setProperty("--c",`var(--${c})`);$$(".nct",nc).forEach(x=>{const on=x.dataset.cat===c;x.setAttribute("aria-checked",on);x._g.base=on?.16:.1;x._g.color=`--${x.dataset.cat}`});NCG.color=`--${c}`;const m=$("#mrng");if(m){m.classList.add("lane");m.style.setProperty("--c",`var(--${c})`);m.style.top=LY(c)+LHo(c)/2+"px"}}
@@ -585,9 +615,8 @@ function layoutFilm(){if(EXP)return;const col=$(".col"),narrow=innerWidth<=860,c
   if(narrow){col.style.width="";col.style.flex="";screen.style.width="100%";screen.style.marginTop=screen.style.marginBottom="";return}
   const open=!$(".main").classList.contains("side-off"),tpH=$("#tpw").offsetHeight,other=tpH+24+10+40,ratio=vid.videoWidth&&vid.videoHeight?vid.videoWidth/vid.videoHeight:16/9,maxW=$(".main").clientWidth-(open?SIDEW:0);
   const W=Math.round(Math.max(420,Math.min(maxW,(ch-H-(H?14:0)-other)*ratio)));col.style.flex="none";col.style.width=W+"px";screen.style.width=W+"px";screen.style.aspectRatio=ratio;
-  /* closed: the film sits mid-way above the transport, which stays at the bottom. Open (the film is smaller): film and transport move as one block,
-     centred between the script bar and the bottom of the page */
-  const free=Math.max(0,ch-H-(H?14:0)-24-10-tpH-W/ratio);screen.style.marginTop=(open?Math.min(free,free/2+5):free/2)+"px";screen.style.marginBottom=(open?0:free/2)+"px"}
+  /* film and transport move as one block, tight together, centred between the script bar and the bottom of the page (side panel open or closed) */
+  const free=Math.max(0,ch-H-(H?14:0)-24-10-tpH-W/ratio);screen.style.marginTop=Math.min(free,free/2+5)+"px";screen.style.marginBottom="0px"}
 const SIDEW=300+32;
 /* the side panel (cues and comments) starts folded away; the button in the header opens it */
 /* opening and closing the side panel springs: the film resizes and travels, the panel unfurls beside it */
@@ -657,7 +686,7 @@ const SC={id:null,pin:false,open:{},replyTo:null,draft:null,text:"",note:false,r
 const avHTML=k=>`<span class="av" style="--c:var(${PEOPLE[k].c})" title="${PEOPLE[k].n}" aria-label="${PEOPLE[k].n}"></span>`;
 /* the cue's sign-off box, one per cue (not per comment): the director approves, the sound designer confirms. Each sees only their own */
 const myK=()=>ROLE==="director"?"dir":"snd";
-const checksHTML=o=>{const on=!!o[myK()],[v,d]=ROLE==="director"?["Approve","Approved"]:["Confirm","Confirmed"];return `<button class="sg${on?" on":""}" data-act="tick" role="checkbox" aria-checked="${on}" title="${on?`${d}. Click to undo`:`${v} this cue`}"><i>${on?ICON.check:""}</i>${on?d:v}</button>`};
+const checksHTML=o=>{const on=!!o[myK()],[v,d]=ROLE==="director"?["Approve","Approved"]:["Confirm","Confirmed"];return `<button class="sg${on?" on":""}" data-act="tick" aria-pressed="${on}" title="${on?`${d}. Click to undo`:`${v} this cue`}">${on?ICON.check:""}${on?d:v}</button>`};
 /* the cue's actions: your sign-off box */
 const actsHTML=q=>`<div class="acts">${checksHTML(q)}</div>`;
 function toggleSign(q){const k=myK();checkpoint(ROLE==="director"?"approve":"confirm");q[k]=!q[k];refreshCue(SC.id);tally();renderComments();changed();renderCard()}
@@ -674,10 +703,10 @@ function openDraft(){const q=CUES[SC.id];if(!q)return;SC.pin=true;if(!SC.draft&&
 function closePanel(){SC.pin=false;SC.draft=null;SC.replyTo=null;SC.text="";SC.open={};renderCard()}
 const linked=id=>!!$(`.cue[data-id="${id}"]`,doc);
 function headHTML(){const q=CUES[SC.id],title=SC.rename?`<input class="rn" value="${esc(q.n)}" aria-label="Cue name">`:`<b>${esc(q.n)}</b>`;
-  return `<div class="ch"><div class="tt">${title}<small><i class="cdot" style="--c:var(--${q.c})" title="${CATS[q.c]}"></i>${span(q)} · ${secs(q.dur)} · ${CATS[q.c]}</small></div><button class="btn btn-ghost btn-icon more" data-act="more" aria-label="Edit cue">${ICON.more}</button>${EXP?"":`<button class="btn btn-ghost btn-icon cls" data-act="close" aria-label="Close (Esc)">${ICON.x}</button>`}</div>`}
+  return `<div class="ch"><div class="tt">${title}<small><span class="cpill" style="--c:var(--${q.c})"><i></i>${CATS[q.c]}</span>${span(q)} · ${secs(q.dur)}</small></div><button class="btn btn-ghost btn-icon more" data-act="more" aria-label="Edit cue">${ICON.more}</button>${EXP?"":`<button class="btn btn-ghost btn-icon cls" data-act="close" aria-label="Close (Esc)">${ICON.x}</button>`}</div>`}
 /* a message: who, and (on a thread's opening message) the moment of the cue it points at; when it was posted sits on the right */
 function msgHTML(x,at){if(x.sys)return `<div class="msg sys">${esc(x.text)} · ${rel(x.at)}</div>`;const p=PEOPLE[x.by],rx=Object.entries(x.react||{}).filter(([,a])=>a.length);
-  return `<div class="msg">${avHTML(x.by)}<div><div class="who"><span>${p.n}${at?`<i>@ ${at}</i>`:""}</span><small>${rel(x.at)}</small></div>${x.text?`<p>${fmtText(x.text)}</p>`:""}${rx.length?`<div class="rxs">${rx.map(([e,a])=>`<span class="rx" title="${a.map(first).join(", ")}">${e}<b>${a.length}</b></span>`).join("")}</div>`:""}</div></div>`}
+  return `<div class="msg">${avHTML(x.by)}<div><div class="who"><span>${p.n}</span><small>${rel(x.at)}</small></div>${at?`<div class="at">${at}</div>`:""}${x.text?`<p>${fmtText(x.text)}</p>`:""}${rx.length?`<div class="rxs">${rx.map(([e,a])=>`<span class="rx" title="${a.map(first).join(", ")}">${e}<b>${a.length}</b></span>`).join("")}</div>`:""}</div></div>`}
 /* what the new comment points at: a moment, or (Extend to) a stretch */
 function rangeHTML(){const d=SC.draft,q=CUES[SC.id],t=cl(now()-q.ft,0,q.dur);
   return `<div class="rng"><span>${d.t1!=null?`${tc(q.ft+d.t0)} – ${tc(q.ft+d.t1)}`:`At ${tc(q.ft+d.t0)}`}</span>${d.t1!=null?`<button class="btn btn-ghost btn-icon" data-act="clrend" title="Back to a single moment" aria-label="Remove the end">${ICON.x}</button>`:""}
@@ -691,8 +720,11 @@ function threadHTML(m){const q=CUES[m.clip],ms=m.msgs.filter(x=>!x.sys),n=ms.len
 /* the director writes the note; the sound designer reads it */
 const noteHTML=q=>!q.d&&!SC.addNote?"":ROLE==="director"?`<label class="cnote ed"><b>Director's note</b><textarea data-note rows="2" placeholder="What should this sound like?">${esc(q.d||"")}</textarea></label>`
   :`<button class="cnote" data-act="note" aria-expanded="${SC.note}"><b>Director's note</b>${esc(q.d)}</button>`;
-function bodyHTML(){const q=CUES[SC.id],cs=commentsOf(SC.id);
-  return `${noteHTML(q)}${offOf(q)?`<div class="osc"><span class="osa">${ARW[offOf(q)]}</span>Comes from off screen, <b>${SIDE[offOf(q)].toLowerCase()}</b>${EXP?"":`<button class="lk2" data-act="side">Change</button>`}</div>`:""}${actsHTML(q)}<div class="clist"><div class="clh">Comments${cs.length?` <b>${cs.length}</b>`:""}</div>${cs.map(threadHTML).join("")||`<p class="empty hint">No comments yet. Write one below.</p>`}</div>`}
+/* the cue's fixed top (note, off-screen side, sign-off) stays put; only the comment list below it scrolls */
+function fixHTML(){const q=CUES[SC.id];
+  return `${noteHTML(q)}${offOf(q)?`<div class="osc"><span class="osa">${ARW[offOf(q)]}</span>Comes from off screen, <b>${SIDE[offOf(q)].toLowerCase()}</b>${EXP?"":`<button class="lk2" data-act="side">Change</button>`}</div>`:""}${actsHTML(q)}`}
+function listHTML(){const cs=commentsOf(SC.id);
+  return `<div class="clist"><div class="clh">Comments</div>${cs.map(threadHTML).join("")||`<p class="empty hint">No comments yet. Write one below.</p>`}</div>`}
 /* trim strip (script view): a zoomed-in window a little wider than the cue, for fine timing; its ends set the in and out, dragging between them moves the whole cue */
 let TW=null;
 function trimHTML(){const q=CUES[SC.id],pad=Math.max(4,q.dur*.75);TW=[Math.max(0,q.ft-pad),Math.min(LEN,q.ft+q.dur+pad)];
@@ -722,8 +754,8 @@ function renderCard(focus){const h=host(),show=!!(SC.id&&CUES[SC.id]&&(EXP||SC.p
   const keep=h._id===SC.id?$(".cbody",h)?.scrollTop||0:0;h._id=SC.id;
   h.innerHTML=`<div class="panel">${EXP?`<div class="clipslot" data-act="film" title="Back to the film"><canvas id="tcv" width="480" height="270" aria-hidden="true"></canvas><span class="cliptag" style="--c:var(--${q.c})"><i></i>${span(q)}</span>
       <button class="btn btn-icon pz" data-act="pp" aria-label="Play or pause">${p?ICON.pause:ICON.play}</button><span class="bk2">${ICON.film}Back to film</span></div>${trimHTML()}`:""}
-    ${headHTML()}<div class="cbody">${bodyHTML()}</div>${rt?`<div class="rng rto"><span>Replying to <b>${esc(PEOPLE[rt.msgs[0].by].n)}</b> · ${esc(snip(rt,40))}</span><button class="btn btn-ghost btn-icon" data-act="norep" title="Cancel the reply (Esc)" aria-label="Cancel the reply">${ICON.x}</button></div>`:SC.draft?rangeHTML():""}
-    <div class="compose"><div class="cin">${avHTML(ME())}<textarea rows="1" data-new placeholder="${ph}" aria-label="${ph}">${esc(SC.text)}</textarea><button class="btn send" data-act="send" aria-label="Send">${ICON.send}</button></div></div></div>`;
+    ${headHTML()}<div class="cfix">${fixHTML()}</div><div class="cbody">${listHTML()}</div>${rt?`<div class="rng rto"><span>Replying to <b>${esc(PEOPLE[rt.msgs[0].by].n)}</b> · ${esc(snip(rt,40))}</span><button class="btn btn-ghost btn-icon" data-act="norep" title="Cancel the reply (Esc)" aria-label="Cancel the reply">${ICON.x}</button></div>`:SC.draft?rangeHTML():""}
+    <div class="compose">${avHTML(ME())}<div class="cin"><textarea rows="1" data-new placeholder="${ph}" aria-label="${ph}">${esc(SC.text)}</textarea><button class="btn send" data-act="send" aria-label="Send"${SC.text.trim()?"":" disabled"}>${ICON.send}</button></div></div></div>`;
   $(".cbody",h).scrollTop=keep;fitNote($("[data-note]",h));
   if(EXP&&vid.readyState>=2)tcx()?.drawImage(vid,0,0,480,270);
   if(SC.rename){const i=$(".rn",h);i.focus();i.select()}
@@ -782,7 +814,7 @@ const cardClick=e=>{if(scDrag){e.stopPropagation();return}const m=e.target.close
   else if(act==="rep"){SC.replyTo=a.dataset.cid;SC.draft=null;SC.pin=true;renderCard(true)}
   else if(act==="norep"){SC.replyTo=null;renderCard(true)}
   else if(act==="tick")toggleSign(CUES[SC.id]);
-  else if(act==="more"){const q=CUES[SC.id];showMenu(a,`<button data-m="ren">${ICON.pen}Rename</button>${ROLE==="director"&&!q.d?`<button data-m="note">${ICON.pen}Add director's note</button>`:""}<div class="mh">Sound</div>${LANES.map(k=>`<button data-m="cat" data-v="${k}"><i class="sw" style="--c:var(--${k})"></i>${CATS[k]}${k===q.c?`<span class="ck2">${ICON.check}</span>`:""}</button>`).join("")}<hr><button data-m="del" class="danger">${ICON.x}Remove cue<kbd>Del</kbd></button>`)}};
+  else if(act==="more"){const q=CUES[SC.id];showMenu(a,`<button data-m="ren">${ICON.pen}Rename</button>${ROLE==="director"&&!q.d?`<button data-m="note">${ICON.clap}Add director's note</button>`:""}<div class="mh">Sound</div>${LANES.map(k=>`<button data-m="cat" data-v="${k}"><i class="sw" style="--c:var(--${k})"></i>${CATS[k]}${k===q.c?`<span class="ck2">${ICON.check}</span>`:""}</button>`).join("")}<hr><button data-m="del" class="danger">${ICON.x}Remove cue<kbd>del</kbd></button>`)}};
 /* @mentions in whichever box you're typing in: typing @ lists the team; arrows pick, Enter or Tab inserts */
 function mentionScan(t){const c=t.closest(".compose");$$(".mpop",host()).forEach(x=>x.remove());const m=t.value.slice(0,t.selectionStart).match(/(^|\s)@(\w*)$/);
   const ks=m?Object.keys(PEOPLE).filter(k=>k!==ME()&&first(k).toLowerCase().startsWith(m[2].toLowerCase())):[];if(!ks.length){MP=null;return}
@@ -795,7 +827,7 @@ dock.addEventListener("animationend",e=>{if(e.target===dock)dock.classList.remov
   h.addEventListener("click",cardClick);
   h.addEventListener("focusin",e=>{if(e.target.matches("[data-new]")&&!SC.draft)openDraft();if(e.target.matches("[data-note]"))noteOpen=false});
   h.addEventListener("input",e=>{const t=e.target;if(t.matches("[data-note]")){if(!noteOpen){checkpoint("edit note");noteOpen=true}const q=CUES[SC.id];q.d=t.value;fitNote(t);clearTimeout(noteT);noteT=setTimeout(changed,400)}
-    else if(t.closest(".cin")){SC.text=t.value;t.style.height="auto";t.style.height=Math.min(120,t.scrollHeight)+"px";mentionScan(t)}});
+    else if(t.closest(".cin")){SC.text=t.value;const sb=$("[data-act=send]",t.closest(".cin"));if(sb)sb.disabled=!t.value.trim();t.style.height="auto";t.style.height=Math.min(120,t.scrollHeight)+"px";mentionScan(t)}});
   h.addEventListener("pointerdown",e=>{if(e.target.closest(".mpop"))e.preventDefault()});
   h.addEventListener("focusout",e=>{if(e.target.matches(".rn")&&SC.rename)rename(e.target.value)});
   h.addEventListener("keydown",e=>{const t=e.target;
@@ -823,7 +855,7 @@ const trimDown=e=>{const h=e.target.closest("[data-h]"),trk=e.target.closest("[d
 
 /* shadcn Sonner-style toast */
 function toast(msg,file,cat,key="set"){const t=document.createElement("div");t.className="toast";t.innerHTML=`<canvas class="g" style="width:16px;height:16px" aria-hidden="true"></canvas><div>${msg}<small>${file}</small></div>`;
-  $("#toasts").appendChild(t);glyph(t.querySelector("canvas"),key,{color:`--${cat}`,base:.08});setTimeout(()=>t.remove(),3200)}
+  stackToast($("#toasts"),t);glyph(t.querySelector("canvas"),key,{color:`--${cat}`,base:.08});}
 
 /* ---------- the script and cues: select a phrase on this reel and either make it a new cue (at the playhead, or between its neighbours when the scenes are timed)
    or attach the selected cue to it. Right-click a cue to remove it: the phrase goes back to plain text and the cue disappears everywhere ---------- */
@@ -870,8 +902,8 @@ function removeCue(id){const q=CUES[id];if(!q)return;checkpoint("remove cue");
   FILM.splice(FILM.indexOf(id),1);delete REEL[id];delete CUES[id];$(`.ci[data-id="${id}"]`)?.remove();$(`.fm[data-id="${id}"]`)?.remove();delete RG[id];
   for(const k in COMMENTS)if(COMMENTS[k].clip===id)delete COMMENTS[k];
   if(SC.id===id)toCue(null);
-  if(!FILM.length)renderList();counts();tally();renderTL();setCur(ownerAt(now()),true);cardFollow(true);changed();toast("Cue removed",`${q.n} · ⌘Z to undo`,q.c,"check")}
-const ctx=document.createElement("div");ctx.className="ctx";ctx.hidden=true;ctx.innerHTML=`<button type="button">${ICON.x}Remove cue<kbd>Del</kbd></button>`;document.body.appendChild(ctx);
+  if(!FILM.length)renderList();counts();tally();renderTL();setCur(ownerAt(now()),true);cardFollow(true);changed();toast("Cue removed",`${esc(q.n)} · <kbd>⌘Z</kbd> to undo`,q.c,"check")}
+const ctx=document.createElement("div");ctx.className="ctx";ctx.hidden=true;ctx.innerHTML=`<button type="button" class="danger">${ICON.x}Remove cue<kbd>del</kbd></button>`;document.body.appendChild(ctx);
 let ctxId=null;function hideCtx(){ctx.hidden=true;ctxId=null}
 const ctxAt=(e,id)=>{e.preventDefault();ctxId=id;ctx.hidden=false;ctx.style.left=Math.min(e.clientX,innerWidth-ctx.offsetWidth-8)+"px";ctx.style.top=Math.min(e.clientY,innerHeight-ctx.offsetHeight-8)+"px"};
 doc.addEventListener("contextmenu",e=>{const c=e.target.closest(".cue:not(.off)");if(c)ctxAt(e,c.dataset.id)});
@@ -882,7 +914,7 @@ document.addEventListener("pointerdown",e=>{if(!ctx.contains(e.target))hideCtx()
 /* ---------- cue list (right-click an entry or a lane to remove it) and comments ---------- */
 const list=$("#cuelist"),clScroll=$("#clScroll"),RG={};
 const ciHTML=id=>{const q=CUES[id];return `<button class="ci" data-id="${id}" style="--c:var(--${q.c})"><canvas class="g" style="width:16px;height:16px" aria-hidden="true"></canvas><span class="lbl" title="${CATS[q.c]}${offOf(q)?`, from off screen ${SIDE[offOf(q)].toLowerCase()}`:""}">${offOf(q)?`<i class="osa">${ARW[offOf(q)]}</i>`:""}${esc(q.n)}</span>${cmcHTML(id)}<span class="tcs">${mmss(q.ft)}</span></button>`};
-/* how many comments a cue has (in the link colour while any is still open); click it to open them */
+/* how many comments a cue has (in the link color while any is still open); click it to open them */
 const cmcHTML=id=>{const cs=commentsOf(id),o=!CUES[id][myK()];return cs.length?`<span class="cmc${o?" open":""}" data-cms title="${cs.length} comment${cs.length>1?"s":""}${o?` · not ${ROLE==="director"?"approved":"confirmed"} by you yet`:""}">${ICON.comment}${cs.length}</span>`:"<span></span>"};
 function renderList(){clScroll.innerHTML=FILM.map(ciHTML).join("")||`<p class="cm-empty">No cues yet. They'll collect here as you mark them on the reel.</p>`;
   $$(".ci",clScroll).forEach(b=>{RG[b.dataset.id]=glyph(b.querySelector("canvas"),restKey(CUES[b.dataset.id]),{color:restColor})})}
@@ -909,16 +941,32 @@ function applyFilter(){const on=curCat!=="all",hit=id=>!on||CUES[id]?.c===curCat
 $("#bar").addEventListener("click",e=>{const b=e.target.closest("[data-cat]");if(!b)return;curCat=curCat===b.dataset.cat?"all":b.dataset.cat;renderBar();applyFilter()});
 
 /* ---------- hover: a cue lights up wherever it appears; on the lanes its interval shows on the axis ---------- */
-let tip=null;
+let tip=null,tipOff=-1e9; /* once one tooltip has shown, its neighbours appear at once */
 /* tooltip: {r: range, d: duration, n: name} renders the meta row over the name; a plain string is just the name line */
-const tipHTML=t=>typeof t==="string"?`<span class="tip-n">${esc(t)}</span>`:`<span class="tip-h"><span class="tip-r">${esc(t.r)}</span>${t.d?`<span class="tip-d">${esc(t.d)}</span>`:""}</span><span class="tip-n">${esc(t.n)}</span>`;
-const showTip=(el,text)=>{tip?.remove();const r=el.getBoundingClientRect();tip=document.createElement("div");tip.className="tip";tip.innerHTML=tipHTML(text);tip.style.left=r.left+Math.min(r.width/2,40)+"px";tip.style.top=r.top-4+"px";document.body.appendChild(tip)};
+/* a plain tooltip ending in "(key)" shows the key as a keycap: "Zoom out (−)" → Zoom out [−]. A bare number in brackets is a count, not a key */
+const tipHTML=t=>typeof t==="string"?(m=>m?`<span class="tip-n">${esc(m[1])}<kbd>${esc(m[2])}</kbd></span>`:`<span class="tip-n">${esc(t)}</span>`)(t.match(/^(.*?)\s*\((?!\d+\))([^()]{1,6})\)$/)):`<span class="tip-h"><span class="tip-r">${esc(t.r)}</span>${t.d?`<span class="tip-d">${esc(t.d)}</span>`:""}</span><span class="tip-n">${esc(t.n)}</span>`;
+const showTip=(el,text)=>{const warm=!!tip||performance.now()-tipOff<400;tip?.remove();const r=el.getBoundingClientRect();tip=document.createElement("div");tip.className="tip"+(warm?" now":"");tip.innerHTML=tipHTML(text);tip.style.left=r.left+Math.min(r.width/2,40)+"px";tip.style.top=r.top-4+"px";document.body.appendChild(tip)};
 function link(id,on){const q=CUES[id];if(!q)return;$$(`[data-id="${id}"]`).forEach(el=>el.classList.toggle("hot",on));
   if(id!==cur&&RG[id])setG(RG[id],on?"unfurl":restKey(q),`--${q.c}`)}
 [ftl,clScroll,doc].forEach(r=>{
   r.addEventListener("pointerover",e=>{const t=e.target.closest("[data-id]");if(!t||t.contains(e.relatedTarget))return;link(t.dataset.id,true);
     if(t.classList.contains("fm")&&!drag){const q=CUES[t.dataset.id],h=$("#hrng");showTip(t,{r:span(q),d:secs(q.dur),n:q.n});rngAt(h,q);h.hidden=t.dataset.id===cur}});
-  r.addEventListener("pointerout",e=>{const t=e.target.closest("[data-id]");if(t&&!t.contains(e.relatedTarget)){link(t.dataset.id,false);tip?.remove();tip=null;const h=$("#hrng");if(h)h.hidden=true}})});
+  r.addEventListener("pointerout",e=>{const t=e.target.closest("[data-id]");if(t&&!t.contains(e.relatedTarget)){link(t.dataset.id,false);if(tip)tipOff=performance.now();tip?.remove();tip=null;const h=$("#hrng");if(h)h.hidden=true}})});
+/* every other control's title shows in the same dark tooltip instead of the browser's. On first hover the title moves to data-ttl, so the browser
+   stays quiet (code that sets .title later is picked up on the next hover). Mouse only; 400ms before the first, then neighbours at once;
+   it flips below when there's no room above and stays inside the window. Cue blocks keep their own two-row tooltip */
+let ttlEl=null,ttlT=0;
+const ttlHide=()=>{clearTimeout(ttlT);if(ttlEl&&tip){tipOff=performance.now();tip.remove();tip=null}ttlEl=null};
+const ttlShow=el=>{const t=el.dataset.ttl;if(!t||!el.isConnected)return;showTip(el,t);const r=el.getBoundingClientRect();let b=tip.getBoundingClientRect();
+  if(b.top<4){tip.classList.add("below");tip.style.top=r.bottom+"px";b=tip.getBoundingClientRect()}
+  const dx=b.left<4?4-b.left:b.right>innerWidth-4?innerWidth-4-b.right:0;if(dx)tip.style.left=parseFloat(tip.style.left)+dx+"px"};
+document.addEventListener("pointerover",e=>{if(e.pointerType!=="mouse")return;const el=e.target.closest("[title],[data-ttl]");if(el===ttlEl)return;
+  if(!el||el.closest(".fm")||drag){if(ttlEl)ttlHide();return}
+  if(el.hasAttribute("title")){el.dataset.ttl=el.getAttribute("title");el.removeAttribute("title");if(el.dataset.ttl&&!el.hasAttribute("aria-label")&&!el.textContent.trim())el.setAttribute("aria-label",el.dataset.ttl)}
+  if(ttlEl)ttlHide();if(!el.dataset.ttl)return;ttlEl=el;const warm=!!tip||performance.now()-tipOff<400;
+  if(warm)ttlShow(el);else ttlT=setTimeout(()=>ttlEl===el&&ttlShow(el),400)});
+document.addEventListener("pointerout",e=>{if(ttlEl&&!ttlEl.contains(e.relatedTarget))ttlHide()});
+["pointerdown","keydown","wheel"].forEach(ev=>addEventListener(ev,()=>ttlEl&&ttlHide(),true));
 
 /* ---------- controls and keys: space play/pause, ←/→ five seconds (⇧ one), [ ] previous/next cue, M mark (start, then end), C comment, Delete removes the selected cue,
    ⌘Z / ⇧⌘Z undo and redo, Esc cancels a mark or leaves script view ---------- */
@@ -943,7 +991,7 @@ document.addEventListener("keydown",e=>{const inText=e.target.closest?.("textare
 document.addEventListener("pointerdown",e=>{if(!e.target.closest(".cmenu,[data-act=more]"))closeMenu();if(!nc.hidden&&!nc.contains(e.target)&&!e.target.closest("#mark"))closeNC()});
 
 /* header: who's working, takes recorded out of approved; in the app, rename the board or start over */
-function renderRole(){$("#role").innerHTML=[["director","Director"],["foley","Sound designer"]].map(([k,n])=>`<button class="tg" data-role="${k}" aria-pressed="${ROLE===k}">${n}</button>`).join("")}
+function renderRole(){$("#role").innerHTML=[["director","Director"],["foley","Sound Designer"]].map(([k,n])=>`<button class="tg" data-role="${k}" aria-pressed="${ROLE===k}">${n}</button>`).join("")}
 $("#role").addEventListener("click",e=>{const b=e.target.closest("[data-role]");if(!b||b.dataset.role===ROLE)return;ROLE=b.dataset.role;try{localStorage.setItem("svsd-role",ROLE)}catch(e){}renderRole();renderComments();renderCard()});
 if(APP){$("#ttl").addEventListener("click",()=>{const t=prompt("Name this board",TITLE);if(t!=null)setTitle(t)});
   $("#newReel").addEventListener("click",()=>{if(confirm("Start a new reel? This board (reel, script, cues, notes and comments) will be cleared from this browser."))D.onReset?.()})}

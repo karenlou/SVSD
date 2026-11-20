@@ -22,7 +22,7 @@ canvas.g{display:block;flex:none}
 
 /* header */
 header.top{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px;padding-block:14px;border-bottom:1px solid var(--border);
-  font:500 11px/16px var(--f-mono);letter-spacing:.08em;text-transform:uppercase}
+  font:500 11px/16px var(--f-sans);letter-spacing:.08em;text-transform:uppercase}
 .brand{display:flex;align-items:center;gap:10px;color:var(--foreground)}
 .crumb{color:var(--muted-foreground)}
 .nav{display:flex;gap:4px}
@@ -32,6 +32,7 @@ header.top{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;ga
 .nav button[aria-selected="true"]::before{content:"[ "}.nav button[aria-selected="true"]::after{content:" ]"}
 .meta{justify-self:end;display:flex;gap:16px;color:var(--muted-foreground)}
 .meta b{font-weight:500;color:var(--foreground)}
+.meta .lk,.meta .tg{font:500 12.5px/16px var(--f-sans);letter-spacing:0;text-transform:none}
 .scr{display:inline-block}
 @media (max-width:760px){header.top{grid-template-columns:1fr auto}.meta>span{display:none}}
 
@@ -57,7 +58,7 @@ header.top{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;ga
 .tg:hover{color:var(--foreground)}
 .tg[aria-pressed="true"]{background:var(--accent);color:var(--foreground)}
 .tg i{width:6px;height:6px;border-radius:50%;background:var(--c)}
-.tg b{font:400 11px var(--f-mono);color:var(--muted-foreground);opacity:.8}
+.tg b{font:400 11px var(--f-sans);color:var(--muted-foreground);opacity:.8}
 .hint{color:var(--muted-foreground);font-size:13px}
 
 /* shadcn: Card */
@@ -81,7 +82,7 @@ header.top{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;ga
 .act{position:relative}
 .act-h{position:sticky;top:0;z-index:5;display:flex;align-items:center;flex-wrap:wrap;gap:4px 14px;padding:11px 20px;width:100%;border:0;text-align:left;cursor:pointer;
   background:color-mix(in srgb,var(--background) 97%,transparent);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
-  border-bottom:1px solid var(--border);font:500 11px/16px var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted-foreground)}
+  border-bottom:1px solid var(--border);font:500 11px/16px var(--f-sans);letter-spacing:.08em;text-transform:uppercase;color:var(--muted-foreground)}
 .act-h:hover{background:color-mix(in srgb,var(--accent) 92%,transparent)}
 .act-h .chev{width:14px;height:14px;flex:none;color:var(--muted-foreground);transition:transform .25s cubic-bezier(.22,1,.36,1)}
 .act.collapsed .chev{transform:rotate(-90deg)}
@@ -94,7 +95,7 @@ header.top{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;ga
 .act-h .at{margin-left:auto;color:var(--foreground)}
 .row{position:relative;display:grid;grid-template-columns:64px minmax(0,1fr)}
 .gut{position:relative}
-.scene-no{position:absolute;right:12px;top:22px;text-align:right;font:500 13px var(--f-mono);color:var(--muted-foreground)}
+.scene-no{position:absolute;right:12px;top:22px;text-align:right;font:500 13px var(--f-sans);color:var(--muted-foreground)}
 .page{padding:0 40px;font-family:var(--f-script);font-size:15px;line-height:28px;transition:opacity .35s}
 .page p{margin:0;padding-bottom:20px}
 .page .slug{font-weight:700;letter-spacing:.03em;padding-top:20px}
@@ -104,7 +105,7 @@ header.top{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;ga
 .ci{display:grid;grid-template-columns:20px 1fr;align-items:center;gap:10px;border:0;background:transparent;text-align:left;cursor:pointer;border-radius:calc(var(--radius) - 2px);padding:6px 8px;transition:background .15s,opacity .3s}
 .ci:hover,.ci.hot,.ci.open{background:var(--accent)}
 .cuelist{width:240px;flex:none;display:flex;flex-direction:column;min-height:0}
-.cuelist-h{padding:11px 8px;border-bottom:1px solid var(--border);font:500 11px/16px var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted-foreground)}
+.cuelist-h{padding:11px 8px;border-bottom:1px solid var(--border);font:500 11px/16px var(--f-sans);letter-spacing:.08em;text-transform:uppercase;color:var(--muted-foreground)}
 .cl-scroll{flex:1;min-height:0;position:relative;overflow-y:auto;scrollbar-width:none;padding-top:8px;-webkit-mask-image:linear-gradient(to bottom,transparent,#000 18px,#000 calc(100% - 64px),transparent);mask-image:linear-gradient(to bottom,transparent,#000 18px,#000 calc(100% - 64px),transparent)}
 .ci .lbl{font-size:13px;font-weight:500;line-height:18px;min-width:0}
 .ci .cat{display:block;font-size:12px;font-weight:400;color:var(--muted-foreground)}
@@ -138,7 +139,7 @@ header.top{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;ga
 button.stc{cursor:pointer}button.stc:hover{background:var(--accent)}
 .stc i{width:6px;height:6px;border-radius:50%;background:var(--c)}
 .stc svg{width:12px;height:12px;color:var(--muted-foreground)}
-.kh{flex:none;font:400 10.5px var(--f-mono);color:var(--muted-foreground);white-space:nowrap}
+.kh{flex:none;font:400 10.5px var(--f-sans);color:var(--muted-foreground);white-space:nowrap}
 .cnote{all:unset;box-sizing:border-box;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;width:100%;padding:12px 18px 0;font:400 12.5px/19px var(--f-script);color:var(--muted-foreground);cursor:pointer}
 .cnote[aria-expanded=true]{-webkit-line-clamp:unset}
 .cnote b{font:500 11.5px var(--f-sans);color:var(--foreground);margin-right:6px}
@@ -154,12 +155,12 @@ button.stc{cursor:pointer}button.stc:hover{background:var(--accent)}
 .rx{display:inline-flex;align-items:center;gap:4px;height:24px;padding:0 8px;border:1px solid var(--border);border-radius:999px;background:transparent;font-size:12.5px;cursor:pointer}
 .rx:hover{background:var(--accent)}
 .rx[aria-pressed=true]{background:color-mix(in srgb,var(--link) 10%,transparent);border-color:color-mix(in srgb,var(--link) 45%,transparent)}
-.rx b{font:400 11px var(--f-mono);color:var(--muted-foreground)}
+.rx b{font:400 11px var(--f-sans);color:var(--muted-foreground)}
 .chips{display:flex;flex-wrap:wrap;gap:4px}
 .chip{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--border);background:transparent;border-radius:999px;padding:3px 9px;font:inherit;font-size:12px;color:var(--muted-foreground);cursor:pointer}
 .chip i{width:6px;height:6px;border-radius:50%;background:var(--c)}
 .chip:hover{background:var(--accent)}
-.chip[aria-pressed=true]{background:var(--foreground);color:var(--background);border-color:var(--foreground)}
+.chip[aria-pressed=true]{background:color-mix(in srgb,var(--foreground) 6%,transparent);color:var(--foreground);border-color:color-mix(in srgb,var(--foreground) 30%,transparent)}
 /* a new comment starts at the playhead; play or scrub on, then "Set end" makes it a range */
 .rng{display:flex;align-items:center;gap:4px;padding:8px 12px 0 18px;border-top:1px solid var(--border);background:var(--popover);font:400 11.5px/24px var(--f-mono);color:var(--foreground)}
 .rng+.compose{border-top:0}
@@ -185,7 +186,7 @@ button.stc{cursor:pointer}button.stc:hover{background:var(--accent)}
 .crow:hover{background:var(--accent)}
 .crow .av{width:24px;height:24px}
 .crow>span:nth-child(2){white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.crow small{display:flex;align-items:center;gap:6px;font:400 11px var(--f-mono);color:var(--muted-foreground)}
+.crow small{display:flex;align-items:center;gap:6px;font:400 11px var(--f-sans);color:var(--muted-foreground)}
 
 /* ---------- film cut: the reel is the main surface. Player on top, cue lanes under it, the script behind the current cue underneath ---------- */
 @media (min-width:861px){body{height:100dvh}}
@@ -204,7 +205,7 @@ body{overflow-x:hidden}
 .tp{min-width:0;display:flex;flex-direction:column;gap:4px}
 .ctl{display:flex;align-items:center;gap:6px;min-width:0}
 .ctl .tc{font:500 12px var(--f-mono);white-space:nowrap;margin-right:8px}
-.ctl .now-sc{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:400 11px var(--f-mono);letter-spacing:.04em;color:var(--muted-foreground);text-transform:uppercase}
+.ctl .now-sc{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:400 11px var(--f-sans);letter-spacing:.04em;color:var(--muted-foreground);text-transform:uppercase}
 .btn svg{width:14px;height:14px}
 
 /* the reel shrinks back into the screen while the script unfolds over it, and grows back out when the script folds away */
@@ -237,7 +238,7 @@ body{overflow-x:hidden}
 .ftl .ax{position:absolute;left:0;right:0;height:1px;background:color-mix(in srgb,var(--foreground) 22%,transparent);pointer-events:none}
 .ftl .scb{position:absolute;border-left:1px solid color-mix(in srgb,var(--foreground) 10%,transparent);pointer-events:none}
 .ftl .scb:nth-child(even){background:color-mix(in srgb,var(--foreground) 2.5%,transparent)}
-.ftl .scb span{position:absolute;left:4px;top:-12px;font:400 9.5px var(--f-mono);color:var(--muted-foreground);white-space:nowrap}
+.ftl .scb span{position:absolute;left:4px;top:-12px;font:400 9.5px var(--f-sans);color:var(--muted-foreground);white-space:nowrap}
 .ftl .tk{position:absolute;width:1px;height:4px;background:color-mix(in srgb,var(--foreground) 25%,transparent);font:normal 400 10px/1 var(--f-mono);color:var(--muted-foreground);pointer-events:none}
 .ftl .tk.l{height:7px;background:color-mix(in srgb,var(--foreground) 50%,transparent)}
 .ftl .tk b{position:absolute;top:9px;left:0;transform:translateX(-50%);font-weight:400;white-space:nowrap}
@@ -261,10 +262,10 @@ body{overflow-x:hidden}
 
 /* the full script */
 .sp{flex:1;min-height:0}
-.sp-h{flex:none;display:flex;align-items:center;gap:12px;padding:8px 10px 8px 20px;border-bottom:1px solid var(--border);font:500 11px/16px var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted-foreground)}
+.sp-h{flex:none;display:flex;align-items:center;gap:12px;padding:8px 10px 8px 20px;border-bottom:1px solid var(--border);font:500 11px/16px var(--f-sans);letter-spacing:.08em;text-transform:uppercase;color:var(--muted-foreground)}
 .sp-h .hint{font:400 12px var(--f-sans);letter-spacing:0;text-transform:none}
 .sp-h .btn{margin-left:auto;font-family:var(--f-sans);letter-spacing:0;text-transform:none}
-kbd{margin-left:4px;padding:0 5px;border:1px solid var(--border);border-bottom-width:2px;border-radius:4px;font:500 10.5px/16px var(--f-mono);color:var(--muted-foreground)}
+kbd{margin-left:4px;padding:0 5px;border:1px solid var(--border);border-bottom-width:2px;border-radius:4px;font:500 10.5px/16px var(--f-sans);color:var(--muted-foreground)}
 .cue.now{background-size:100% 100%,100% 1px;background-image:linear-gradient(90deg,color-mix(in srgb,var(--c) 22%,transparent),color-mix(in srgb,var(--c) 45%,transparent)),linear-gradient(90deg,var(--c),var(--c))}
 .cue.off{cursor:default;background-image:none}
 mark.cue{color:inherit;background-color:transparent}
@@ -296,7 +297,7 @@ mark.cue{color:inherit;background-color:transparent}
 .cbody{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain}
 .pop .ch{margin-top:6px}
 .cmenu{position:absolute;z-index:5;min-width:170px;padding:4px;background:var(--popover);border:1px solid var(--border);border-radius:10px;box-shadow:var(--shadow-md)}
-.cmenu .mh{padding:6px 10px 4px;font:500 10.5px var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted-foreground)}
+.cmenu .mh{padding:6px 10px 4px;font:500 10.5px var(--f-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--muted-foreground)}
 .cmenu button{display:flex;align-items:center;gap:8px;width:100%;padding:7px 10px;border:0;border-radius:6px;background:none;font-size:13px;text-align:left;cursor:pointer}
 .cmenu button:hover{background:var(--accent)}
 .cmenu svg{width:14px;height:14px;color:var(--muted-foreground)}
@@ -343,9 +344,8 @@ mark.cue{color:inherit;background-color:transparent}
 
 /* shadcn Sonner toast */
 .toasts{position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:60;display:flex;flex-direction:column;gap:8px}
-.toast{display:flex;align-items:center;gap:10px;background:var(--popover);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-md);padding:12px 14px;font-size:13px;min-width:260px;animation:tin .25s cubic-bezier(.2,1.2,.4,1)}
-.toast small{display:block;color:var(--muted-foreground);font:400 11.5px var(--f-mono)}
-@keyframes tin{from{opacity:0;transform:translateY(10px)}}
+.toast{display:flex;align-items:center;gap:10px;background:var(--popover);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-md);padding:12px 14px;font-size:13px;min-width:260px}
+.toast small{display:block;color:var(--muted-foreground);font:400 11.5px var(--f-sans)}
 
 :root{--radius:3px;--paper:#f8f7f4}
 #player.card{background:transparent;border:0;box-shadow:none;padding:0}
@@ -353,7 +353,7 @@ mark.cue{color:inherit;background-color:transparent}
 .sp .act-h,.ex .act-h,.sheet .act-h{background:color-mix(in srgb,var(--paper) 96%,transparent)}
 .sp::after{background:linear-gradient(to bottom,transparent,var(--paper) 85%)}
 .ctl{min-height:32px}
-/* sound filter: colour dots; the chosen one gets a ring and the rest dim */
+/* sound filter: color dots; the chosen one gets a ring and the rest dim */
 .legend{margin-left:auto;flex:none;display:flex;align-items:center;gap:2px}
 .lg{display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 6px;border:0;background:none;font-size:12px;color:var(--muted-foreground);cursor:pointer;white-space:nowrap;transition:color .15s,opacity .15s}
 .lg i{width:7px;height:7px;border-radius:50%;background:var(--c)}
@@ -379,7 +379,7 @@ mark.cue{color:inherit;background-color:transparent}
   .sp{min-height:70vh}
   .pop{width:min(330px,calc(100vw - 32px))}
 }
-@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition-property:opacity,color,background-color,border-color!important;transition-duration:.15s!important;transition-delay:0s!important;transition-timing-function:ease!important}}
 
 /* ---------- board additions ---------- */
 #app{display:contents}
@@ -445,7 +445,7 @@ mark.cue{color:inherit;background-color:transparent}
 .start-b{flex:1;display:flex;flex-direction:column;justify-content:center;max-width:620px;width:100%;margin:0 auto;padding:40px 0 64px}
 .start h1{margin:0 0 10px;font-size:28px;line-height:34px;font-weight:600;letter-spacing:-.01em}
 .start .lede{margin:0 0 26px;font-size:15px;line-height:23px;color:var(--muted-foreground)}
-.steps{display:flex;gap:18px;margin:0 0 22px;padding:0;list-style:none;counter-reset:s;font:500 11px/16px var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted-foreground)}
+.steps{display:flex;gap:18px;margin:0 0 22px;padding:0;list-style:none;counter-reset:s;font:500 11px/16px var(--f-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--muted-foreground)}
 .steps li{counter-increment:s}.steps li::before{content:counter(s) ". ";color:var(--foreground)}
 .drops{display:grid;grid-template-columns:1.4fr 1fr;gap:12px;margin-bottom:12px}
 .drop{position:relative;display:flex;flex-direction:column;gap:4px;min-height:132px;padding:18px;border:1px dashed var(--input);border-radius:3px;background:var(--paper);cursor:pointer;transition:border-color .15s,background .15s}
@@ -454,7 +454,7 @@ mark.cue{color:inherit;background-color:transparent}
 .drop b{font-size:14px;font-weight:600}.drop b small{font-weight:400;color:var(--muted-foreground);margin-left:6px}
 .drop span{font-size:13px;color:var(--muted-foreground)}
 .drop.bad{border-color:var(--hardfx)}.drop.bad em{color:var(--hardfx);white-space:normal}
-.drop em{margin-top:auto;font:400 12px var(--f-mono);font-style:normal;color:var(--foreground);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.drop em{margin-top:auto;font:400 12px var(--f-sans);font-style:normal;color:var(--foreground);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .drop input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer}
 .paste{font-size:12.5px;color:var(--muted-foreground);margin:0 0 14px}
 .paste button{border:0;background:none;padding:0;font:inherit;color:var(--foreground);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
@@ -466,7 +466,7 @@ mark.cue{color:inherit;background-color:transparent}
 .go a{font-size:13px;color:var(--muted-foreground)}.go a:hover{color:var(--foreground)}
 .resume{display:flex;align-items:center;gap:12px;margin-bottom:28px;padding:12px 14px;border:1px solid var(--border);border-radius:3px;background:var(--card);font-size:13.5px}
 .resume[hidden]{display:none}
-.resume span{flex:1;min-width:0}.resume small{display:block;color:var(--muted-foreground);font:400 11.5px var(--f-mono)}
+.resume span{flex:1;min-width:0}.resume small{display:block;color:var(--muted-foreground);font:400 11.5px var(--f-sans)}
 .start .note .lk{text-decoration:underline;text-underline-offset:3px;color:var(--foreground)}
 .start .note{margin-top:22px;font-size:12px;color:var(--muted-foreground)}
 @media (max-width:640px){.drops{grid-template-columns:1fr}}
@@ -525,7 +525,7 @@ mark.cue{color:inherit;background-color:transparent}
 .sview #grip .gripbar{display:none}
 .sview .dock{display:none}
 
-/* ---------- timeline: every lane is always there (a short colour tick at its start); the selected cue gets handles to trim and can be dragged ---------- */
+/* ---------- timeline: every lane is always there (a short color tick at its start); the selected cue gets handles to trim and can be dragged ---------- */
 .ftl .lnl.on{background:color-mix(in srgb,var(--c) 30%,transparent)}
 .fm.sel{z-index:3;cursor:grab}
 .fm.sel::before{top:1px;height:7px;background:var(--c);opacity:1}
@@ -541,7 +541,7 @@ mark.cue{color:inherit;background-color:transparent}
   background:linear-gradient(140deg,var(--card) 35%,color-mix(in srgb,var(--c) 9%,var(--card)));border-color:color-mix(in srgb,var(--c) 30%,var(--border));transition:border-color .2s}
 .nc>*{position:relative;z-index:1}
 .nc .nc-bg{position:absolute;z-index:0;right:-36px;bottom:-44px;opacity:.22;pointer-events:none}
-.nc-h{align-items:baseline;font:500 10.5px/16px var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted-foreground)}
+.nc-h{align-items:baseline;font:500 10.5px/16px var(--f-sans);letter-spacing:.08em;text-transform:uppercase;color:var(--muted-foreground)}
 .nc-h b{font:500 12px var(--f-mono);letter-spacing:0;color:var(--foreground)}
 .nc-n{height:40px;padding:0 2px;border:0;border-bottom:1px solid var(--input);border-radius:0;background:transparent;font:500 17px var(--f-sans)}
 .nc-n:focus{border-color:var(--c)}
@@ -549,13 +549,13 @@ mark.cue{color:inherit;background-color:transparent}
 .nct{display:flex;flex-direction:column;align-items:flex-start;gap:8px;padding:8px 9px 7px;border:1px solid var(--border);border-radius:3px;background:color-mix(in srgb,var(--card) 75%,transparent);font-size:12.5px;font-weight:500;color:var(--muted-foreground);cursor:pointer;text-align:left;transition:border-color .15s,background .15s,color .15s}
 .nct:hover{color:var(--foreground);border-color:color-mix(in srgb,var(--c) 45%,var(--border))}
 .nct[aria-checked=true]{color:var(--foreground);border-color:var(--c);background:color-mix(in srgb,var(--c) 13%,var(--card))}
-.nc-f{align-items:center}.nc-f .hint{margin-right:auto;font-size:11.5px}
+.nc-f{align-items:center}
 
 /* ---------- a script arriving: the trifold's top flap carries a cover ---------- */
 .sheet .cover{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:0 24px;background:var(--paper);text-align:center;font-family:var(--f-script)}
 .sheet .cover b{font-size:22px;letter-spacing:.06em;text-transform:uppercase}
 .sheet .cover span{font-size:13px;color:var(--muted-foreground)}
-.sheet .cover small{font:400 11px var(--f-mono);color:var(--muted-foreground);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sheet .cover small{font:400 11px var(--f-sans);color:var(--muted-foreground);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .sheet .pnl.up{transform-origin:50% 100%;transform:translateZ(var(--z,0px)) rotateX(var(--a,0deg))}
 /* overlapping cues in a lane: shorter ones sit on top so they stay reachable; the selected one is always on top, its handles just outside its ends */
 .ftl .fm{z-index:var(--zz,1)}
@@ -583,7 +583,7 @@ mark.cue{color:inherit;background-color:transparent}
 .fh[data-h="in"]{margin-left:-6px;border-right:0;border-radius:0}
 .fh[data-h="out"]{margin-left:2px;border-left:0;border-radius:0}
 .fh:hover,.ftl.grabbing .fh{border-color:var(--foreground)}
-/* ---------- side panel: the sound as a colour ---------- */
+/* ---------- side panel: the sound as a color ---------- */
 .cdot{display:inline-block;width:7px;height:7px;margin-right:6px;border-radius:50%;background:var(--c);vertical-align:0}
 .ci{grid-template-columns:18px 1fr auto;padding-top:9px;padding-bottom:9px}
 .ci .lbl{font-weight:500}
@@ -610,7 +610,7 @@ mark.cue{color:inherit;background-color:transparent}
 .nc-h small{margin-left:0}
 .nc-h small::before{content:"· ";}
 
-/* ---------- the bracket motif: the selected cue sits between two thin brackets in its own colour, on the timeline and in the list ---------- */
+/* ---------- the bracket motif: the selected cue sits between two thin brackets in its own color, on the timeline and in the list ---------- */
 .fh{width:3px;height:10px;margin-top:0;border:1.25px solid var(--c);opacity:.85}
 .fh[data-h="in"]{margin-left:-5px;border-right:0}
 .fh[data-h="out"]{margin-left:2px;border-left:0}
@@ -618,7 +618,7 @@ mark.cue{color:inherit;background-color:transparent}
 .fh:hover,.ftl.grabbing .fh{border-color:var(--c);opacity:1}
 .ci{position:relative}
 .ci.in{box-shadow:none}
-.ci::before,.ci::after{content:"";position:absolute;top:7px;bottom:7px;width:4px;border:1.25px solid var(--c);opacity:0;pointer-events:none;transition:opacity .15s}
+.ci::before,.ci::after{content:"";position:absolute;top:0;bottom:0;width:4px;border:1.25px solid var(--c);opacity:0;pointer-events:none;transition:opacity .15s}
 .ci::before{left:1px;border-right:0}
 .ci::after{right:1px;border-left:0}
 .ci.sel::before,.ci.sel::after{opacity:1}
@@ -637,9 +637,10 @@ mark.cue{color:inherit;background-color:transparent}
 .cin .btn.send:hover{opacity:.85}
 .cin .btn.send svg{width:13px;height:13px}
 .dock .crow{border-radius:3px;font-size:13px;color:var(--foreground)}
-.dock .crow small,.dock .msg .who small{font:400 11px var(--f-mono);color:var(--muted-foreground)}
+.dock .crow small{font:400 11px var(--f-sans);color:var(--muted-foreground)}
+.dock .msg .who small{font:400 11px var(--f-mono);color:var(--muted-foreground)}
 .dock .msg p{color:var(--foreground)}
-.dock .msg.sys{font:400 11px var(--f-mono);color:var(--muted-foreground)}
+.dock .msg.sys{font:400 11px var(--f-sans);color:var(--muted-foreground)}
 .dock .clist .empty{font-size:12.5px;color:var(--muted-foreground)}
 .rng{background:none;border-top:1px solid var(--border);font:400 11.5px/24px var(--f-mono)}
 .dock .rng{padding:8px 0 0}
@@ -653,7 +654,7 @@ mark.cue{color:inherit;background-color:transparent}
 
 /* ---------- the sidebar is the cue list. A cue's comment count sits on its row ---------- */
 .ci{grid-template-columns:18px minmax(0,1fr) auto auto}
-.cmc{display:inline-flex;align-items:center;gap:3px;font:500 11px var(--f-mono);color:var(--muted-foreground);padding:1px 5px;border-radius:999px;cursor:pointer}
+.cmc{display:inline-flex;align-items:center;gap:3px;font:500 11px var(--f-sans);color:var(--muted-foreground);padding:1px 5px;border-radius:999px;cursor:pointer}
 .cmc svg{width:12px;height:12px}
 .cmc.open{color:var(--link);background:color-mix(in srgb,var(--link) 12%,transparent)}
 .cmc:hover{background:var(--accent);color:var(--foreground)}
@@ -663,7 +664,7 @@ mark.cue{color:inherit;background-color:transparent}
 .dock{height:auto;max-height:46%;margin-top:6px}
 .dock .cnote{padding:2px 0 0}
 .dock .cnote.ed textarea{min-height:0}
-.acts .cmt b{font:500 11px var(--f-mono);color:var(--link)}
+.acts .cmt b{font:500 11px var(--f-sans);color:var(--link)}
 
 /* ---------- the cue's actions: two sign-off boxes, then its comments ---------- */
 .acts{flex:none;display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:10px 0 4px}
@@ -677,7 +678,7 @@ mark.cue{color:inherit;background-color:transparent}
 .acts .cmt{height:32px;font-size:12.5px;justify-content:flex-start;padding:0 10px}
 .acts .cmt svg{width:14px;height:14px}
 .acts .cmt kbd{margin-left:auto}
-.acts .cmt b{font:500 11px var(--f-mono);color:var(--muted-foreground)}
+.acts .cmt b{font:500 11px var(--f-sans);color:var(--muted-foreground)}
 
 /* ---------- comments rise as a sheet over the list, in the same paper, borders and type as the rest of the board ---------- */
 .dock.up{position:absolute;left:0;right:0;width:auto;bottom:0;z-index:30;height:auto;max-height:min(80%,620px);margin:0;padding:0 8px 14px;
@@ -697,32 +698,32 @@ mark.cue{color:inherit;background-color:transparent}
 .mpop button{display:flex;align-items:center;gap:8px;width:100%;padding:6px 8px;border:0;border-radius:2px;background:none;text-align:left;font:500 13px var(--f-sans);color:var(--foreground);cursor:pointer}
 .mpop button[aria-selected=true],.mpop button:hover{background:var(--accent)}
 .mpop .av{width:20px;height:20px}
-.mpop small{margin-left:auto;font:400 11px var(--f-mono);color:var(--muted-foreground)}
+.mpop small{margin-left:auto;font:400 12px var(--f-sans);color:var(--muted-foreground)}
 .pop .compose{position:relative}
 .pop .mpop{left:12px;right:12px}
 
 /* ---------- the cue panel, the same card in the film view and script view: name and timing, note, your confirm box, then the threads ---------- */
 .pop .panel{box-shadow:0 1px 8px rgba(0,0,0,.12)}
-.dock.up .cbody{padding:0 0 6px}
+.dock.up .cbody{padding-bottom:6px}
 .dock.up .acts{padding:10px 0 2px}
-.clh{padding:14px 0 4px;font:500 11px/16px var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted-foreground)}
-.clh b{font-weight:500;color:var(--foreground)}
+.clh{padding:14px 0 4px;font:500 12px/16px var(--f-sans);color:var(--muted-foreground)}
 .pop .clist{padding:0 12px 6px 18px}
 .dock .clist{padding:0}
 /* a thread: its opening message (click to open or close), then a line with your box, when it points and the replies toggle */
 .th{border-top:1px solid var(--border)}
 .clh+.th{border-top:0}
-.th-h{cursor:pointer;border-radius:3px;margin:0 -6px;padding:0 6px;outline:none}
+.th-h{cursor:pointer;border-radius:3px;margin:0 -8px;padding:0 8px;outline:none}
+.dock .cbody{margin-inline:-8px;padding-inline:8px}
 .th-h:hover{background:var(--accent)}
 .th-h:focus-visible{box-shadow:inset 0 0 0 1px var(--foreground)}
 .th .msg{padding:10px 0 4px}
 .th:not(.open) .th-h .msg p{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
-.cft{display:flex;align-items:center;gap:8px;padding:2px 0 10px 32px;font:400 11px var(--f-mono);color:var(--muted-foreground)}
+.cft{display:flex;align-items:center;gap:8px;padding:2px 0 10px 32px;font:400 11px var(--f-sans);color:var(--muted-foreground)}
 .cft .when{display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
 .cft .when svg{width:12px;height:12px}
 .tgl{margin-left:auto;display:inline-flex;align-items:center;gap:3px;border:0;background:none;padding:2px 0;font:500 12px var(--f-sans);color:var(--foreground);cursor:pointer;white-space:nowrap}
 .tgl svg{width:12px;height:12px;color:var(--muted-foreground)}
-.tgl:hover{text-decoration:underline;text-underline-offset:2px}
+.tgl:hover{color:var(--muted-foreground)}
 /* open: the replies hang off the opening message on the same thread line, with a reply box at the end */
 .th-r{position:relative;padding:0 0 10px 32px}
 .th-r::before{content:"";position:absolute;left:10.25px;top:-6px;bottom:22px;width:1.5px;border-radius:1px;background:var(--border)}
@@ -747,8 +748,7 @@ mark.cue{color:inherit;background-color:transparent}
 /* under each thread: show or hide its replies, and Reply */
 .cft{padding:0 0 10px 32px}
 .tgl{margin-left:0}
-.tgl.rp{margin-left:auto;color:var(--muted-foreground)}
-.tgl.rp:hover{color:var(--foreground)}
+.tgl.rp{margin-left:auto}
 .th-r{padding:0 0 4px 32px}
 .th-r::before{bottom:10px}
 .th.rto-on .th-h{box-shadow:inset 2px 0 0 var(--foreground)}
@@ -774,10 +774,10 @@ mark.cue{color:inherit;background-color:transparent}
 .gate-up:hover .gate-ic,.gate-up.over .gate-ic{transform:translateY(-2px)}
 .gate-up b,.gate-busy b{font:600 16px/22px var(--f-sans);color:var(--foreground)}
 .gate-s{font-size:13px;color:var(--muted-foreground)}
-.gate-up em{margin-top:14px;font:400 10.5px var(--f-mono);font-style:normal;letter-spacing:.06em;text-transform:uppercase;color:var(--muted-foreground)}
+.gate-up em{margin-top:14px;font:400 10.5px var(--f-sans);font-style:normal;letter-spacing:.06em;text-transform:uppercase;color:var(--muted-foreground)}
 .gate-busy{gap:10px;animation:gatein .3s ease-out}
 .gate-busy canvas{margin-bottom:6px}
-.gate-busy span{font:400 11px var(--f-mono);letter-spacing:.04em;color:var(--muted-foreground)}
+.gate-busy span{font:400 11px var(--f-sans);letter-spacing:.04em;color:var(--muted-foreground)}
 .gate-n{margin:0;font-size:12.5px;color:var(--muted-foreground)}
 @keyframes gatein{from{opacity:0;transform:scale(.98)}}
 .arrive .wrap{animation:arrive .5s ease-out}
@@ -790,8 +790,8 @@ mark.cue{color:inherit;background-color:transparent}
 .cuelist.empty .dock-e{max-width:250px;margin:0 auto;padding:0 0 8vh;text-align:center}
 
 /* ===============================================================================================
-   Look: white page, bright soft colour. Sounds take the reference's palette (cornflower, pink, butter, tangerine,
-   sage, lavender); surfaces are white with hairline borders; colour shows up as soft, translucent, slightly blurred
+   Look: white page, bright soft color. Sounds take the reference's palette (cornflower, pink, butter, tangerine,
+   sage, lavender); surfaces are white with hairline borders; color shows up as soft, translucent, slightly blurred
    shapes. The thin brackets stay as the selection mark.
    ====================================================================================================== */
 :root{
@@ -829,12 +829,12 @@ header.top{border-bottom-color:var(--border)}
 .fph{background:var(--foreground);width:1.5px}
 .fh{border-color:var(--c);border-width:1.5px;opacity:1}
 
-/* the script: phrases marked like a soft highlighter in their sound's colour */
+/* the script: phrases marked like a soft highlighter in their sound's color */
 .cue{background-image:linear-gradient(90deg,color-mix(in srgb,var(--c) 14%,transparent),color-mix(in srgb,var(--c) 26%,transparent)),linear-gradient(90deg,color-mix(in srgb,var(--c) 55%,transparent),color-mix(in srgb,var(--c) 55%,transparent));border-radius:4px}
 .cue.now,.cue.hot{background-size:100% 100%,100% 1.5px}
 .cue.now{background-image:linear-gradient(90deg,color-mix(in srgb,var(--c) 26%,transparent),color-mix(in srgb,var(--c) 40%,transparent)),linear-gradient(90deg,var(--c),var(--c))}
 
-/* list: the current cue on a soft wash of its colour; the selected one in its brackets */
+/* list: the current cue on a soft wash of its color; the selected one in its brackets */
 .ci{border-radius:6px}
 .ci.in{background:color-mix(in srgb,var(--c) 10%,#fff)}
 .ci:hover{background:color-mix(in srgb,var(--c) 7%,#fff)}
@@ -842,7 +842,7 @@ header.top{border-bottom-color:var(--border)}
 .cm-i.in{background:color-mix(in srgb,var(--c) 10%,#fff)}
 .legend .lg i,.cdot,.cm-i .cq i{box-shadow:0 0 0 2px color-mix(in srgb,var(--c) 18%,transparent)}
 
-/* new-cue card: white, its sound's colour drifting behind it */
+/* new-cue card: white, its sound's color drifting behind it */
 .nc{background:#fff;border-color:color-mix(in srgb,var(--c) 28%,var(--border));box-shadow:0 18px 40px -18px color-mix(in srgb,var(--c) 45%,transparent),var(--shadow-md);border-radius:6px}
 .nc .nc-bg{opacity:.45;filter:blur(.4px)}
 .nct{border-radius:6px;background:rgba(255,255,255,.7)}
@@ -933,7 +933,7 @@ button.sti:hover svg{transform:rotate(-12deg) scale(1.08)}
 .nc-corner .sf{inset:0}
 .nc .nc-bg{position:absolute;right:10px;top:10px;bottom:auto;opacity:.32;filter:none}
 
-/* the gate's upload tile: a flat grained colour, nudged up on hover */
+/* the gate's upload tile: a flat grained color, nudged up on hover */
 .gate-ic{box-shadow:none;background:var(--hardfx);background-image:var(--grain);background-size:140px}
 .gate-up:hover .gate-ic,.gate-up.over .gate-ic{transform:translateY(-3px) rotate(-4deg)}
 .gate-up,.gate-busy{box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none;background:rgba(255,255,255,.94)}
@@ -988,7 +988,7 @@ body:not(.sview) #ex .sp-h{border-bottom:0}
 .screen:active .big{transform:scale(.9)}
 
 /* before the first cue: the instructions stand in for the timeline. One line of instruction over a pair of brackets with a square between them:
-   the square grows while you mark, takes the colour of the sound you pick, and finally shrinks onto its line as the timeline fades back in */
+   the square grows while you mark, takes the color of the sound you pick, and finally shrinks onto its line as the timeline fades back in */
 .tpw{position:relative;flex:none;min-width:0}
 .tpw.clip{overflow:clip;overflow-clip-margin:12px}
 .tp{transition:opacity .4s ease}
@@ -998,7 +998,7 @@ body:not(.sview) #ex .sp-h{border-bottom:0}
 .prompt .onb{opacity:1;pointer-events:auto}
 .prompt.land .onb{pointer-events:none}
 .onb-t{margin:0;font-size:14.5px;line-height:20px;color:var(--foreground);text-align:center}
-.onb-t kbd{display:inline-grid;place-items:center;min-width:22px;height:22px;margin:0 2px;padding:0 5px;border:1px solid var(--border);border-bottom-width:2px;border-radius:3px;background:#fff;font:500 12px var(--f-mono);vertical-align:1px}
+.onb-t kbd{display:inline-grid;place-items:center;min-width:22px;height:22px;margin:0 2px;padding:0 5px;border:1px solid var(--border);border-bottom-width:2px;border-radius:3px;background:#fff;font:500 12px var(--f-sans);vertical-align:1px}
 .onb-t.sw{animation:onb-sw .35s ease-out}
 @keyframes onb-sw{from{opacity:0;transform:translateY(4px)}}
 .onb-v{display:flex;align-items:center;gap:7px;height:40px;padding:0;border:0;background:none;cursor:pointer}
@@ -1007,7 +1007,7 @@ body:not(.sview) #ex .sp-h{border-bottom:0}
 .onb-r{width:22px;height:22px;border-radius:2px;background:color-mix(in srgb,var(--c) 78%,transparent);background-image:var(--grain-soft);transform-origin:0 0;transition:width .12s linear,background-color .3s}
 .onb[data-step="0"] .onb-v{animation:onb-breathe 1.8s ease-in-out infinite}
 @keyframes onb-breathe{50%{transform:scale(1.06)}}
-.onb-c{min-height:16px;font:400 12px/16px var(--f-mono);color:var(--muted-foreground)}
+.onb-c{min-height:16px;font:400 12px/16px var(--f-sans);color:var(--muted-foreground)}
 .land .onb-t,.land .onb .bk,.land .onb-c{opacity:0;transition:opacity .25s}
 @media (prefers-reduced-motion:reduce){.onb-v{animation:none!important}.onb-t.sw{animation:none}}
 
@@ -1048,7 +1048,7 @@ body:not(.sview) #ex .sp-h{border-bottom:0}
 .oza{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:rgba(0,0,0,.5);font:500 17px/1 var(--f-sans)}
 .ozl{padding:2px 7px;border-radius:3px;background:rgba(0,0,0,.6);font:500 11.5px var(--f-sans)}
 .osq{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);margin:0;padding:8px 14px;border-radius:4px;background:rgba(0,0,0,.72);color:#fff;font:500 14px/20px var(--f-sans);text-align:center;pointer-events:none;white-space:nowrap}
-.osq small{display:block;font:400 11px var(--f-mono);color:rgba(255,255,255,.7)}
+.osq small{display:block;font:400 11px var(--f-sans);color:rgba(255,255,255,.7)}
 .screen.picking .big,.screen.picking .oedge{display:none}
 
 /* on the picture: while an off-screen cue plays, its edge glows, and its name sits on a dark chip so it reads over any frame */
@@ -1076,7 +1076,7 @@ body:not(.sview) #ex .sp-h{border-bottom:0}
    cues as solid blocks that light up while they sound, a ghost playhead on hover, and scrubbing that catches on cue edges ---------- */
 .tlg{display:grid;grid-template-columns:76px minmax(0,1fr);gap:8px}
 .tll{position:relative;pointer-events:none}
-.tll span{position:absolute;left:0;right:0;display:flex;align-items:center;gap:6px;font:400 10.5px var(--f-mono);letter-spacing:.02em;color:var(--muted-foreground);white-space:nowrap;transition:color .2s}
+.tll span{position:absolute;left:0;right:0;display:flex;align-items:center;gap:6px;font:400 10.5px var(--f-sans);letter-spacing:.02em;color:var(--muted-foreground);white-space:nowrap;transition:color .2s}
 .tll i{width:6px;height:6px;border-radius:50%;background:color-mix(in srgb,var(--c) 45%,transparent);transition:background .2s,box-shadow .2s,transform .2s cubic-bezier(.34,1.56,.64,1)}
 .tll span.live{color:var(--foreground)}
 .tll span.live i{background:var(--c);box-shadow:0 0 0 3px color-mix(in srgb,var(--c) 18%,transparent);transform:scale(1.15)}
@@ -1094,7 +1094,8 @@ body:not(.sview) #ex .sp-h{border-bottom:0}
 .ftl .fm.on::before{top:4px;height:16px;background:var(--c);box-shadow:0 0 0 1px var(--c),0 0 12px -2px var(--c)}
 .ftl .fm.bed.on::before{top:3px;height:18px;background:repeating-linear-gradient(90deg,var(--c) 0 2px,color-mix(in srgb,var(--c) 70%,transparent) 2px 5px)}
 .ftl .fm.cur::before{background:var(--c)}
-.ftl .fm.sel::before{top:3px;height:18px;border-radius:4px;background:var(--c);box-shadow:0 0 0 1.5px var(--card),0 0 0 3px var(--c)}
+.ftl .fm.sel::before{top:5px;height:18px;border-radius:4px;background:var(--c);box-shadow:0 0 0 1.5px var(--card),0 0 0 3px var(--c)}
+.ftl .fm.sel.on::before,.ftl .fm.bed.sel::before,.ftl .fm.bed.sel:hover::before,.ftl .fm.bed.sel.hot::before,.ftl .fm.bed.sel.on::before{top:5px;height:18px}
 .ftl .fh,.ftl .fh:hover,.ftl.grabbing .fh{height:18px;margin-top:0}
 .ftl .fh::after{top:6px}
 
@@ -1114,7 +1115,7 @@ body:not(.sview) #ex .sp-h{border-bottom:0}
 .ftl .tk.z b{transform:none}
 .tzr{margin-top:6px;align-items:center}
 .tzb{display:flex;align-items:center;gap:2px}
-.tzb .btn{height:22px;min-width:22px;padding:0 5px;font:500 12px/1 var(--f-mono);color:var(--muted-foreground)}
+.tzb .btn{height:22px;min-width:22px;padding:0 5px;font:500 12px/1 var(--f-sans);color:var(--muted-foreground)}
 .tzb .btn:hover:not(:disabled){color:var(--foreground)}
 .tzb .btn:disabled{opacity:.35;cursor:default}
 .tnv{position:relative;height:24px;border-radius:4px;background:color-mix(in srgb,var(--foreground) 4%,transparent);overflow:hidden;cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none}
@@ -1145,14 +1146,14 @@ body:not(.sview) #ex .sp-h{border-bottom:0}
 .ftl .fm.mini::before,.ftl .fm.mini:hover::before,.ftl .fm.mini.on::before{top:3px;height:4px;border-radius:2px}
 .fcl{position:absolute;z-index:2;padding:0;border:0;background:none;cursor:zoom-in;display:flex;align-items:center;justify-content:center;transition:opacity .2s}
 .fcl::before{content:"";position:absolute;left:0;right:0;top:50%;height:12px;margin-top:-6px;border-radius:6px;background:repeating-linear-gradient(90deg,color-mix(in srgb,var(--c) 70%,transparent) 0 2px,color-mix(in srgb,var(--c) 30%,transparent) 2px 4px);box-shadow:inset 0 0 0 1px var(--c);transition:transform .2s cubic-bezier(.34,1.56,.64,1)}
-.fcl span{position:relative;padding:0 4px;border-radius:6px;background:var(--card);color:var(--foreground);font:500 9.5px/12px var(--f-mono);box-shadow:0 0 0 1px var(--c)}
+.fcl span{position:relative;padding:0 4px;border-radius:6px;background:var(--card);color:var(--foreground);font:500 9.5px/12px var(--f-sans);box-shadow:0 0 0 1px var(--c)}
 .fcl:hover::before{transform:scaleY(1.25)}
 .fcl.faded{opacity:.12}
 .ftl .scb span{pointer-events:auto;cursor:zoom-in;padding:0 3px;margin-left:-3px;border-radius:3px;transition:background .15s,color .15s}
 .ftl .scb span:hover{background:var(--foreground);color:var(--background)}
 .tzr{grid-template-columns:76px minmax(0,1fr) auto}
 .tzp{display:flex;align-items:center;gap:1px}
-.tzp .btn{height:22px;padding:0 6px;font:500 11px/1 var(--f-mono);color:var(--muted-foreground)}
+.tzp .btn{height:22px;padding:0 6px;font:500 11px/1 var(--f-sans);color:var(--muted-foreground)}
 .tzp .btn:hover{color:var(--foreground)}
 .tzp .btn:disabled{opacity:.35;cursor:default}
 .tzp #zFol[aria-pressed=true]{color:var(--foreground);background:var(--accent)}
@@ -1167,7 +1168,7 @@ body:not(.sview) #ex .sp-h{border-bottom:0}
 @media (max-width:860px){.tzr{grid-template-columns:auto minmax(0,1fr)}.tzp{grid-column:1/-1;justify-content:flex-end}}
 /* the clock: the reel's time, turning over (a drum rotating on its axis) to the cue's running length while you mark */
 .clock{height:22px;perspective:240px}
-.clock-in{position:relative;height:22px;transform-style:preserve-3d;transition:transform .55s var(--spring)}
+.clock-in{position:relative;height:22px;transform-style:preserve-3d;transition:transform .3s var(--spring)} /* .3s: it turns on every M press, so it has to keep up with the key */
 .clock .face{display:flex;align-items:center;justify-content:center;height:22px;margin:0;font:500 14px/22px var(--f-mono);letter-spacing:.02em;color:var(--foreground);white-space:nowrap;backface-visibility:hidden;-webkit-backface-visibility:hidden;transform:translateZ(11px)}
 .clock .face.rec{position:absolute;inset:0;color:var(--hardfx);transform:rotateX(-90deg) translateZ(11px)}
 .clock .face.rec::before{content:"";width:6px;height:6px;margin-right:7px;border-radius:50%;background:currentColor;animation:rec 1s ease-in-out infinite}
@@ -1176,7 +1177,7 @@ body:not(.sview) #ex .sp-h{border-bottom:0}
 /* the ranges on the axis (the selected cue's, and the one being marked) are rectangles too */
 .rng-ax,.rng-ax.hov,.rng-ax.mrk{border-radius:1px}
 .ftl.mk #crng,.ftl.mk #hrng{opacity:0}
-/* the dashed cue, once it has a kind of sound: on that sound's lane, in its colour, gliding between lanes as you pick */
+/* the dashed cue, once it has a kind of sound: on that sound's lane, in its color, gliding between lanes as you pick */
 .rng-ax.mrk.lane{border-color:var(--c);background:color-mix(in srgb,var(--c) 14%,transparent);transition:top .3s var(--spring),border-color .2s,background-color .2s;z-index:4}
 /* in the onboarding the brackets and square land as one piece, so the brackets stay */
 .land .onb .bk{opacity:1}
@@ -1205,7 +1206,7 @@ body:not(.sview) #ex .sp-h{border-bottom:0}
 .mkb:hover{background:#e6e6e6;color:#3f3f3f}
 .mkb:active{transform:scale(.97)}
 .mkb svg{width:15px;height:15px}
-.mkb kbd{margin:0 0 0 2px;padding:0;border:0;background:none;font:400 12px var(--f-mono);letter-spacing:0;color:#9a9a9a}
+.mkb kbd{margin:0 0 0 2px;padding:0;border:0;background:none;font:400 12px var(--f-sans);letter-spacing:0;color:#9a9a9a}
 .mkb.on{background:#e2e2e2;color:var(--foreground)}
 .mkb.on kbd{color:#6f6f6f}
 
@@ -1265,7 +1266,7 @@ button,.btn,.mkb,.tg,.lg,.nct,.sidet,.ci,.cm-i{border-radius:2px!important}
 /* the playhead's cap slides inward at either end of the view (see capFit) instead of being cut by the timeline's edge */
 .ftl .fph::before{left:calc(-4px + var(--cap,0px))}
 
-/* the sound filter: five small colour dots in one row, balancing Mark cue on the other side of the clock. The name appears beside the one you've picked; every dot says its name on hover */
+/* the sound filter: five small color dots in one row, balancing Mark cue on the other side of the clock. The name appears beside the one you've picked; every dot says its name on hover */
 .ctl .legend{flex-wrap:nowrap;justify-self:end;justify-content:flex-end;gap:0}
 .legend .lg{gap:0;height:28px;padding:0 7px}
 .legend .lg i{width:8px;height:8px}
@@ -1278,3 +1279,214 @@ button,.btn,.mkb,.tg,.lg,.nct,.sidet,.ci,.cm-i{border-radius:2px!important}
 .gate-up:hover,.gate-up.over{border-color:color-mix(in srgb,var(--charcoal) 45%,var(--border))}
 .gate-ic,.gate-up:hover .gate-ic{background-color:var(--charcoal)}
 .gate-up.bad{border-color:var(--charcoal)}.gate-up.bad .gate-s{color:var(--charcoal)}
+
+/* sound filter lives in the cue list header, to the right of the count */
+.cuelist-h .legend{margin:-6px -4px -6px auto;min-width:0;flex-wrap:wrap;justify-content:flex-end;font:400 12px/16px var(--f-sans);letter-spacing:0;text-transform:none}
+.cuelist-h .legend .lg{height:28px}
+/* the navigator strip scrubs: the window only shows a grab cursor while zoomed in */
+.tnv.full .tnw{cursor:pointer}
+
+/* the selected cue's name and the skip buttons sit at the right of the Mark Cue row, in the space beside the clock */
+.ctl-r{justify-self:stretch;min-width:0;padding-left:12px;font-size:12.5px;line-height:18px;color:var(--muted-foreground);opacity:0;pointer-events:none;transition:opacity .2s ease}
+.ctl-r.on{opacity:1;pointer-events:auto}
+.ctl-r #tlL{color:var(--muted-foreground);text-align:right}
+
+/* ---------- keyboard shortcuts: Geist rather than mono, and a 1px inner stroke in place of the border ---------- */
+kbd,.mkb kbd,.mkb.on kbd,.onb-t kbd,.ctx kbd,.cmenu kbd{font-family:var(--f-sans);border:0;border-radius:4px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.1)}
+
+/* ---------- craft pass (2026-11-19): press feedback, menu entrances, hover gating, toast exit, text wrapping ---------- */
+/* .ctx, .hl and .nc asked for `popin`, which was never defined, so they appeared with no entrance. `scale` (not transform) keeps .hl's translateX(-50%) */
+@keyframes popin{from{opacity:0;scale:.97}}
+.hl{transform-origin:50% 100%}
+/* frequent and keyboard-driven surfaces appear at once: the right-click menu, the @ picker (rebuilt on every keystroke, so it replayed as you typed),
+   and a tooltip whose neighbour was just showing */
+.ctx,.mpop,.tip.now{animation:none}
+/* press: 0.96 everywhere; 0.9 on the side toggle and play disc read as an effect rather than a press */
+.sidet:active,.screen:active .big{transform:scale(.96)}
+/* hover-only motion stays on a real pointer, so a tap doesn't leave a dot or arrow stuck mid-lift */
+@media not ((hover:hover) and (pointer:fine)){.hl button:hover,.cin .btn.send:hover svg,.gate-up:hover:not(.over) .gate-ic,.fm:hover::before,.ci:hover canvas.g,.lg:hover i,button.sti:hover svg,.trim .hd:hover,.tnw i:hover::after,.fcl:hover::before{transform:none}}
+/* toast motion, per transitions.dev. Arrive and stack: "Banner stacking" (P34). Time-up close: "Toast open/close" (P22).
+   Every state shares one transition on transform/opacity/filter; arriving and pushing back use the open clock, leaving the close clock */
+:root{--toast-open:350ms;--toast-close:250ms;--toast-distance:16px;--toast-blur:2px;--toast-scale:.97;--toast-ease:cubic-bezier(.22,1,.36,1);
+  --stack-rise:60px;--stack-peek:12px;--stack-gap:8px;--stack-depth-scale:.06;--stack-depth-fade:.4;--stack-d1-blur:1px;--stack-d2-blur:2px}
+.toasts{display:block;width:min(340px,calc(100vw - 32px))}
+.toast{position:absolute;left:0;right:0;bottom:0;min-width:0;transform-origin:50% 50%;filter:blur(0);will-change:transform,opacity,filter;
+  transition:transform var(--toast-open) var(--toast-ease),opacity var(--toast-open) var(--toast-ease),filter var(--toast-open) var(--toast-ease)}
+.toast[data-depth="0"]{z-index:3;transform:translateY(0) scale(1);opacity:1}
+.toast[data-depth="1"]{z-index:2;transform-origin:50% 100%;transform:translateY(calc(var(--stack-peek) * -1)) scale(calc(1 - var(--stack-depth-scale)));opacity:calc(1 - var(--stack-depth-fade));filter:blur(var(--stack-d1-blur))}
+.toast[data-depth="2"]{z-index:1;transform-origin:50% 100%;transform:translateY(calc(var(--stack-peek) * -2)) scale(calc(1 - var(--stack-depth-scale) * 2));opacity:calc(1 - var(--stack-depth-fade) * 1.6);filter:blur(var(--stack-d2-blur))}
+/* spread: the newest stays put, older ones climb by the heights in front of them (--sy, set in JS since toasts differ in height) */
+.toasts.spread .toast[data-depth="1"],.toasts.spread .toast[data-depth="2"]{opacity:1;filter:blur(0);transform:translateY(var(--sy)) scale(1)}
+.toast.enter{transition:none;transform:translateY(var(--stack-rise)) scale(var(--toast-scale));opacity:0;filter:blur(var(--toast-blur))}
+.toast.out,.toast.leaving{pointer-events:none;transition:transform var(--toast-close) var(--toast-ease),opacity var(--toast-close) var(--toast-ease),filter var(--toast-close) var(--toast-ease)}
+.toast.out{z-index:4;transform:translateY(var(--toast-distance)) scale(var(--toast-scale));opacity:0;filter:blur(var(--toast-blur))}
+.toast.leaving{z-index:0;transform-origin:50% 100%;transform:translateY(calc(var(--stack-peek) * -3)) scale(calc(1 - var(--stack-depth-scale) * 3));opacity:0;filter:blur(var(--toast-blur))}
+@media (prefers-reduced-motion:reduce){.toast{transform:none!important;filter:none!important}}
+/* counts in sans that change in place */
+.meta b{font-variant-numeric:tabular-nums}
+/* wrapping: tooltips and short headings balance, sentences avoid orphans */
+.tip-n,.onb-t,.osq{text-wrap:balance}
+.toast,.msg p,.vdrop span,.gate-s{text-wrap:pretty}
+
+/* ---------- buttons are medium weight, like .btn; Mark cue and the comment range bar's buttons had dropped to regular ---------- */
+.mkb,.rng .btn{font-weight:500}
+
+/* ===============================================================================================
+   Tactile buttons, from the portfolio's design system (portfolio/app/globals.css .tac-raised / .tac-primary), in the board's cool neutrals.
+   One five-layer recipe: fill, a 1px ring drawn inside, a soft white inner glow, a top-lit stroke just inside the edge (::before),
+   and a crisp 1px drop. Hover only changes colour (and only with a real pointer); press squeezes and the drop sinks away.
+   Raised: outline buttons, Mark cue, the sign-off box. Primary: default buttons and Send. Mark cue while marking is a sunk well.
+   Ghost buttons stay flat, with the rounder corner.
+   ====================================================================================================== */
+:root{
+  --tac-r:8px; --tac-r-sm:6px; --tac-drop-a:.2; --tac-dur:150ms; --tac-ease:cubic-bezier(.22,1,.36,1); --tac-press:120ms;
+  --tac-raised-fill:#f4f4f7; --tac-raised-text:#4f4d57; --tac-raised-ring:#d3d3da; --tac-raised-stroke-top:1; --tac-raised-glow-a:.4;
+  --tac-raised-hover-fill:#ececf0; --tac-raised-hover-ring:#ababb4; --tac-raised-hover-text:#2c2a32;
+  --tac-primary-fill:#17151c; --tac-primary-text:#ffffff; --tac-primary-ring:#0a090d; --tac-primary-stroke-top:.24; --tac-primary-glow-a:.08;
+  --tac-primary-hover-fill:#2b2931; --tac-primary-hover-ring:#0a090d; --tac-primary-hover-text:#ffffff;
+  --tac-well-fill:#ececf0; --tac-well-inset:rgba(0,0,0,.06);
+  --tac-dis-fill:#f6f6f8; --tac-dis-text:#b9b8c0;
+}
+.btn-outline,.mkb,.sg{
+  --m-fill:var(--tac-raised-fill);--m-text:var(--tac-raised-text);--m-ring:var(--tac-raised-ring);--m-stroke-top:var(--tac-raised-stroke-top);--m-glow-a:var(--tac-raised-glow-a);
+  --m-hover-fill:var(--tac-raised-hover-fill);--m-hover-ring:var(--tac-raised-hover-ring);--m-hover-text:var(--tac-raised-hover-text)}
+.btn-default,.cin .btn.send,.dock .cin .btn.send{
+  --m-fill:var(--tac-primary-fill);--m-text:var(--tac-primary-text);--m-ring:var(--tac-primary-ring);--m-stroke-top:var(--tac-primary-stroke-top);--m-glow-a:var(--tac-primary-glow-a);
+  --m-hover-fill:var(--tac-primary-hover-fill);--m-hover-ring:var(--tac-primary-hover-ring);--m-hover-text:var(--tac-primary-hover-text)}
+.btn-outline,.btn-default,.mkb,.sg,.cin .btn.send,.dock .cin .btn.send{
+  --m-drop-a:var(--tac-drop-a);position:relative;border:0;border-radius:var(--tac-r)!important;opacity:1;
+  background:var(--m-fill);color:var(--m-text);
+  box-shadow:inset 0 0 3px 1px rgb(255 255 255 / var(--m-glow-a)),inset 0 0 0 1px var(--m-ring),0 1px 2px 0 rgb(0 0 0 / var(--m-drop-a));
+  transition:background-color var(--tac-dur) var(--tac-ease),box-shadow var(--tac-dur) var(--tac-ease),color var(--tac-dur) var(--tac-ease),transform var(--tac-press) ease-out}
+.btn-outline::before,.btn-default::before,.mkb::before,.sg::before,.cin .btn.send::before{
+  content:"";position:absolute;inset:1px;padding:1px;border-radius:calc(var(--tac-r) - 1px);pointer-events:none;
+  background:linear-gradient(180deg,rgb(255 255 255 / var(--m-stroke-top)),rgb(255 255 255 / 0));
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;
+  mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0);transition:opacity var(--tac-dur) var(--tac-ease)}
+/* hover is colour only (the old fade and greying are dropped) */
+.btn-default:hover,.btn-outline:hover,.cin .btn.send:hover,.mkb:hover,.sg:hover{opacity:1;background:var(--m-fill);color:var(--m-text);border-color:transparent}
+@media (hover:hover) and (pointer:fine){
+  .btn-outline:not(:disabled):hover,.btn-default:not(:disabled):hover,.mkb:hover,.sg:hover,.cin .btn.send:hover{--m-fill:var(--m-hover-fill);--m-ring:var(--m-hover-ring);--m-text:var(--m-hover-text)}}
+/* press: a squeeze, and the drop sinks into the ground */
+.btn-outline:not(:disabled):active,.btn-default:not(:disabled):active,.mkb:active,.sg:active,.cin .btn.send:active{transform:scale(.96);--m-drop-a:0}
+/* Mark cue while marking: pressed in, a sunk well with ink text */
+.mkb.on,.mkb.on:hover{background:var(--tac-well-fill);color:var(--foreground);box-shadow:inset 0 1px 2px 0 var(--tac-well-inset),inset 0 0 0 1px var(--tac-raised-ring)}
+.mkb.on::before{opacity:0}
+/* disabled is flat: no stroke, glow or drop */
+.btn-outline:disabled,.btn-default:disabled,.cin .btn.send:disabled{opacity:1;background:var(--tac-dis-fill);color:var(--tac-dis-text);box-shadow:inset 0 0 0 1px var(--tac-dis-fill)}
+:is(.btn-outline,.btn-default,.cin .btn.send):disabled::before{opacity:0}
+/* every other button (ghost, icon, toggles, the side panel toggle, the new-cue tiles) gets the smaller step of the same rounder corner */
+.btn,.tg,.nct,.sidet{border-radius:var(--tac-r-sm)!important}
+@media (prefers-reduced-motion:reduce){.btn:active,.mkb:active,.sg:active{transform:none}}
+.btn-outline,.btn-default,.mkb,.sg,.cin .btn.send{border-radius:var(--tac-r)!important}
+
+/* ---------- taste pass (2026-11-19) ---------- */
+/* secondary text measured 4.0–4.2:1 on the page's whites and 3.8:1 on hover rows; one ink step darker clears 4.5:1 on all of them */
+:root{--muted-foreground:#706e79}
+/* floating surfaces: a translucent ring inside the shadow instead of an opaque border; the transparent border stays for forced-colours mode */
+.ctx,.cmenu,.mpop,.toast,.hl{border-color:transparent;box-shadow:0 0 0 1px rgba(23,21,28,.08),var(--shadow-md)}
+/* the highlighter's 16px dots get a 24px hit area; the gap widens 6→8 so neighbouring hit areas don't overlap */
+.hl{gap:8px}
+.hl button:not(.att){position:relative}
+.hl button:not(.att)::after{content:"";position:absolute;inset:-4px}
+/* resting cue rows sit at 60%, which took their small time and comment count to 2.4:1; at rest those two take ink, so through the dim they land at 4.7:1.
+   Once the row is at full strength (playhead, hover, hot) they go back to grey */
+.ci:not(.in):not(.hot):not(:hover) :is(.tcs,.cmc:not(.open)){color:var(--foreground)}
+/* blue as text: a darker step of the link blue for words (mentions, the open comment count); buttons keep --link */
+:root{--link-text:#1d6bc2}
+.mention,.cmc.open{color:var(--link-text)}
+/* Mark cue's M hint was a hard-coded #8a8a8a (3.3:1); it takes the shared muted grey */
+.mkb kbd{color:var(--muted-foreground)}
+/* the sign-off box is its own toggle, so no checkbox inside it: open is a raised button; signed sits pressed in (a well), in ink, with a check before the word */
+.sg{gap:6px}
+.sg svg{flex:none;width:14px;height:14px;stroke-width:1.8}
+.sg.on,.sg.on:hover{background:var(--tac-well-fill);color:var(--foreground);box-shadow:inset 0 1px 2px 0 var(--tac-well-inset),inset 0 0 0 1px var(--tac-raised-ring)}
+.sg.on::before{opacity:0}
+/* keycaps in text: a little more room above and below the letter */
+kbd{padding-top:2px;padding-bottom:2px}
+/* shortcuts named in a toast's second line sit in keycaps, like everywhere else */
+.toast small kbd{margin:0 2px 0 0;font-size:10.5px;line-height:14px;vertical-align:baseline}
+.toast small{font-family:var(--f-sans);font-size:12px}
+/* the highlighter's dots and Attach sit on one centre line */
+.hl{align-items:center}
+/* onboarding keycap: the letter in the sentence's own ink, and nudged down half a pixel so the cap sits optically centred (Geist's line box carries more room above the cap than below the baseline) */
+.onb-t kbd{color:inherit;padding:2px 5px 1px}
+/* the idle breathe scales the brackets about their middle (the landing keeps its top-left origin, which its maths relies on) */
+.onb[data-step="0"] .onb-v{transform-origin:50% 50%}
+/* off-screen chips: the name may run past the glow band (the side bands are only a quarter of the frame), up to most of the picture, and ends in … if it's longer still */
+.oe b{flex:none;max-width:none}
+.oe.left b,.oe.right b{max-width:calc(100% * 100 / 26 - 24px)}
+.oe.top b,.oe.bottom b{max-width:calc(100% - 24px)}
+.oe b span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* picking a side: just the arrows; the question's second line in Geist, with Esc in a keycap (its stroke lightened to read on the dark chip) */
+.osq small{margin-top:4px;font-family:var(--f-sans);font-size:12px}
+.osq kbd{margin:0 2px 0 0;color:inherit;font-size:10.5px;line-height:14px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.3)}
+/* the comment box's corner follows the Send button inside it: outer radius = inner radius + the gap between them (3px padding + 1px border) */
+.cin,.dock .cin{border-radius:calc(var(--tac-r) + 4px)}
+/* Approve / Confirm: 32 → 28 tall, so 2px less above and below the label */
+.sg{height:28px}
+/* badge: shadcn's tinted recipe (as its Destructive badge: the colour at 10% for the fill, the colour for the text, no visible border, 20px tall),
+   so it reads as a label and not as the outlined chip or status. The sound colours are too light to be text on their own tint,
+   so the text is the colour mixed toward ink until it clears 4.5:1 */
+.badge{height:20px;padding:0 8px;gap:0;border-color:transparent;background:color-mix(in srgb,var(--c) 10%,transparent);color:color-mix(in oklab,var(--c) 55%,var(--foreground))}
+.badge i{display:none}
+/* destructive actions: one red, worn in shades. Label and icon share one red pulled toward ink, medium weight;
+   the Del key stays the plain grey key; hover is a soft red wash. Never a solid red fill */
+:root{--destructive:#dc2626}
+.danger{--d-ink:color-mix(in oklab,var(--destructive) 78%,var(--foreground))}
+.ctx .danger,.cmenu .danger,.ctx .danger svg,.cmenu .danger svg{color:var(--d-ink)}
+.ctx .danger,.cmenu .danger{font-weight:500}
+.cmenu .danger:hover,.cmenu .danger:focus-visible{background:color-mix(in srgb,var(--destructive) 7%,transparent)}
+/* the cue menu holds one item, so the item is the menu: .ctx is only a positioner, the button carries the surface,
+   ring and shadow itself, and on hover that outermost ring is the one that turns red */
+.ctx{padding:0;border:0;background:none;box-shadow:none;min-width:0}
+.ctx button{min-width:150px;padding:8px 10px;border-radius:6px;background:var(--popover);box-shadow:0 0 0 1px rgba(23,21,28,.08),var(--shadow-md)}
+.ctx .danger:hover,.ctx .danger:focus-visible{background:color-mix(in srgb,var(--destructive) 6%,var(--popover));box-shadow:0 0 0 1px color-mix(in srgb,var(--destructive) 40%,transparent),var(--shadow-md)}
+
+/* Geist Mono is for timestamps only (timecodes, ranges, durations, relative times); every label, header, count and key is Geist *//* reply line: one trunk drops from under the opening message's avatar, and each reply hangs off it on a rounded elbow
+   that runs into its avatar. --av is the opening avatar's size, so the trunk sits on its centre in both the panel and the dock */
+.th{--av:32px;--tl:calc(var(--av) / 2 - .75px)}
+.dock .th{--av:22px}
+.th-r::before{display:none}
+.th.open .th-h .msg::after{content:"";position:absolute;left:var(--tl);top:calc(10px + var(--av) + 4px);bottom:0;width:1.5px;background:var(--border)}
+.th-r .msg{position:relative}
+.th .th-r .msg.msg::before{content:"";display:block;position:absolute;left:calc(var(--tl) - 24px);top:0;width:calc(28px - var(--tl));height:18.75px;box-sizing:border-box;
+  border:solid var(--border);border-width:0 0 1.5px 1.5px;border-bottom-left-radius:12px;background:none;bottom:auto}
+.th-r .msg:not(:last-child)::after{content:"";position:absolute;left:calc(var(--tl) - 24px);top:0;bottom:0;width:1.5px;background:var(--border)}
+/* the cue range on a comment is a timestamp: same style as the cue header meta line (.ch small) */
+.msg .at{margin-top:1px;font:400 11px/16px var(--f-mono);color:var(--muted-foreground)}
+/* "2 replies / Reply" lines up with the name and text column: avatar width plus the gap after it */
+.th{--gap:12px}.dock .th{--gap:10px}
+.th .cft{padding-left:calc(var(--av) + var(--gap))}
+/* cluster count sits in a true circle: height sets the size, min-width matches it, so one digit is round and two digits grow into a pill */
+.fcl span{box-sizing:border-box;min-width:12px;height:12px;padding:0 2px;text-align:center;font-variant-numeric:tabular-nums}
+/* director's note: the text stays on the column edge and the box bleeds 8px either side, the same edges as the comment hover */
+.dock .cnote.ed textarea{box-sizing:border-box;width:calc(100% + 16px);margin:0 -8px;padding:6px 7px}
+.cnote.ed{overflow:visible}
+/* cue header meta: the sound category leads as a tinted pill with its dot (Geist, it is a label), then the range and length in mono */
+.ch small{display:flex;align-items:center;gap:8px;margin-top:2px}
+.cpill{flex:none;display:inline-flex;align-items:center;gap:5px;height:18px;padding:0 7px 0 6px;border-radius:999px;
+  background:color-mix(in srgb,var(--c) 14%,transparent);font:500 11px/1 var(--f-sans);color:color-mix(in oklab,var(--c) 50%,var(--foreground))}
+.cpill i{width:6px;height:6px;border-radius:50%;background:var(--c)}
+
+/* replies get the same hover as the opening message: they bleed 8px each side (the elbows shift to match) */
+.th-r .msg{margin-inline:-8px;padding-inline:8px;border-radius:3px}
+.th-r .msg:hover{background:var(--accent)}
+/* the cue's top (note and sign-off) is fixed; only the comment list scrolls */
+.cfix{flex:none}
+/* avatars: Craft's image outline. 1px pure black at 10%, drawn inside the edge (offset −1) so it takes no space; it gives the pale dotted discs an edge on white */
+.av{outline:1px solid rgb(0 0 0 / .1);outline-offset:-1px}
+/* compose: your avatar sits outside the input, the same size and gap as a comment's, so the input box lines up with the comment text */
+.compose{--av:32px;--gap:12px;display:flex;align-items:center;gap:var(--gap)}
+.dock .compose{--av:22px;--gap:10px}
+.compose>.av{display:block;flex:none;width:var(--av);height:var(--av);margin:0}
+.compose>.cin{flex:1;min-width:0}
+/* tooltip: more air between the range and the length (8 → 16px); the header never wraps, so this also sets the tooltip's narrowest width */
+.tip-h{gap:16px}
+/* plain tooltips hug their text (the 96px floor is for the cue tooltip's two rows); a shortcut sits beside the label as a keycap drawn for the dark ground */
+.tip:not(:has(.tip-h)){min-width:0}
+.tip-n:has(kbd){display:flex;align-items:center;gap:6px}
+.tip kbd{margin:0;padding:0 5px;font:500 10.5px/16px var(--f-sans);color:rgb(255 255 255 / .7);box-shadow:inset 0 0 0 1px rgb(255 255 255 / .25)}
+/* a tooltip with no room above the control opens below it */
+.tip.below{transform:translate(-50%,0);margin-top:6px;animation-name:tipin-b}
+@keyframes tipin-b{from{opacity:0;transform:translate(-50%,-10%)}}
